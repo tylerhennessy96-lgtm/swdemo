@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pricing — Sunwing RMS</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="data.js"></script>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Top Nav ── -->
+  <nav class="topnav">
+    <a href="pricing.html" class="logo">
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="4" fill="#fff"/>
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="logo-text">Sunwing RMS</span>
+    </a>
+
+    <div class="nav-tabs">
+      <a href="pricing.html" class="nav-tab active">Pricing</a>
+      <a href="demand.html"  class="nav-tab">Demand Forecast</a>
+      <a href="#"            class="nav-tab">Rules &amp; Parameters</a>
+      <a href="#"            class="nav-tab">Audit Log</a>
+    </div>
+
+    <div class="nav-divider"></div>
+
+    <div style="position:relative;">
+      <button class="nav-menu-btn" id="menuBtn" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-dropdown" id="navDropdown">
+        <a href="#">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/></svg>
+          Settings
+        </a>
+        <a href="#">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="1.5"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="9" x2="11" y2="9"/><line x1="5" y1="12" x2="9" y2="12"/></svg>
+          Reports
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Filter Bar ── -->
+  <div class="filter-bar" id="filterBar">
+    <div class="ms-wrap" id="fRegion">
+      <button class="ms-trigger" onclick="toggleFilter('fRegion')">
+        <span id="fRegionLabel">All Regions</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown">
+        <div class="ms-options" id="fRegionOptions"></div>
+      </div>
+    </div>
+
+    <div class="ms-wrap" id="fDestination">
+      <button class="ms-trigger" onclick="toggleFilter('fDestination')">
+        <span id="fDestinationLabel">All Destinations</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown">
+        <div class="ms-options" id="fDestinationOptions"></div>
+      </div>
+    </div>
+
+    <div class="ms-wrap" id="fDuration">
+      <button class="ms-trigger" onclick="toggleFilter('fDuration')">
+        <span id="fDurationLabel">All Durations</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown">
+        <div class="ms-options" id="fDurationOptions"></div>
+      </div>
+    </div>
+
+    <div class="ms-wrap" id="fRM">
+      <button class="ms-trigger" onclick="toggleFilter('fRM')">
+        <span id="fRMLabel">All RMs</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown">
+        <div class="ms-options" id="fRMOptions"></div>
+      </div>
+    </div>
+
+    <div class="ms-wrap" id="fGateway">
+      <button class="ms-trigger" onclick="toggleFilter('fGateway')">
+        <span id="fGatewayLabel">All Gateways</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown">
+        <div class="ms-options" id="fGatewayOptions"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Sub-tab Bar ── -->
+  <div class="subtab-bar">
+    <a href="pricing.html" class="subtab active">Vacation Packages</a>
+    <a href="hotel.html"   class="subtab">Hotel Only</a>
+    <a href="flight.html"  class="subtab">Flight Only</a>
+    <a href="#groups"      class="subtab">Groups</a>
+    <div class="subtab-spacer"></div>
+    <button class="btn btn-primary" onclick="runEvaluation()" style="margin-right:8px;">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="3,2 12,7 3,12" fill="currentColor" stroke="none"/></svg>
+      Run Evaluation
+    </button>
+    <button class="btn btn-ghost" onclick="publishChanges()">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7h10M7 2l5 5-5 5"/></svg>
+      Publish Changes
+    </button>
+  </div>
+
+  <!-- ── Stats Bar ── -->
+  <div id="pricingStatsBar" style="background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;gap:20px;align-items:center;flex-wrap:nowrap;overflow-x:auto;font-size:12px;"></div>
+
+  <!-- ── Main ── -->
+  <div class="main">
+    <div class="table-wrap" id="tableWrap">
+      <table class="data-table" id="pricingTable">
+        <thead>
+          <tr>
+            <th style="min-width:260px;">Destination / Duration / Package</th>
+            <th>Hotel<br><span class="th-sub">Room Category</span></th>
+            <th>Departure<br><span class="th-sub">Flight #</span></th>
+            <th style="text-align:right;">Total Cost<br><span class="th-sub">land + air</span></th>
+            <th style="text-align:right;width:90px;">Current<br><span class="th-sub">Margin $</span></th>
+            <th style="text-align:right;width:90px;">Rec.<br><span class="th-sub">Margin $</span></th>
+            <th style="text-align:right;width:70px;">Delta<br><span class="th-sub">$</span></th>
+            <th style="text-align:right;">Current<br><span class="th-sub">Price</span></th>
+            <th style="text-align:right;">Rec.<br><span class="th-sub">Price</span></th>
+            <th style="text-align:right;width:70px;">LF %</th>
+            <th style="text-align:right;">Comp 1</th>
+            <th style="text-align:right;">Comp 2</th>
+            <th style="width:110px;">Pace</th>
+            <th style="width:90px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- ── Slide-up panel: booking curve + competitor price ── -->
+    <div class="panels-container" id="panelsContainer">
+      <div class="exposure-wrap" id="exposureWrap" style="display:none;">
+        <div class="panel-collapse-handle" onclick="toggleExposure()">
+          <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,5 7,9 11,5"/></svg>
+        </div>
+        <div class="exposure-panel" id="exposurePanel">
+          <div class="panel-header-bar">
+            <span class="exposure-title">Package Analytics</span>
+            <span style="color:#3d4150;margin:0 10px;">|</span>
+            <span class="exposure-prop" id="exposurePropName">Select a package</span>
+            <button onclick="toggleExposure()" title="Close panel" style="background:none;border:none;cursor:pointer;color:#6b7280;display:flex;align-items:center;padding:4px 8px;border-radius:4px;margin-left:auto;" onmouseover="this.style.color='#e5e7eb'" onmouseout="this.style.color='#6b7280'">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="3" x2="11" y2="11"/><line x1="11" y1="3" x2="3" y2="11"/></svg>
+            </button>
+          </div>
+          <div class="exposure-inner">
+            <div class="exposure-charts">
+              <div class="chart-box">
+                <div class="chart-label">
+                  Booking Curve <span style="font-size:10px;color:#6b7280;">Load factor %</span>
+                  <div class="chart-legend">
+                    <span class="legend-item"><span class="legend-line" style="background:#e8007d"></span>Actual</span>
+                    <span class="legend-item"><span class="legend-line" style="background:#9ca3af;border-top:1px dashed #9ca3af;height:0;"></span>Target</span>
+                  </div>
+                </div>
+                <div style="position:relative;width:100%;height:200px;">
+                  <canvas id="bookingCurveChart"></canvas>
+                </div>
+              </div>
+              <div class="chart-box">
+                <div class="chart-label">
+                  Competitor Price <span style="font-size:10px;color:#6b7280;">CAD $</span>
+                  <div class="chart-legend">
+                    <span class="legend-item"><span class="legend-line" style="background:#e8007d"></span>Sunwing</span>
+                    <span class="legend-item"><span class="legend-line" style="background:#60a5fa"></span>Competitor 1</span>
+                    <span class="legend-item"><span class="legend-line" style="background:#a78bfa"></span>Competitor 2</span>
+                  </div>
+                </div>
+                <div style="position:relative;width:100%;height:200px;">
+                  <canvas id="compPriceChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Right side drawer: package rules ── -->
+    <aside class="adv-drawer" id="rulesDrawer">
+      <div class="adv-drawer-header">
+        <span class="adv-drawer-title">Package Rules</span>
+        <button class="adv-close" onclick="toggleRulesDrawer()">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="3" x2="11" y2="11"/><line x1="11" y1="3" x2="3" y2="11"/></svg>
+        </button>
+      </div>
+
+      <div class="adv-section">
+        <div class="adv-section-title">Package</div>
+        <div style="font-size:12.5px;color:var(--text-primary);font-family:'DM Mono',monospace;" id="rulesPkgId">—</div>
+        <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;" id="rulesPkgHotel">—</div>
+      </div>
+
+      <div class="adv-section">
+        <div class="adv-section-title">Price Rules</div>
+        <div class="adv-row">
+          <label>Min price ($)</label>
+          <input class="margin-input" id="ruleMinPrice" type="number" style="width:90px;" />
+        </div>
+        <div class="adv-row">
+          <label>Max price ($)</label>
+          <input class="margin-input" id="ruleMaxPrice" type="number" style="width:90px;" />
+        </div>
+      </div>
+
+      <div class="adv-section">
+        <div class="adv-section-title">Margin Rules</div>
+        <div class="adv-row">
+          <label>Min margin ($)</label>
+          <input class="margin-input" id="ruleMinMargin" type="number" style="width:90px;" />
+        </div>
+        <div class="adv-row">
+          <label>Max margin ($)</label>
+          <input class="margin-input" id="ruleMaxMargin" type="number" style="width:90px;" />
+        </div>
+      </div>
+
+      <div class="adv-section">
+        <div class="adv-section-title">Lock</div>
+        <div class="toggle-row">
+          <label style="font-size:12.5px;color:var(--text-secondary);">Lock current price</label>
+          <label class="toggle">
+            <input type="checkbox" id="ruleLockToggle" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:6px;" id="rulesLastMod">Last modified: —</div>
+      </div>
+
+      <div class="adv-footer">
+        <button class="btn-apply" onclick="saveRules()">Save rules</button>
+      </div>
+    </aside>
+
+  </div><!-- /.main -->
+
+</div><!-- /.app -->
+
+<script>
+// ── State ───────────────────────────────────────────────────
+const expandedDests = new Set();      // destination IDs currently expanded
+const expandedDurations = new Set();  // `${destId}-${duration}` keys currently expanded
+const marginOverrides = {};           // { pkgId: newMargin } — inline edits
+
+// Start with the first destination expanded
+if (PACKAGE_DATA.length) {
+  expandedDests.add(PACKAGE_DATA[0].id);
+  PACKAGE_DATA[0].durations.forEach(d => expandedDurations.add(`${PACKAGE_DATA[0].id}-${d.duration}`));
+}
+
+// ── Formatters / badge helpers ──────────────────────────────
+function fmt$(n) {
+  if (n == null || isNaN(n)) return '—';
+  return '$' + Math.round(n).toLocaleString('en-CA');
+}
+
+function fmtPct(n) {
+  if (n == null || isNaN(n)) return '—';
+  return Math.round(n * 100) + '%';
+}
+
+function regionBadge(region) {
+  const cls = 'region-' + region.toLowerCase().replace(/[^a-z]/g, '');
+  return `<span class="region-badge ${cls}">${region}</span>`;
+}
+
+function gatewayChip(gw) {
+  return `<span class="gateway-chip">${gw}</span>`;
+}
+
+function paceBadge(pace) {
+  const map = {
+    'ahead':    { cls: 'pace-ahead',   label: 'Ahead' },
+    'on track': { cls: 'pace-ontrack', label: 'On Track' },
+    'behind':   { cls: 'pace-behind',  label: 'Behind' },
+  };
+  const p = map[pace] || map['on track'];
+  return `<span class="pace-badge ${p.cls}">${p.label}</span>`;
+}
+
+function paceDot(pace) {
+  const cls = pace === 'ahead' ? 'pace-ahead' : pace === 'behind' ? 'pace-behind' : 'pace-ontrack';
+  return `<span class="pace-dot ${cls}" title="${pace}"></span>`;
+}
+
+function ratioBadge(ratio) {
+  let cls = 'ratio-balanced';
+  let title = 'Beds:seats balanced';
+  if (ratio < 0.92) { cls = 'ratio-underbed'; title = 'Under-bedded (more seats than beds)'; }
+  else if (ratio > 1.08) { cls = 'ratio-overbed'; title = 'Over-bedded (more beds than seats)'; }
+  return `<span class="ratio-badge ${cls}" title="${title}">B:S ${ratio.toFixed(2)}</span>`;
+}
+
+function lfPill(lf) {
+  const pct = Math.round(lf * 100);
+  let cls = 'lf-mid';
+  if (pct >= 75) cls = 'lf-high';
+  else if (pct < 50) cls = 'lf-low';
+  return `<span class="lf-pill ${cls}">${pct}%</span>`;
+}
+
+function deltaCell(delta) {
+  if (!delta) return `<span class="text-muted">$0</span>`;
+  const cls = delta > 0 ? 'delta-pos' : 'delta-neg';
+  const sign = delta > 0 ? '+' : '';
+  return `<span class="${cls}">${sign}${fmt$(delta)}</span>`;
+}
+
+function chevron(open) {
+  return `<svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" style="transform:${open ? 'rotate(90deg)' : 'none'};transition:transform .15s;"><polyline points="4,2 8,6 4,10"/></svg>`;
+}
+
+// Aggregate a destination across all its packages
+function aggregateDestination(dest) {
+  const all = dest.durations.flatMap(d => d.packages);
+  if (!all.length) return null;
+  const currentMargin = all.reduce((s, p) => s + getEffectiveMargin(p), 0) / all.length;
+  const recMargin     = all.reduce((s, p) => s + p.recMargin, 0) / all.length;
+  const totalCost     = all.reduce((s, p) => s + p.totalCost, 0) / all.length;
+  const lf            = all.reduce((s, p) => s + p.lf, 0) / all.length;
+  // Dominant pace: pick the worst (behind > on track > ahead)
+  const paceCount = { ahead: 0, 'on track': 0, behind: 0 };
+  all.forEach(p => paceCount[p.bookingPace]++);
+  let pace = 'on track';
+  if (paceCount.behind >= paceCount.ahead && paceCount.behind > 0) pace = 'behind';
+  else if (paceCount.ahead > paceCount.behind) pace = 'ahead';
+  return {
+    currentMargin,
+    recMargin,
+    deltaMargin: recMargin - currentMargin,
+    currentPrice: totalCost + currentMargin,
+    recPrice: totalCost + recMargin,
+    lf,
+    pace,
+    count: all.length,
+  };
+}
+
+function aggregateDuration(durationGroup) {
+  const packages = durationGroup.packages;
+  if (!packages.length) return null;
+  const currentMargin = packages.reduce((s, p) => s + getEffectiveMargin(p), 0) / packages.length;
+  const recMargin     = packages.reduce((s, p) => s + p.recMargin, 0) / packages.length;
+  const totalCost     = packages.reduce((s, p) => s + p.totalCost, 0) / packages.length;
+  const lf            = packages.reduce((s, p) => s + p.lf, 0) / packages.length;
+  return {
+    currentMargin,
+    recMargin,
+    deltaMargin: recMargin - currentMargin,
+    currentPrice: totalCost + currentMargin,
+    recPrice: totalCost + recMargin,
+    lf,
+    count: packages.length,
+  };
+}
+
+function getEffectiveMargin(pkg) {
+  return marginOverrides[pkg.id] != null ? marginOverrides[pkg.id] : pkg.currentMargin;
+}
+
+function getEffectivePrice(pkg) {
+  return pkg.totalCost + getEffectiveMargin(pkg);
+}
+
+// ── Table rendering ─────────────────────────────────────────
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const rows = [];
+
+  PACKAGE_DATA.forEach(dest => {
+    const isOpen = expandedDests.has(dest.id);
+    const agg = aggregateDestination(dest);
+
+    // Destination row
+    rows.push(`
+      <tr class="row-property" data-dest="${dest.id}" onclick="toggleDest('${dest.id}')" style="cursor:pointer;">
+        <td>
+          <button class="expand-btn ${isOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleDest('${dest.id}')">${chevron(isOpen)}</button>
+          <span style="font-weight:600;">${dest.name}</span>
+          ${regionBadge(dest.region)}
+          ${gatewayChip(dest.departureGateway)}
+          <span style="color:var(--text-muted);margin-left:8px;font-size:11px;">${dest.totalPackages} pkgs</span>
+        </td>
+        <td><span class="text-muted">${ratioBadge(dest.bedsToSeatsRatio)}</span></td>
+        <td class="text-muted" style="font-size:11px;">${dest.bedsBought.toLocaleString()} beds<br>${dest.seatsBought.toLocaleString()} seats</td>
+        <td class="text-right text-muted">${fmt$(agg.currentPrice - agg.currentMargin)}</td>
+        <td class="text-right">${fmt$(agg.currentMargin)}</td>
+        <td class="text-right highlight-teal">${fmt$(agg.recMargin)}</td>
+        <td class="text-right">${deltaCell(agg.deltaMargin)}</td>
+        <td class="text-right">${fmt$(agg.currentPrice)}</td>
+        <td class="text-right highlight-teal">${fmt$(agg.recPrice)}</td>
+        <td class="text-right">${lfPill(dest.loadFactor)}</td>
+        <td class="text-right text-muted">—</td>
+        <td class="text-right text-muted">—</td>
+        <td>${paceBadge(agg.pace)}</td>
+        <td></td>
+      </tr>
+    `);
+
+    if (!isOpen) return;
+
+    // Duration rows
+    dest.durations.forEach(durGroup => {
+      const durKey = `${dest.id}-${durGroup.duration}`;
+      const durOpen = expandedDurations.has(durKey);
+      const durAgg = aggregateDuration(durGroup);
+      if (!durAgg) return;
+
+      rows.push(`
+        <tr class="row-bedtype clickable" data-dest="${dest.id}" data-duration="${durGroup.duration}" onclick="toggleDuration('${durKey}')" style="cursor:pointer;">
+          <td>
+            <button class="expand-btn ${durOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleDuration('${durKey}')">${chevron(durOpen)}</button>
+            <span style="font-weight:500;">${durGroup.duration} Nights</span>
+            <span style="color:var(--text-muted);margin-left:8px;font-size:11px;">${durGroup.packages.length} pkgs</span>
+          </td>
+          <td class="text-muted">—</td>
+          <td class="text-muted">—</td>
+          <td class="text-right text-muted">${fmt$(durAgg.currentPrice - durAgg.currentMargin)}</td>
+          <td class="text-right">${fmt$(durAgg.currentMargin)}</td>
+          <td class="text-right highlight-teal">${fmt$(durAgg.recMargin)}</td>
+          <td class="text-right">${deltaCell(durAgg.deltaMargin)}</td>
+          <td class="text-right">${fmt$(durAgg.currentPrice)}</td>
+          <td class="text-right highlight-teal">${fmt$(durAgg.recPrice)}</td>
+          <td class="text-right">${lfPill(durAgg.lf)}</td>
+          <td class="text-right text-muted">—</td>
+          <td class="text-right text-muted">—</td>
+          <td></td>
+          <td></td>
+        </tr>
+      `);
+
+      if (!durOpen) return;
+
+      // Package rows (leaves)
+      durGroup.packages.forEach(pkg => {
+        const effMargin = getEffectiveMargin(pkg);
+        const effPrice  = pkg.totalCost + effMargin;
+        const effDelta  = pkg.recMargin - effMargin;
+
+        rows.push(`
+          <tr class="row-unit" data-pkg="${pkg.id}">
+            <td>
+              <span class="font-mono" style="font-size:11.5px;color:var(--text-secondary);">${pkg.id}</span>
+              ${pkg.locked ? '<svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--accent);margin-left:6px;vertical-align:middle;"><rect x="3" y="6" width="8" height="6" rx="1"/><path d="M5 6V4a2 2 0 0 1 4 0v2"/></svg>' : ''}
+            </td>
+            <td>
+              <div style="font-weight:500;">${pkg.hotel}</div>
+              <div style="font-size:11px;color:var(--text-muted);">${pkg.roomCategory}</div>
+            </td>
+            <td>
+              <div>${pkg.departureDate}</div>
+              <div class="font-mono" style="font-size:10.5px;color:var(--text-muted);">${pkg.flightNum}</div>
+            </td>
+            <td class="text-right font-mono">${fmt$(pkg.totalCost)}</td>
+            <td class="text-right">
+              <input class="margin-input" type="number" value="${effMargin}" data-pkg="${pkg.id}" onchange="updateMargin('${pkg.id}', this.value)" onclick="event.stopPropagation()" />
+            </td>
+            <td class="text-right">
+              <span class="rec-margin-cell" onclick="event.stopPropagation();acceptRec('${pkg.id}')" title="Click to accept">${fmt$(pkg.recMargin)}</span>
+            </td>
+            <td class="text-right">${deltaCell(effDelta)}</td>
+            <td class="text-right font-mono">${fmt$(effPrice)}</td>
+            <td class="text-right font-mono highlight-teal">${fmt$(pkg.recPrice)}</td>
+            <td class="text-right">${lfPill(pkg.lf)}</td>
+            <td class="text-right font-mono text-muted">${fmt$(pkg.competitor1Price)}</td>
+            <td class="text-right font-mono text-muted">${fmt$(pkg.competitor2Price)}</td>
+            <td>${paceBadge(pkg.bookingPace)}</td>
+            <td>
+              <span class="pkg-action-icons">
+                <button title="Booking curve" onclick="event.stopPropagation();openPackagePanel('${pkg.id}')">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="1,12 5,7 8,9 13,3"/><line x1="1" y1="13" x2="13" y2="13"/></svg>
+                </button>
+                <button title="Rules" onclick="event.stopPropagation();openPackageRules('${pkg.id}')">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="2"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2M2.5 2.5l1.4 1.4M10.1 10.1l1.4 1.4M2.5 11.5l1.4-1.4M10.1 3.9l1.4-1.4"/></svg>
+                </button>
+                <button class="${pkg.locked ? 'locked' : ''}" title="${pkg.locked ? 'Unlock price' : 'Lock price'}" onclick="event.stopPropagation();toggleLock('${pkg.id}')">
+                  ${pkg.locked
+                    ? '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="8" height="6" rx="1"/><path d="M5 6V4a2 2 0 0 1 4 0v2"/></svg>'
+                    : '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="8" height="6" rx="1"/><path d="M5 6V4a2 2 0 0 1 3.5-.8"/></svg>'}
+                </button>
+              </span>
+            </td>
+          </tr>
+        `);
+      });
+    });
+  });
+
+  tbody.innerHTML = rows.join('');
+}
+
+// ── Expand / collapse ──────────────────────────────────────
+function toggleDest(destId) {
+  if (expandedDests.has(destId)) {
+    expandedDests.delete(destId);
+  } else {
+    expandedDests.add(destId);
+  }
+  renderTable();
+}
+
+function toggleDuration(durKey) {
+  if (expandedDurations.has(durKey)) {
+    expandedDurations.delete(durKey);
+  } else {
+    expandedDurations.add(durKey);
+  }
+  renderTable();
+}
+
+// ── Inline margin edit ─────────────────────────────────────
+function updateMargin(pkgId, value) {
+  const v = Number(value);
+  if (isNaN(v)) return;
+  marginOverrides[pkgId] = v;
+  renderTable();
+}
+
+function acceptRec(pkgId) {
+  const hit = getPackageById(pkgId);
+  if (!hit) return;
+  marginOverrides[pkgId] = hit.package.recMargin;
+  renderTable();
+}
+
+function toggleLock(pkgId) {
+  const hit = getPackageById(pkgId);
+  if (!hit) return;
+  hit.package.locked = !hit.package.locked;
+  renderTable();
+}
+
+// ── Stats bar ──────────────────────────────────────────────
+function renderStatsBar() {
+  const el = document.getElementById('pricingStatsBar');
+  const totalPkgs = PACKAGE_DATA.reduce((s, d) => s + d.totalPackages, 0);
+  const avgLoad = PACKAGE_DATA.reduce((s, d) => s + d.loadFactor, 0) / PACKAGE_DATA.length;
+  const allPkgs = PACKAGE_DATA.flatMap(d => d.durations.flatMap(g => g.packages));
+  const behind = allPkgs.filter(p => p.bookingPace === 'behind').length;
+  const ahead  = allPkgs.filter(p => p.bookingPace === 'ahead').length;
+  const totalDelta = allPkgs.reduce((s, p) => s + p.deltaMargin, 0);
+
+  el.innerHTML = `
+    <span style="font-weight:600;color:var(--text-primary);">${PACKAGE_DATA.length}</span>
+    <span style="color:var(--text-muted);">destinations</span>
+    <span style="color:var(--border-mid);">|</span>
+    <span style="font-weight:600;color:var(--text-primary);">${totalPkgs}</span>
+    <span style="color:var(--text-muted);">packages on sale</span>
+    <span style="color:var(--border-mid);">|</span>
+    <span style="color:var(--text-muted);">Avg load factor</span>
+    <span style="font-weight:600;">${Math.round(avgLoad * 100)}%</span>
+    <span style="color:var(--border-mid);">|</span>
+    <span style="color:var(--text-muted);">Pace</span>
+    <span class="pace-dot pace-ahead"></span><span>${ahead}</span>
+    <span class="pace-dot pace-behind" style="margin-left:6px;"></span><span>${behind}</span>
+    <span style="color:var(--border-mid);">|</span>
+    <span style="color:var(--text-muted);">Net margin uplift</span>
+    <span class="${totalDelta >= 0 ? 'delta-pos' : 'delta-neg'}" style="font-weight:600;">${totalDelta >= 0 ? '+' : ''}${fmt$(totalDelta)}</span>
+  `;
+}
+
+// ── Filter / menu stubs (wired fully in Part 4) ────────────
+function toggleFilter(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const open = el.classList.contains('open');
+  document.querySelectorAll('.ms-wrap.open').forEach(w => w.classList.remove('open'));
+  if (!open) el.classList.add('open');
+}
+function toggleMenu() {
+  document.getElementById('navDropdown').classList.toggle('open');
+}
+function runEvaluation() { /* TODO */ }
+function publishChanges() { /* TODO */ }
+
+// ── Booking Curve / Competitor Price Panel ─────────────────
+let bookingCurveChart = null;
+let compPriceChart = null;
+let activePanelPkgId = null;
+
+const CHART_DARK_GRID = 'rgba(255,255,255,0.06)';
+const CHART_DARK_TICK = '#6b7280';
+
+function baseChartOptions(yLabel, yFormat) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#16181d',
+        borderColor: '#2a2d35',
+        borderWidth: 1,
+        titleColor: '#e5e7eb',
+        bodyColor: '#cbd5e1',
+        padding: 10,
+        callbacks: {
+          label: (ctx) => `${ctx.dataset.label}: ${yFormat ? yFormat(ctx.parsed.y) : ctx.parsed.y}`,
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: { color: CHART_DARK_GRID, drawBorder: false },
+        ticks: { color: CHART_DARK_TICK, font: { size: 10, family: 'DM Sans' } },
+      },
+      y: {
+        grid: { color: CHART_DARK_GRID, drawBorder: false },
+        ticks: {
+          color: CHART_DARK_TICK,
+          font: { size: 10, family: 'DM Sans' },
+          callback: (v) => yFormat ? yFormat(v) : v,
+        },
+        title: yLabel ? { display: true, text: yLabel, color: CHART_DARK_TICK, font: { size: 10 } } : undefined,
+      },
+    },
+  };
+}
+
+function renderBookingCurveChart(pkg) {
+  const { labels, target, actual } = makeBookingCurveData(pkg.lf);
+  const ctx = document.getElementById('bookingCurveChart').getContext('2d');
+  if (bookingCurveChart) bookingCurveChart.destroy();
+  bookingCurveChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Target',
+          data: target,
+          borderColor: '#9ca3af',
+          borderDash: [5, 4],
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          pointRadius: 0,
+          tension: 0.35,
+        },
+        {
+          label: 'Actual',
+          data: actual,
+          borderColor: '#e8007d',
+          backgroundColor: 'rgba(232, 0, 125, 0.12)',
+          borderWidth: 2.5,
+          pointRadius: 3,
+          pointBackgroundColor: '#e8007d',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 1,
+          fill: true,
+          tension: 0.35,
+        },
+      ],
+    },
+    options: baseChartOptions(null, (v) => v + '%'),
+  });
+}
+
+function renderCompPriceChart(pkg) {
+  const basePrice = getEffectivePrice(pkg);
+  // Override ours with flat current + rec for context, but use helper for comps
+  const { labels, ours, comp1, comp2 } = makeCompData(basePrice);
+  const ctx = document.getElementById('compPriceChart').getContext('2d');
+  if (compPriceChart) compPriceChart.destroy();
+  compPriceChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Sunwing',
+          data: ours,
+          borderColor: '#e8007d',
+          backgroundColor: 'rgba(232, 0, 125, 0.10)',
+          borderWidth: 2.5,
+          pointRadius: 0,
+          fill: true,
+          tension: 0.3,
+        },
+        {
+          label: 'Competitor 1',
+          data: comp1,
+          borderColor: '#60a5fa',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.3,
+        },
+        {
+          label: 'Competitor 2',
+          data: comp2,
+          borderColor: '#a78bfa',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.3,
+        },
+      ],
+    },
+    options: baseChartOptions(null, (v) => '$' + v),
+  });
+}
+
+function openPackagePanel(pkgId) {
+  const hit = getPackageById(pkgId);
+  if (!hit) return;
+  activePanelPkgId = pkgId;
+
+  const wrap = document.getElementById('exposureWrap');
+  wrap.style.display = 'block';
+  document.getElementById('exposurePanel').classList.remove('panel-closed');
+
+  document.getElementById('exposurePropName').textContent =
+    `${hit.destination.name} · ${hit.package.hotel} · ${hit.package.id}`;
+
+  // Render charts after the panel is visible so the canvas has layout
+  requestAnimationFrame(() => {
+    renderBookingCurveChart(hit.package);
+    renderCompPriceChart(hit.package);
+  });
+}
+
+function toggleExposure() {
+  const wrap = document.getElementById('exposureWrap');
+  if (wrap.style.display === 'none' || !wrap.style.display) {
+    if (activePanelPkgId) {
+      openPackagePanel(activePanelPkgId);
+    } else {
+      wrap.style.display = 'block';
+    }
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+// ── Rules drawer ───────────────────────────────────────────
+// packageRules[pkgId] = { minPrice, maxPrice, minMargin, maxMargin, lock, lastModified }
+const packageRules = {};
+let activeRulesPkgId = null;
+
+function getRulesFor(pkg) {
+  if (packageRules[pkg.id]) return packageRules[pkg.id];
+  // Sensible defaults centered on current values
+  return {
+    minPrice:  Math.round(pkg.totalCost + 40),
+    maxPrice:  Math.round(pkg.currentPrice + 220),
+    minMargin: 60,
+    maxMargin: Math.round(pkg.currentMargin + 180),
+    lock:      !!pkg.locked,
+    lastModified: null,
+  };
+}
+
+function openPackageRules(pkgId) {
+  const hit = getPackageById(pkgId);
+  if (!hit) return;
+  activeRulesPkgId = pkgId;
+  const rules = getRulesFor(hit.package);
+
+  document.getElementById('rulesPkgId').textContent = pkgId;
+  document.getElementById('rulesPkgHotel').textContent =
+    `${hit.package.hotel} · ${hit.package.roomCategory}`;
+  document.getElementById('ruleMinPrice').value  = rules.minPrice;
+  document.getElementById('ruleMaxPrice').value  = rules.maxPrice;
+  document.getElementById('ruleMinMargin').value = rules.minMargin;
+  document.getElementById('ruleMaxMargin').value = rules.maxMargin;
+  document.getElementById('ruleLockToggle').checked = rules.lock;
+  document.getElementById('rulesLastMod').textContent =
+    'Last modified: ' + (rules.lastModified || 'never');
+
+  document.getElementById('rulesDrawer').classList.add('open');
+}
+
+function toggleRulesDrawer() {
+  document.getElementById('rulesDrawer').classList.toggle('open');
+}
+
+function saveRules() {
+  if (!activeRulesPkgId) { toggleRulesDrawer(); return; }
+  const hit = getPackageById(activeRulesPkgId);
+  if (!hit) { toggleRulesDrawer(); return; }
+
+  const minPrice  = Number(document.getElementById('ruleMinPrice').value)  || 0;
+  const maxPrice  = Number(document.getElementById('ruleMaxPrice').value)  || 0;
+  const minMargin = Number(document.getElementById('ruleMinMargin').value) || 0;
+  const maxMargin = Number(document.getElementById('ruleMaxMargin').value) || 0;
+  const lock      = document.getElementById('ruleLockToggle').checked;
+
+  const now = new Date();
+  const stamp = now.toLocaleDateString('en-CA') + ' ' +
+                String(now.getHours()).padStart(2, '0') + ':' +
+                String(now.getMinutes()).padStart(2, '0');
+
+  packageRules[activeRulesPkgId] = {
+    minPrice, maxPrice, minMargin, maxMargin, lock,
+    lastModified: stamp,
+  };
+  hit.package.locked = lock;
+
+  document.getElementById('rulesLastMod').textContent = 'Last modified: ' + stamp;
+  document.getElementById('rulesDrawer').classList.remove('open');
+  renderTable();
+}
+
+// Close filter dropdowns on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.ms-wrap')) {
+    document.querySelectorAll('.ms-wrap.open').forEach(w => w.classList.remove('open'));
+  }
+  if (!e.target.closest('#menuBtn') && !e.target.closest('#navDropdown')) {
+    document.getElementById('navDropdown').classList.remove('open');
+  }
+});
+
+// ── Init ───────────────────────────────────────────────────
+renderStatsBar();
+renderTable();
+</script>
+
+</body>
+</html>

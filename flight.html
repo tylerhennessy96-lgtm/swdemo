@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flight Only — Sunwing RMS</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="data.js"></script>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Top Nav ── -->
+  <nav class="topnav">
+    <a href="pricing.html" class="logo">
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="4" fill="#fff"/>
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="logo-text">Sunwing RMS</span>
+    </a>
+
+    <div class="nav-tabs">
+      <a href="pricing.html" class="nav-tab active">Pricing</a>
+      <a href="demand.html"  class="nav-tab">Demand Forecast</a>
+      <a href="#"            class="nav-tab">Rules &amp; Parameters</a>
+      <a href="#"            class="nav-tab">Audit Log</a>
+    </div>
+
+    <div class="nav-divider"></div>
+
+    <div style="position:relative;">
+      <button class="nav-menu-btn" id="menuBtn" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-dropdown" id="navDropdown">
+        <a href="#">Settings</a>
+        <a href="#">Reports</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Filter Bar ── -->
+  <div class="filter-bar" id="filterBar">
+    <div class="ms-wrap" id="fRegion">
+      <button class="ms-trigger" onclick="toggleFilter('fRegion')">
+        <span>All Regions</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown"><div class="ms-options"></div></div>
+    </div>
+    <div class="ms-wrap" id="fDestination">
+      <button class="ms-trigger" onclick="toggleFilter('fDestination')">
+        <span>All Destinations</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown"><div class="ms-options"></div></div>
+    </div>
+    <div class="ms-wrap" id="fGateway">
+      <button class="ms-trigger" onclick="toggleFilter('fGateway')">
+        <span>All Gateways</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown"><div class="ms-options"></div></div>
+    </div>
+    <div class="ms-wrap" id="fCategory">
+      <button class="ms-trigger" onclick="toggleFilter('fCategory')">
+        <span>All Categories</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown"><div class="ms-options"></div></div>
+    </div>
+    <div class="ms-wrap" id="fRM">
+      <button class="ms-trigger" onclick="toggleFilter('fRM')">
+        <span>All RMs</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown"><div class="ms-options"></div></div>
+    </div>
+  </div>
+
+  <!-- ── Sub-tab Bar ── -->
+  <div class="subtab-bar">
+    <a href="pricing.html" class="subtab">Vacation Packages</a>
+    <a href="hotel.html"   class="subtab">Hotel Only</a>
+    <a href="flight.html"  class="subtab active">Flight Only</a>
+    <a href="#groups"      class="subtab">Groups</a>
+    <div class="subtab-spacer"></div>
+    <button class="btn btn-primary" onclick="runEvaluation()" style="margin-right:8px;">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="3,2 12,7 3,12" fill="currentColor" stroke="none"/></svg>
+      Run Evaluation
+    </button>
+    <button class="btn btn-ghost" onclick="publishChanges()">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7h10M7 2l5 5-5 5"/></svg>
+      Publish Changes
+    </button>
+  </div>
+
+  <!-- ── Metrics Bar (6 KPI cards) ── -->
+  <div class="metrics-bar" id="metricsBar">
+    <div class="metric-card">
+      <div class="metric-card-label">Flights behind target</div>
+      <div class="metric-card-value metric-warn" id="mFlightsBehind">—</div>
+      <div class="metric-card-sub">Under forecast vs plan</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-card-label">Avg. forecast LF</div>
+      <div class="metric-card-value" id="mAvgForecastLF">—</div>
+      <div class="metric-card-sub">Across next 8 weeks</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-card-label">Avg. fare change</div>
+      <div class="metric-card-value" id="mAvgFareChange">—</div>
+      <div class="metric-card-sub">Across selected routes</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-card-label">Rate of sale alerts</div>
+      <div class="metric-card-value metric-warn" id="mROSAlerts">—</div>
+      <div class="metric-card-sub">Below target pace</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-card-label">Competitor undercuts</div>
+      <div class="metric-card-value metric-neg" id="mCompUndercuts">—</div>
+      <div class="metric-card-sub">Comp cheaper than ours</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-card-label">Pending approval</div>
+      <div class="metric-card-value" id="mPendingApproval">—</div>
+      <div class="metric-card-sub">Waiting to publish</div>
+    </div>
+  </div>
+
+  <!-- ── Sub-subtab Bar ── -->
+  <div class="subsubtab-bar" id="subsubtabBar">
+    <a class="subsubtab active" data-view="recs"       onclick="switchView('recs')">New Recommendations</a>
+    <a class="subsubtab"        data-view="published"  onclick="switchView('published')">Published Changes</a>
+    <a class="subsubtab"        data-view="competitor" onclick="switchView('competitor')">Competitor Analysis</a>
+  </div>
+
+  <!-- ── Main ── -->
+  <div class="main">
+    <!-- New Recommendations view (tree table) -->
+    <div class="view" id="viewRecs">
+      <div class="table-wrap" id="recsTableWrap">
+        <div style="padding:40px 20px;text-align:center;color:var(--text-muted);font-size:13px;">
+          Tree table (Destination → Route → Flight Date) will render here.
+        </div>
+      </div>
+    </div>
+
+    <!-- Published Changes view (flat table) -->
+    <div class="view hidden" id="viewPublished">
+      <div class="table-wrap" id="publishedTableWrap">
+        <div style="padding:40px 20px;text-align:center;color:var(--text-muted);font-size:13px;">
+          Flight Published Changes flat table will render here.
+        </div>
+      </div>
+    </div>
+
+    <!-- Competitor Analysis view (flat table) -->
+    <div class="view hidden" id="viewCompetitor">
+      <div class="table-wrap" id="competitorTableWrap">
+        <div style="padding:40px 20px;text-align:center;color:var(--text-muted);font-size:13px;">
+          Competitor Analysis flat table will render here.
+        </div>
+      </div>
+    </div>
+  </div><!-- /.main -->
+
+</div><!-- /.app -->
+
+<script>
+// ── Formatting helpers ─────────────────────────────────────
+function fmt$(n) {
+  if (n == null || isNaN(n)) return '—';
+  const r = Math.round(n);
+  return (r < 0 ? '-$' : '$') + Math.abs(r).toLocaleString('en-CA');
+}
+function fmtSignedDollar(n) {
+  if (n == null || isNaN(n)) return '—';
+  const r = Math.round(n);
+  if (r === 0) return '$0';
+  return (r > 0 ? '+' : '') + fmt$(r);
+}
+
+// ── Metrics bar computation ────────────────────────────────
+function computeMetrics() {
+  const allDates = FLIGHT_DATA.flatMap(d => d.routes.flatMap(r => r.dates));
+
+  // Flights behind target: forecast LF materially under target
+  const flightsBehind = allDates.filter(x => x.forecastLF < x.targetLF - 0.05).length;
+
+  // Avg forecast LF
+  const avgForecastLF = allDates.reduce((s, x) => s + x.forecastLF, 0) / Math.max(1, allDates.length);
+
+  // Avg fare change (rec - current)
+  const avgFareChange = allDates.reduce((s, x) => s + (x.recFare - x.currentFare), 0) / Math.max(1, allDates.length);
+
+  // Rate of sale alerts: actual ROS below target
+  const rosAlerts = allDates.filter(x => x.rateOfSale < x.rateOfSaleTarget).length;
+
+  // Competitor undercuts: our fare strictly above cheapest competitor
+  const compUndercuts = COMPETITOR_FLIGHT_DATA.filter(c => c.ourDelta > 0).length;
+
+  // Pending approval
+  const pendingApproval = FLIGHT_PUBLISHED_DATA.filter(p => p.status === 'Scheduled').length;
+
+  return { flightsBehind, avgForecastLF, avgFareChange, rosAlerts, compUndercuts, pendingApproval };
+}
+
+function renderMetricsBar() {
+  const m = computeMetrics();
+  document.getElementById('mFlightsBehind').textContent   = m.flightsBehind;
+  document.getElementById('mAvgForecastLF').textContent   = Math.round(m.avgForecastLF * 100) + '%';
+  document.getElementById('mAvgFareChange').textContent   = fmtSignedDollar(m.avgFareChange);
+  document.getElementById('mROSAlerts').textContent       = m.rosAlerts;
+  document.getElementById('mCompUndercuts').textContent   = m.compUndercuts;
+  document.getElementById('mPendingApproval').textContent = m.pendingApproval;
+
+  const fareEl = document.getElementById('mAvgFareChange');
+  fareEl.classList.remove('metric-pos', 'metric-neg', 'metric-warn');
+  if (m.avgFareChange > 0) fareEl.classList.add('metric-pos');
+  else if (m.avgFareChange < 0) fareEl.classList.add('metric-neg');
+}
+
+// ── Sub-subtab view switching ──────────────────────────────
+function switchView(view) {
+  document.querySelectorAll('.subsubtab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.subsubtab[data-view="${view}"]`).classList.add('active');
+
+  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+  const map = { recs: 'viewRecs', published: 'viewPublished', competitor: 'viewCompetitor' };
+  document.getElementById(map[view]).classList.remove('hidden');
+}
+
+// ── Filter / menu stubs ────────────────────────────────────
+function toggleFilter(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const open = el.classList.contains('open');
+  document.querySelectorAll('.ms-wrap.open').forEach(w => w.classList.remove('open'));
+  if (!open) el.classList.add('open');
+}
+function toggleMenu() {
+  document.getElementById('navDropdown').classList.toggle('open');
+}
+function runEvaluation() {}
+function publishChanges() {}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.ms-wrap')) {
+    document.querySelectorAll('.ms-wrap.open').forEach(w => w.classList.remove('open'));
+  }
+  if (!e.target.closest('#menuBtn') && !e.target.closest('#navDropdown')) {
+    document.getElementById('navDropdown').classList.remove('open');
+  }
+});
+
+// ── Init ───────────────────────────────────────────────────
+renderMetricsBar();
+</script>
+
+</body>
+</html>

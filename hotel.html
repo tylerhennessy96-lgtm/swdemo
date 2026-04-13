@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hotel Only — Sunwing RMS</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="data.js"></script>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Top Nav ── -->
+  <nav class="topnav">
+    <a href="pricing.html" class="logo">
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="4" fill="#fff"/>
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="logo-text">Sunwing RMS</span>
+    </a>
+
+    <div class="nav-tabs">
+      <a href="pricing.html" class="nav-tab active">Pricing</a>
+      <a href="demand.html"  class="nav-tab">Demand Forecast</a>
+      <a href="#"            class="nav-tab">Rules &amp; Parameters</a>
+      <a href="#"            class="nav-tab">Audit Log</a>
+    </div>
+
+    <div class="nav-divider"></div>
+
+    <div style="position:relative;">
+      <button class="nav-menu-btn" id="menuBtn" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-dropdown" id="navDropdown">
+        <a href="#">Settings</a>
+        <a href="#">Reports</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Filter Bar ── -->
+  <div class="filter-bar" id="filterBar">
+    <div class="ms-wrap" id="fRegion">
+      <button class="ms-trigger" onclick="toggleFilter('fRegion')">
+        <span>All Regions</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown"><div class="ms-options"></div></div>
+    </div>
+    <div class="ms-wrap" id="fDestination">
+      <button class="ms-trigger" onclick="toggleFilter('fDestination')">
+        <span>All Destinations</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown"><div class="ms-options"></div></div>
+    </div>
+    <div class="ms-wrap" id="fClassification">
+      <button class="ms-trigger" onclick="toggleFilter('fClassification')">
+        <span>All Classifications</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown"><div class="ms-options"></div></div>
+    </div>
+    <div class="ms-wrap" id="fStars">
+      <button class="ms-trigger" onclick="toggleFilter('fStars')">
+        <span>All Star Ratings</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown"><div class="ms-options"></div></div>
+    </div>
+    <div class="ms-wrap" id="fRM">
+      <button class="ms-trigger" onclick="toggleFilter('fRM')">
+        <span>All RMs</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown"><div class="ms-options"></div></div>
+    </div>
+  </div>
+
+  <!-- ── Sub-tab Bar ── -->
+  <div class="subtab-bar">
+    <a href="pricing.html" class="subtab">Vacation Packages</a>
+    <a href="hotel.html"   class="subtab active">Hotel Only</a>
+    <a href="flight.html"  class="subtab">Flight Only</a>
+    <a href="#groups"      class="subtab">Groups</a>
+    <div class="subtab-spacer"></div>
+    <button class="btn btn-primary" onclick="runEvaluation()" style="margin-right:8px;">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="3,2 12,7 3,12" fill="currentColor" stroke="none"/></svg>
+      Run Evaluation
+    </button>
+    <button class="btn btn-ghost" onclick="publishChanges()">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7h10M7 2l5 5-5 5"/></svg>
+      Publish Changes
+    </button>
+  </div>
+
+  <!-- ── Metrics Bar (6 KPI cards) ── -->
+  <div class="metrics-bar" id="metricsBar">
+    <div class="metric-card">
+      <div class="metric-card-label">Hotels behind plan</div>
+      <div class="metric-card-value metric-warn" id="mHotelsBehind">—</div>
+      <div class="metric-card-sub">Need hotel pricing action</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-card-label">Avg. forecast occ.</div>
+      <div class="metric-card-value" id="mAvgForecastOcc">—</div>
+      <div class="metric-card-sub">Across next 60 days</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-card-label">Avg. ADR change</div>
+      <div class="metric-card-value" id="mAvgADRChange">—</div>
+      <div class="metric-card-sub">Across selected hotels</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-card-label">High package demand hotels</div>
+      <div class="metric-card-value metric-pos" id="mHighDemand">—</div>
+      <div class="metric-card-sub">Beds need protection</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-card-label">Supplier cost changes</div>
+      <div class="metric-card-value metric-warn" id="mCostChanges">—</div>
+      <div class="metric-card-sub">Contract or allotment updates</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-card-label">Pending approval</div>
+      <div class="metric-card-value" id="mPendingApproval">—</div>
+      <div class="metric-card-sub">Waiting to publish</div>
+    </div>
+  </div>
+
+  <!-- ── Sub-subtab Bar ── -->
+  <div class="subsubtab-bar" id="subsubtabBar">
+    <a class="subsubtab active" data-view="recs"       onclick="switchView('recs')">New Recommendations</a>
+    <a class="subsubtab"        data-view="published"  onclick="switchView('published')">Published Changes</a>
+    <a class="subsubtab"        data-view="exceptions" onclick="switchView('exceptions')">Cost Change Exceptions</a>
+  </div>
+
+  <!-- ── Main ── -->
+  <div class="main">
+    <!-- New Recommendations view (tree table) -->
+    <div class="view" id="viewRecs">
+      <div class="table-wrap">
+        <table class="data-table hotel-recs-table" id="recsTable">
+          <thead id="recsTableHead"></thead>
+          <tbody id="recsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Published Changes view (flat table) -->
+    <div class="view hidden" id="viewPublished">
+      <div class="table-wrap">
+        <table class="data-table" id="publishedTable">
+          <thead>
+            <tr>
+              <th>Destination</th>
+              <th>Hotel</th>
+              <th>Room Category</th>
+              <th>Check-in Week</th>
+              <th style="text-align:right;">Old ADR</th>
+              <th style="text-align:right;">New ADR</th>
+              <th style="text-align:right;">Change $</th>
+              <th>Published By</th>
+              <th>Published Date</th>
+              <th style="width:110px;">Status</th>
+            </tr>
+          </thead>
+          <tbody id="publishedTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Cost Change Exceptions view (flat table) -->
+    <div class="view hidden" id="viewExceptions">
+      <div class="table-wrap">
+        <table class="data-table" id="exceptionsTable">
+          <thead>
+            <tr>
+              <th>Destination</th>
+              <th>Hotel</th>
+              <th>Room Category</th>
+              <th>Check-in Week</th>
+              <th style="text-align:right;">Old Cost</th>
+              <th style="text-align:right;">New Cost</th>
+              <th style="text-align:right;">Change $</th>
+              <th style="text-align:right;">Change %</th>
+              <th>Date Received</th>
+              <th style="width:110px;">Status</th>
+              <th style="width:100px;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="exceptionsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- /.main -->
+
+  <!-- ── Notes Modal ── -->
+  <div class="modal-backdrop" id="notesModalBackdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">Row notes</div>
+          <div class="modal-subtitle" id="notesModalSub">—</div>
+        </div>
+        <button class="modal-close" onclick="closeNotesModal()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <label style="display:block;font-size:11.5px;font-weight:500;color:var(--text-secondary);margin-bottom:4px;">Note text</label>
+        <textarea class="note-textarea" id="notesText" rows="4" placeholder="Add a note for this check-in week…" style="margin-bottom:12px;"></textarea>
+
+        <div style="display:flex;gap:12px;">
+          <div style="flex:1;">
+            <label style="display:block;font-size:11.5px;font-weight:500;color:var(--text-secondary);margin-bottom:4px;">Expiry date</label>
+            <input type="date" id="notesExpiry" style="width:100%;padding:8px 12px;border:1px solid var(--border-mid);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;" />
+          </div>
+          <div style="flex:1;">
+            <label style="display:block;font-size:11.5px;font-weight:500;color:var(--text-secondary);margin-bottom:4px;">Created by</label>
+            <input type="text" id="notesCreatedBy" readonly value="Sarah Chen" style="width:100%;padding:8px 12px;border:1px solid var(--border-mid);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;background:#f9fafb;color:var(--text-secondary);outline:none;" />
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:10px;" id="notesCreatedAt">Created: —</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="notesDeleteBtn" onclick="deleteNote()" style="margin-right:auto;display:none;color:var(--danger);border-color:rgba(224,82,82,0.3);">Delete</button>
+        <button class="btn btn-ghost" onclick="closeNotesModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveNote()">Save</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.app -->
+
+<script>
+// ── State ──────────────────────────────────────────────────
+const expandedDests  = new Set();  // destination IDs
+const expandedHotels = new Set();  // hotel IDs
+const adrOverrides   = {};         // { weekId: newADR }
+const notes          = {};         // { weekId: { text, expires, createdBy, createdAt } }
+let   activeNoteKey  = null;
+
+// Seed-expand the first destination + first hotel
+if (HOTEL_DATA.length) {
+  const d0 = HOTEL_DATA[0];
+  expandedDests.add(d0.id);
+  if (d0.hotels[0]) expandedHotels.add(d0.hotels[0].id);
+}
+
+// ── Formatting helpers ─────────────────────────────────────
+function fmt$(n) {
+  if (n == null || isNaN(n)) return '—';
+  const r = Math.round(n);
+  return (r < 0 ? '-$' : '$') + Math.abs(r).toLocaleString('en-CA');
+}
+function fmtSignedDollar(n) {
+  if (n == null || isNaN(n)) return '—';
+  const r = Math.round(n);
+  if (r === 0) return '$0';
+  return (r > 0 ? '+' : '') + fmt$(r);
+}
+function fmtPct(n) {
+  if (n == null || isNaN(n)) return '—';
+  return Math.round(n * 100) + '%';
+}
+function regionBadge(region) {
+  const cls = 'region-' + region.toLowerCase().replace(/[^a-z]/g, '');
+  return `<span class="region-badge ${cls}">${region}</span>`;
+}
+function classBadge(classification) {
+  const cls = classification.toLowerCase();
+  return `<span class="class-badge ${cls}">${classification}</span>`;
+}
+function starsMarkup(n) {
+  const filled = '★'.repeat(n);
+  const empty = '★'.repeat(5 - n);
+  return `<span class="stars">${filled}<span class="stars-empty">${empty}</span></span>`;
+}
+function occPill(occ) {
+  const pct = Math.round(occ * 100);
+  let cls = 'occ-mid';
+  if (pct >= 75) cls = 'occ-high';
+  else if (pct < 50) cls = 'occ-low';
+  return `<span class="occ-pill ${cls}">${pct}%</span>`;
+}
+function soldPctText(pct) {
+  const v = Math.round(pct * 100);
+  let color = 'var(--text-primary)';
+  if (v >= 75) color = '#047857';
+  else if (v < 50) color = 'var(--danger)';
+  return `<span style="color:${color};font-weight:500;">${v}%</span>`;
+}
+function deltaCell(delta) {
+  if (!delta) return `<span class="text-muted">$0</span>`;
+  const cls = delta > 0 ? 'delta-pos' : 'delta-neg';
+  const sign = delta > 0 ? '+' : '';
+  return `<span class="${cls}">${sign}${fmt$(delta)}</span>`;
+}
+function chevron(open) {
+  return `<svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" style="transform:${open ? 'rotate(90deg)' : 'none'};transition:transform .15s;"><polyline points="4,2 8,6 4,10"/></svg>`;
+}
+function statusBadge(status) {
+  const key = status.toLowerCase();
+  return `<span class="status-badge status-${key}">${status}</span>`;
+}
+
+// ── Effective ADR (respects overrides) ─────────────────────
+function getEffectiveADR(week) {
+  return adrOverrides[week.id] != null ? adrOverrides[week.id] : week.currentADR;
+}
+
+// Re-aggregate a category after an inline override
+function aggregateCategoryLive(category) {
+  const weeks = category.checkInWeeks;
+  const avgCurrentADR = weeks.reduce((s, w) => s + getEffectiveADR(w), 0) / weeks.length;
+  const avgRecADR = weeks.reduce((s, w) => s + w.recADR, 0) / weeks.length;
+  return {
+    avgCurrentADR: Math.round(avgCurrentADR),
+    avgRecADR: Math.round(avgRecADR),
+    deltaADR: Math.round(avgRecADR - avgCurrentADR),
+  };
+}
+function aggregateHotelLive(hotel) {
+  const catsAgg = hotel.categories.map(aggregateCategoryLive);
+  const avgCurrentADR = catsAgg.reduce((s, c) => s + c.avgCurrentADR, 0) / catsAgg.length;
+  const avgRecADR = catsAgg.reduce((s, c) => s + c.avgRecADR, 0) / catsAgg.length;
+  return {
+    avgCurrentADR: Math.round(avgCurrentADR),
+    avgRecADR: Math.round(avgRecADR),
+    deltaADR: Math.round(avgRecADR - avgCurrentADR),
+  };
+}
+function aggregateDestinationLive(dest) {
+  const hotelsAgg = dest.hotels.map(aggregateHotelLive);
+  const avgCurrentADR = hotelsAgg.reduce((s, h) => s + h.avgCurrentADR, 0) / hotelsAgg.length;
+  const avgRecADR = hotelsAgg.reduce((s, h) => s + h.avgRecADR, 0) / hotelsAgg.length;
+  return {
+    avgCurrentADR: Math.round(avgCurrentADR),
+    avgRecADR: Math.round(avgRecADR),
+    deltaADR: Math.round(avgRecADR - avgCurrentADR),
+  };
+}
+
+// ── Recommendations tree table render ──────────────────────
+// Aggregate ADR for a list of categories at a given week index
+function aggWeekForCategories(cats, i) {
+  if (!cats.length) return { cur: 0, rec: 0, delta: 0 };
+  const cur = cats.reduce((s, c) => s + getEffectiveADR(c.checkInWeeks[i]), 0) / cats.length;
+  const rec = cats.reduce((s, c) => s + c.checkInWeeks[i].recADR, 0) / cats.length;
+  return {
+    cur: Math.round(cur),
+    rec: Math.round(rec),
+    delta: Math.round(rec - cur),
+  };
+}
+
+function deltaTextSmall(delta) {
+  if (!delta) return `<div class="wk-delta">$0</div>`;
+  const cls = delta > 0 ? 'delta-pos' : 'delta-neg';
+  const sign = delta > 0 ? '+' : '';
+  return `<div class="wk-delta ${cls}">${sign}${fmt$(delta)}</div>`;
+}
+
+function weekAggCellHTML(agg) {
+  return `
+    <div class="wk-cell">
+      <div class="wk-adr-row">
+        <span class="wk-cur">${fmt$(agg.cur)}</span>
+        <span class="wk-rec wk-rec-readonly">${fmt$(agg.rec)}</span>
+      </div>
+      ${deltaTextSmall(agg.delta)}
+    </div>
+  `;
+}
+
+function weekCatCellHTML(week) {
+  const eff = getEffectiveADR(week);
+  const delta = week.recADR - eff;
+  const hasNote = !!notes[week.id];
+  return `
+    <div class="wk-cell">
+      <div class="wk-adr-row">
+        <span class="wk-cur">${fmt$(eff)}</span>
+        <span class="wk-rec" onclick="event.stopPropagation();acceptRec('${week.id}')" title="Click to accept">${fmt$(week.recADR)}</span>
+      </div>
+      ${deltaTextSmall(delta)}
+      <div class="wk-flags">
+        ${week.hasCostChange ? '<span class="cost-change-flag" title="Supplier cost changed">⚠️</span>' : ''}
+        ${hasNote ? `<button class="notes-icon has-note" title="Edit note" onclick="event.stopPropagation();openNotesModal('${week.id}')"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2h8l2 2v8H2z"/><line x1="4" y1="5" x2="10" y2="5"/><line x1="4" y1="8" x2="10" y2="8"/><line x1="4" y1="11" x2="8" y2="11"/></svg></button>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function renderRecsHead() {
+  const thead = document.getElementById('recsTableHead');
+  const fixed = `
+    <th class="col-fixed col-name">Destination / Hotel / Room Category</th>
+    <th class="col-fixed col-class">Class / Stars</th>
+    <th class="col-fixed col-alloc">Alloc</th>
+    <th class="col-fixed col-sold">Sold</th>
+    <th class="col-fixed col-soldpct">Sold %</th>
+    <th class="col-fixed col-fcstocc">Forecast<span class="th-sub">Occ %</span></th>
+    <th class="col-fixed col-curocc">Current<span class="th-sub">Occ %</span></th>
+  `;
+  const weeks = CHECK_IN_WEEKS.map(w =>
+    `<th class="col-week">${w.weekLabel}<span class="th-sub">ADR / Rec</span></th>`
+  ).join('');
+  thead.innerHTML = `<tr>${fixed}${weeks}</tr>`;
+}
+
+function renderRecsTable() {
+  const tbody = document.getElementById('recsTableBody');
+  const rows = [];
+  const W = CHECK_IN_WEEKS.length;
+
+  HOTEL_DATA.forEach(dest => {
+    const destOpen = expandedDests.has(dest.id);
+    const allCats = dest.hotels.flatMap(h => h.categories);
+
+    const dFixed = `
+      <td class="col-fixed col-name">
+        <button class="expand-btn ${destOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleDest('${dest.id}')">${chevron(destOpen)}</button>
+        <span style="font-weight:600;">${dest.name}</span>
+        ${regionBadge(dest.region)}
+        <span style="color:var(--text-muted);margin-left:6px;font-size:11px;">${dest.totalHotels} hotels</span>
+      </td>
+      <td class="col-fixed col-class text-muted">—</td>
+      <td class="col-fixed col-alloc font-mono">${dest.allocation.toLocaleString()}</td>
+      <td class="col-fixed col-sold font-mono">${dest.sold.toLocaleString()}</td>
+      <td class="col-fixed col-soldpct">${soldPctText(dest.soldPct)}</td>
+      <td class="col-fixed col-fcstocc">${occPill(dest.forecastOcc)}</td>
+      <td class="col-fixed col-curocc font-mono">${fmtPct(dest.currentOcc)}</td>
+    `;
+    const dWeeks = Array.from({ length: W }, (_, i) =>
+      `<td class="col-week">${weekAggCellHTML(aggWeekForCategories(allCats, i))}</td>`
+    ).join('');
+    rows.push(`<tr class="row-property" onclick="toggleDest('${dest.id}')" style="cursor:pointer;">${dFixed}${dWeeks}</tr>`);
+
+    if (!destOpen) return;
+
+    dest.hotels.forEach(hotel => {
+      const hotelOpen = expandedHotels.has(hotel.id);
+      const hFixed = `
+        <td class="col-fixed col-name">
+          <button class="expand-btn ${hotelOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleHotel('${hotel.id}')">${chevron(hotelOpen)}</button>
+          <span style="font-weight:500;">${hotel.name}</span>
+          <span class="font-mono" style="color:var(--text-muted);margin-left:6px;font-size:10.5px;">${hotel.id}</span>
+        </td>
+        <td class="col-fixed col-class">${classBadge(hotel.classification)} ${starsMarkup(hotel.stars)}</td>
+        <td class="col-fixed col-alloc font-mono">${hotel.allocation.toLocaleString()}</td>
+        <td class="col-fixed col-sold font-mono">${hotel.sold.toLocaleString()}</td>
+        <td class="col-fixed col-soldpct">${soldPctText(hotel.soldPct)}</td>
+        <td class="col-fixed col-fcstocc">${occPill(hotel.forecastOcc)}</td>
+        <td class="col-fixed col-curocc font-mono">${fmtPct(hotel.currentOcc)}</td>
+      `;
+      const hWeeks = Array.from({ length: W }, (_, i) =>
+        `<td class="col-week">${weekAggCellHTML(aggWeekForCategories(hotel.categories, i))}</td>`
+      ).join('');
+      rows.push(`<tr class="row-bedtype clickable" onclick="toggleHotel('${hotel.id}')" style="cursor:pointer;">${hFixed}${hWeeks}</tr>`);
+
+      if (!hotelOpen) return;
+
+      hotel.categories.forEach(cat => {
+        const cFixed = `
+          <td class="col-fixed col-name">
+            <span>${cat.name}</span>
+            <span class="font-mono" style="color:var(--text-muted);margin-left:6px;font-size:10.5px;">${cat.id}</span>
+          </td>
+          <td class="col-fixed col-class text-muted">—</td>
+          <td class="col-fixed col-alloc font-mono">${cat.allocation}</td>
+          <td class="col-fixed col-sold font-mono">${cat.sold}</td>
+          <td class="col-fixed col-soldpct">${soldPctText(cat.soldPct)}</td>
+          <td class="col-fixed col-fcstocc">${occPill(cat.forecastOcc)}</td>
+          <td class="col-fixed col-curocc font-mono">${fmtPct(cat.currentOcc)}</td>
+        `;
+        const cWeeks = cat.checkInWeeks.map(week =>
+          `<td class="col-week">${weekCatCellHTML(week)}</td>`
+        ).join('');
+        rows.push(`<tr class="row-unit">${cFixed}${cWeeks}</tr>`);
+      });
+    });
+  });
+
+  tbody.innerHTML = rows.join('');
+}
+
+// ── Published Changes flat table ───────────────────────────
+function renderPublishedTable() {
+  const tbody = document.getElementById('publishedTableBody');
+  tbody.innerHTML = PUBLISHED_HOTEL_CHANGES.map(p => `
+    <tr class="row-flat">
+      <td>${p.destination}</td>
+      <td>${p.hotel}</td>
+      <td>${p.roomCategory}</td>
+      <td class="font-mono" style="font-size:11.5px;">${p.checkInWeek}</td>
+      <td class="text-right font-mono">${fmt$(p.oldADR)}</td>
+      <td class="text-right font-mono">${fmt$(p.newADR)}</td>
+      <td class="text-right ${p.changeAmt >= 0 ? 'delta-pos' : 'delta-neg'}">${p.changeAmt >= 0 ? '+' : ''}${fmt$(p.changeAmt)}</td>
+      <td>${p.publishedBy}</td>
+      <td class="font-mono" style="font-size:11.5px;">${p.publishedDate}</td>
+      <td>${statusBadge(p.status)}</td>
+    </tr>
+  `).join('');
+}
+
+// ── Cost Change Exceptions flat table ──────────────────────
+function renderExceptionsTable() {
+  const tbody = document.getElementById('exceptionsTableBody');
+  tbody.innerHTML = COST_CHANGE_DATA.map(c => `
+    <tr class="row-flat">
+      <td>${c.destination}</td>
+      <td>${c.hotel}</td>
+      <td>${c.roomCategory}</td>
+      <td class="font-mono" style="font-size:11.5px;">${c.checkInWeek}</td>
+      <td class="text-right font-mono">${fmt$(c.oldCost)}</td>
+      <td class="text-right font-mono">${fmt$(c.newCost)}</td>
+      <td class="text-right ${c.changeAmt >= 0 ? 'delta-neg' : 'delta-pos'}">${c.changeAmt >= 0 ? '+' : ''}${fmt$(c.changeAmt)}</td>
+      <td class="text-right ${c.changeAmt >= 0 ? 'delta-neg' : 'delta-pos'}">${c.changePct >= 0 ? '+' : ''}${c.changePct}%</td>
+      <td class="font-mono" style="font-size:11.5px;">${c.dateReceived}</td>
+      <td>${statusBadge(c.status)}</td>
+      <td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;">Review</button></td>
+    </tr>
+  `).join('');
+}
+
+// ── Metrics bar ────────────────────────────────────────────
+function computeMetrics() {
+  const allHotels = HOTEL_DATA.flatMap(d => d.hotels);
+  const allWeeks = allHotels.flatMap(h => h.categories.flatMap(c => c.checkInWeeks));
+
+  const hotelsBehind = allHotels.filter(h => h.currentOcc < h.forecastOcc - 0.08).length;
+  const avgForecastOcc = allWeeks.reduce((s, w) => s + w.forecastOcc, 0) / Math.max(1, allWeeks.length);
+  const avgADRChange = allWeeks.reduce((s, w) => s + w.deltaADR, 0) / Math.max(1, allWeeks.length);
+  const highDemand = allHotels.filter(h => h.forecastOcc >= 0.75).length;
+  const costChanges = COST_CHANGE_DATA.filter(c => c.status === 'Pending').length;
+  const pendingApproval = PUBLISHED_HOTEL_CHANGES.filter(p => p.status === 'Scheduled').length;
+
+  return { hotelsBehind, avgForecastOcc, avgADRChange, highDemand, costChanges, pendingApproval };
+}
+
+function renderMetricsBar() {
+  const m = computeMetrics();
+  document.getElementById('mHotelsBehind').textContent    = m.hotelsBehind;
+  document.getElementById('mAvgForecastOcc').textContent  = Math.round(m.avgForecastOcc * 100) + '%';
+  document.getElementById('mAvgADRChange').textContent    = fmtSignedDollar(m.avgADRChange);
+  document.getElementById('mHighDemand').textContent      = m.highDemand;
+  document.getElementById('mCostChanges').textContent     = m.costChanges + ' active';
+  document.getElementById('mPendingApproval').textContent = m.pendingApproval;
+
+  const adrEl = document.getElementById('mAvgADRChange');
+  adrEl.classList.remove('metric-pos', 'metric-neg', 'metric-warn');
+  if (m.avgADRChange > 0) adrEl.classList.add('metric-pos');
+  else if (m.avgADRChange < 0) adrEl.classList.add('metric-neg');
+}
+
+// ── Expand / collapse ──────────────────────────────────────
+function toggleDest(id)   { expandedDests.has(id)  ? expandedDests.delete(id)  : expandedDests.add(id);  renderRecsTable(); }
+function toggleHotel(id)  { expandedHotels.has(id) ? expandedHotels.delete(id) : expandedHotels.add(id); renderRecsTable(); }
+
+// ── Inline edit / accept / lock ───────────────────────────
+function updateADR(weekId, value) {
+  const v = Number(value);
+  if (isNaN(v)) return;
+  adrOverrides[weekId] = v;
+  renderRecsTable();
+  renderMetricsBar();
+}
+function acceptRec(weekId) {
+  const hit = getCheckInWeekById(weekId);
+  if (!hit) return;
+  adrOverrides[weekId] = hit.week.recADR;
+  renderRecsTable();
+  renderMetricsBar();
+}
+function toggleLock(weekId) {
+  const hit = getCheckInWeekById(weekId);
+  if (!hit) return;
+  hit.week.locked = !hit.week.locked;
+  renderRecsTable();
+}
+
+// ── Notes modal ────────────────────────────────────────────
+function openNotesModal(weekId) {
+  activeNoteKey = weekId;
+  const hit = getCheckInWeekById(weekId);
+  const sub = hit ? `${hit.destination.name} · ${hit.hotel.name} · ${hit.category.name} · ${hit.week.weekLabel}` : weekId;
+  document.getElementById('notesModalSub').textContent = sub;
+
+  const existing = notes[weekId];
+  document.getElementById('notesText').value = existing ? existing.text : '';
+  document.getElementById('notesExpiry').value = existing ? existing.expires : '';
+  document.getElementById('notesCreatedBy').value = existing ? existing.createdBy : 'Sarah Chen';
+  document.getElementById('notesCreatedAt').textContent = existing
+    ? `Created: ${existing.createdAt}`
+    : 'Created: —';
+  document.getElementById('notesDeleteBtn').style.display = existing ? 'inline-flex' : 'none';
+
+  document.getElementById('notesModalBackdrop').classList.add('open');
+}
+function closeNotesModal() {
+  document.getElementById('notesModalBackdrop').classList.remove('open');
+  activeNoteKey = null;
+}
+function saveNote() {
+  if (!activeNoteKey) return;
+  const text = document.getElementById('notesText').value.trim();
+  if (!text) { closeNotesModal(); return; }
+  const expires = document.getElementById('notesExpiry').value;
+  const createdBy = document.getElementById('notesCreatedBy').value;
+  const existing = notes[activeNoteKey];
+  const now = new Date();
+  const createdAt = existing ? existing.createdAt
+    : `${now.toLocaleDateString('en-CA')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+  notes[activeNoteKey] = { text, expires, createdBy, createdAt };
+  closeNotesModal();
+  renderRecsTable();
+}
+function deleteNote() {
+  if (!activeNoteKey) return;
+  delete notes[activeNoteKey];
+  closeNotesModal();
+  renderRecsTable();
+}
+
+// ── Sub-subtab view switching ──────────────────────────────
+function switchView(view) {
+  document.querySelectorAll('.subsubtab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.subsubtab[data-view="${view}"]`).classList.add('active');
+
+  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+  const map = { recs: 'viewRecs', published: 'viewPublished', exceptions: 'viewExceptions' };
+  document.getElementById(map[view]).classList.remove('hidden');
+}
+
+// ── Filter / menu stubs ────────────────────────────────────
+function toggleFilter(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const open = el.classList.contains('open');
+  document.querySelectorAll('.ms-wrap.open').forEach(w => w.classList.remove('open'));
+  if (!open) el.classList.add('open');
+}
+function toggleMenu() {
+  document.getElementById('navDropdown').classList.toggle('open');
+}
+function runEvaluation() {}
+function publishChanges() {}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.ms-wrap')) {
+    document.querySelectorAll('.ms-wrap.open').forEach(w => w.classList.remove('open'));
+  }
+  if (!e.target.closest('#menuBtn') && !e.target.closest('#navDropdown')) {
+    document.getElementById('navDropdown').classList.remove('open');
+  }
+  // Close notes modal when clicking backdrop
+  if (e.target.id === 'notesModalBackdrop') closeNotesModal();
+});
+
+// ── Init ───────────────────────────────────────────────────
+renderMetricsBar();
+renderRecsHead();
+renderRecsTable();
+renderPublishedTable();
+renderExceptionsTable();
+</script>
+
+</body>
+</html>
