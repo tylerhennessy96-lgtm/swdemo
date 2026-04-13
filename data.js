@@ -1,563 +1,255 @@
-// ── Windsor Communities / GID Seed Data ───────────────────
+// ── Sunwing Revenue Management — Seed Data ──────────────────
+// All prices in CAD ($). All data fictional and for demo use only.
 
-const STATES = ['All States', 'Texas', 'Florida', 'Georgia', 'North Carolina', 'Virginia', 'Arizona', 'Colorado'];
+const REGIONS    = ['All', 'Caribbean', 'Mexico', 'Europe', 'Sun/Sand'];
+const GATEWAYS   = ['YYZ', 'YVR', 'YWG', 'YUL', 'YYC'];
+const TRIP_DURATIONS = [7, 10, 14];
 
-const METROS = {
-  'All States': ['All Metros'],
-  'Texas': ['All Metros', 'Dallas-Fort Worth', 'Houston', 'Austin', 'San Antonio'],
-  'Florida': ['All Metros', 'Miami', 'Orlando', 'Tampa', 'Jacksonville'],
-  'Georgia': ['All Metros', 'Atlanta'],
-  'North Carolina': ['All Metros', 'Charlotte', 'Raleigh'],
-  'Virginia': ['All Metros', 'Northern Virginia', 'Richmond'],
-  'Arizona': ['All Metros', 'Phoenix', 'Scottsdale'],
-  'Colorado': ['All Metros', 'Denver', 'Boulder'],
+const REVENUE_MANAGERS = ['All RMs', 'Sarah Chen', 'Marcus Webb', 'Priya Patel', 'Jordan Kim'];
+const SALES_MANAGERS   = ['All Sales', 'Tom Reyes', 'Diana Novak', 'Amir Hassan', 'Chloe Martin'];
+
+// ── Destinations ───────────────────────────────────────────
+const DESTINATIONS = [
+  { id: 'CUN', name: 'Cancun',          region: 'Mexico',    country: 'Mexico',              departureGateway: 'YYZ', revenueManager: 'Sarah Chen',   salesManager: 'Tom Reyes'    },
+  { id: 'PUJ', name: 'Punta Cana',      region: 'Caribbean', country: 'Dominican Republic',  departureGateway: 'YYZ', revenueManager: 'Sarah Chen',   salesManager: 'Tom Reyes'    },
+  { id: 'VRA', name: 'Varadero',        region: 'Caribbean', country: 'Cuba',                departureGateway: 'YUL', revenueManager: 'Marcus Webb',  salesManager: 'Diana Novak'  },
+  { id: 'MBJ', name: 'Montego Bay',     region: 'Caribbean', country: 'Jamaica',             departureGateway: 'YYZ', revenueManager: 'Marcus Webb',  salesManager: 'Diana Novak'  },
+  { id: 'POP', name: 'Puerto Plata',    region: 'Caribbean', country: 'Dominican Republic',  departureGateway: 'YWG', revenueManager: 'Priya Patel',  salesManager: 'Amir Hassan'  },
+  { id: 'SJD', name: 'Los Cabos',       region: 'Mexico',    country: 'Mexico',              departureGateway: 'YVR', revenueManager: 'Priya Patel',  salesManager: 'Amir Hassan'  },
+  { id: 'PVR', name: 'Puerto Vallarta', region: 'Mexico',    country: 'Mexico',              departureGateway: 'YVR', revenueManager: 'Jordan Kim',   salesManager: 'Chloe Martin' },
+  { id: 'TUL', name: 'Tulum',           region: 'Mexico',    country: 'Mexico',              departureGateway: 'YYZ', revenueManager: 'Sarah Chen',   salesManager: 'Chloe Martin' },
+  { id: 'NAS', name: 'Nassau',          region: 'Caribbean', country: 'Bahamas',             departureGateway: 'YYZ', revenueManager: 'Marcus Webb',  salesManager: 'Tom Reyes'    },
+  { id: 'AUA', name: 'Aruba',           region: 'Caribbean', country: 'Aruba',               departureGateway: 'YYZ', revenueManager: 'Jordan Kim',   salesManager: 'Diana Novak'  },
+  { id: 'HUX', name: 'Huatulco',        region: 'Mexico',    country: 'Mexico',              departureGateway: 'YYC', revenueManager: 'Priya Patel',  salesManager: 'Amir Hassan'  },
+  { id: 'CZM', name: 'Cozumel',         region: 'Mexico',    country: 'Mexico',              departureGateway: 'YUL', revenueManager: 'Jordan Kim',   salesManager: 'Chloe Martin' },
+];
+
+// ── Hotel / flight pools for seeding ───────────────────────
+const _HOTELS_BY_DEST = {
+  CUN: ['Riu Palace Costa Mujeres', 'Iberostar Selection Cancun', 'Moon Palace Cancun', 'Grand Oasis Cancun', 'Hard Rock Riviera Maya', 'Barcelo Maya Palace', 'Royalton Riviera Cancun', 'Secrets The Vine'],
+  PUJ: ['Bahia Principe Luxury Ambar', 'Riu Republica', 'Majestic Colonial', 'Iberostar Bavaro', 'Secrets Royal Beach', 'Melia Caribe Beach', 'Hard Rock Punta Cana', 'Hyatt Zilara'],
+  VRA: ['Melia Las Americas', 'Paradisus Varadero', 'Iberostar Selection Varadero', 'Melia Marina', 'Sol Palmeras', 'Royalton Hicacos', 'Roc Arenas Doradas', 'Be Live Experience Turquesa'],
+  MBJ: ['Riu Montego Bay', 'Iberostar Rose Hall', 'Royalton Blue Waters', 'Secrets St James', 'Hyatt Ziva Rose Hall', 'Couples Tower Isle', 'Grand Palladium Jamaica', 'Sandals Montego Bay'],
+  POP: ['Iberostar Costa Dorada', 'Be Live Marien', 'Lifestyle Tropical', 'Senator Puerto Plata', 'Grand Paradise', 'Blue Jack Tar', 'Playa Bachata Resort', 'VH Gran Ventana'],
+  SJD: ['Riu Palace Cabo San Lucas', 'Barcelo Gran Faro', 'Hyatt Ziva Los Cabos', 'Hard Rock Los Cabos', 'Grand Velas Los Cabos', 'Paradisus Los Cabos', 'Secrets Puerto Los Cabos', 'Pueblo Bonito Sunset Beach'],
+  PVR: ['Secrets Vallarta Bay', 'Now Amber', 'Hard Rock Vallarta', 'Riu Jalisco', 'Krystal Vallarta', 'Marival Distinct', 'Barcelo Puerto Vallarta', 'Hyatt Ziva Puerto Vallarta'],
+  TUL: ['Bahia Principe Luxury Akumal', 'Dreams Tulum', 'Grand Bahia Principe Tulum', 'Sensimar Seaside Suites', 'Catalonia Royal Tulum', 'Akumal Bay Beach', 'Dreams Sapphire', 'Secrets Akumal'],
+  NAS: ['Atlantis Royal Towers', 'Baha Mar Grand Hyatt', 'Breezes Bahamas', 'Warwick Paradise Island', 'Melia Nassau Beach', 'Sandals Royal Bahamian', 'Comfort Suites Paradise', 'British Colonial'],
+  AUA: ['Riu Palace Aruba', 'Riu Antillas', 'Barcelo Aruba', 'Divi Aruba', 'Holiday Inn Aruba', 'Hyatt Regency Aruba', 'Tamarijn Aruba', 'Radisson Aruba'],
+  HUX: ['Dreams Huatulco', 'Secrets Huatulco', 'Barcelo Huatulco', 'Las Brisas Huatulco', 'Park Royal Huatulco', 'Camino Real Zaashila', 'Binniguenda Huatulco', 'Royal Decameron'],
+  CZM: ['Iberostar Cozumel', 'Occidental at Xcaret', 'Cozumel Palace', 'El Cid La Ceiba', 'Grand Park Royal Cozumel', 'Melia Cozumel', 'Playa Azul Cozumel', 'Hotel B Cozumel'],
 };
 
-const ALL_AMENITIES = ['Pool','Concierge','Parking Garage','Co-working Lounge','Fitness Center','Pet Friendly','Rooftop Deck','EV Charging','Dog Park','Package Lockers','Business Center','Bike Storage'];
+const _ROOM_CATEGORIES = ['Standard', 'Deluxe', 'Ocean View', 'Suite'];
+const _PACES = ['ahead', 'on track', 'behind'];
 
-function _randAmenities() {
-  return ALL_AMENITIES.filter(() => Math.random() > 0.45);
+function _fmtDate(d) {
+  const mo = String(d.getMonth() + 1).padStart(2, '0');
+  const da = String(d.getDate()).padStart(2, '0');
+  const yr = String(d.getFullYear()).slice(-2);
+  return `${mo}/${da}/${yr}`;
 }
 
-const _COMMUNITIES_RAW = [
-  { id: 'WCC-001', name: 'Windsor at Falcon Creek',    state: 'Texas', metro: 'Dallas-Fort Worth', rm: 'Sarah Mitchell',  cd: 'James Holbrook' },
-  { id: 'WCC-002', name: 'Windsor Meadows',            state: 'Texas', metro: 'Dallas-Fort Worth', rm: 'Sarah Mitchell',  cd: 'James Holbrook' },
-  { id: 'WCC-003', name: 'Windsor at Viridian',        state: 'Texas', metro: 'Dallas-Fort Worth', rm: 'Sarah Mitchell',  cd: 'Dana Cortez'    },
-  { id: 'WCC-004', name: 'Windsor Lantana Hills',      state: 'Texas', metro: 'Austin',            rm: 'Tom Bridges',    cd: 'Dana Cortez'    },
-  { id: 'WCC-005', name: 'Windsor at Waterview',       state: 'Texas', metro: 'Houston',           rm: 'Tom Bridges',    cd: 'Renee Park'     },
-  { id: 'WCC-006', name: 'Windsor Plantation',         state: 'Georgia', metro: 'Atlanta',           rm: 'Priya Nair',     cd: 'Renee Park'     },
-  { id: 'WCC-007', name: 'Windsor at Lake Pointe',     state: 'Florida', metro: 'Orlando',           rm: 'Priya Nair',     cd: 'Marcus Webb'    },
-  { id: 'WCC-008', name: 'Windsor Boca Raton',         state: 'Florida', metro: 'Miami',             rm: 'Carlos Reyes',   cd: 'Marcus Webb'    },
-  { id: 'WCC-009', name: 'Windsor at Westside',        state: 'North Carolina', metro: 'Charlotte',         rm: 'Carlos Reyes',   cd: 'Linda Foss'     },
-  { id: 'WCC-010', name: 'Windsor Southpark',          state: 'North Carolina', metro: 'Charlotte',         rm: 'Carlos Reyes',   cd: 'Linda Foss'     },
-  { id: 'WCC-011', name: 'Windsor at Dulles',          state: 'Virginia', metro: 'Northern Virginia', rm: 'Amy Chen',       cd: 'Steve Nguyen'   },
-  { id: 'WCC-012', name: 'Windsor at Kingstowne',      state: 'Virginia', metro: 'Northern Virginia', rm: 'Amy Chen',       cd: 'Steve Nguyen'   },
-];
-
-const COMMUNITIES = _COMMUNITIES_RAW.map((c, i) => ({
-  ...c,
-  class: i < 6 ? 'A' : 'B',
-  yearBuilt: Math.floor(Math.random() * 31 + 1985),
-  amenities: _randAmenities(),
-}));
-
-const REVENUE_MANAGERS = ['All RMs', 'Sarah Mitchell', 'Tom Bridges', 'Priya Nair', 'Carlos Reyes', 'Amy Chen'];
-const COMMUNITY_DIRECTORS = ['All CDs', 'James Holbrook', 'Dana Cortez', 'Renee Park', 'Marcus Webb', 'Linda Foss', 'Steve Nguyen'];
-
-// Pricing table data — units per community
-const UNIT_TYPES = ['1 Bed', '2 Bed', '3 Bed'];
-
-const NOTE_TEXTS = [
-  'Holding price pending comp survey',
-  'Manager approved override',
-  'Lease-up concession applied',
-  'Do not discount',
-  'High demand floor',
-  'Seasonal rate adjustment',
-  'Renewal retention pricing',
-  'Below market — strategic hold',
-  'Pending renovation premium',
-  'Price matched to sister community',
-];
-
-function makeNote() {
-  if (Math.random() > 0.4) return null;
-  const text = NOTE_TEXTS[Math.floor(Math.random() * NOTE_TEXTS.length)];
-  const d = new Date();
-  d.setDate(d.getDate() + Math.floor(Math.random() * 60) + 7);
-  const expires = String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0') + '/' + String(d.getFullYear()).slice(-2);
-  return { text, expires };
+function _seededRandom(seed) {
+  // Simple deterministic PRNG so the demo is stable across reloads
+  let s = seed;
+  return function () {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
 }
 
-function makeUnits(communityId, bedType, count, baseRent) {
-  const moveOutDays = [10, 25, 40];
-  const availDays = [18, 33, 48];
-  return Array.from({ length: count }, (_, i) => {
-    const num = String(i + 1).padStart(3, '0');
-    const status = i % 2 === 0 ? 'vacant' : 'on notice';
-    const mo = new Date(); mo.setDate(mo.getDate() + (moveOutDays[i] || 30));
-    const av = new Date(); av.setDate(av.getDate() + (availDays[i] || 40));
-    const moveOut = String(mo.getMonth()+1).padStart(2,'0') + '/' + String(mo.getDate()).padStart(2,'0') + '/' + String(mo.getFullYear()).slice(-2);
-    const availDate = String(av.getMonth()+1).padStart(2,'0') + '/' + String(av.getDate()).padStart(2,'0') + '/' + String(av.getFullYear()).slice(-2);
-    const priorRent = baseRent - 80;
-    const recRent = baseRent + 20;
-    const alertPool = ['concession', 'comp', 'optimizer', 'manual'];
-    const alerts = alertPool.filter(() => Math.random() > 0.65);
-    const grossRent = priorRent + [0,50,100,150][Math.floor(Math.random()*4)];
-    return {
-      id: `${communityId}-${bedType.replace(' ', '')}-${num}`,
-      status,
-      moveOut,
-      availDate,
-      priorRent,
-      grossRent,
-      hasPriorConcession: grossRent > priorRent,
-      floorplan: ['Studio','1BR/1BA','1BR/2BA','2BR/1BA','2BR/2BA','3BR/2BA'][Math.floor(Math.random()*6)],
-      area: Math.floor(Math.random()*600+450),
-      floor: Math.floor(Math.random()*8+1),
-      initialPrice: baseRent,
-      priorPeriodPrice: baseRent - 40,
-      recRent,
-      deltaInitial: -2.2,
-      deltaPrior: 1.1,
-      lt: 12,
-      attValue: 100,
-      netEffRent: recRent,
-      concsAmt: Math.random() < 0.6 ? [100,150,200,250,300][Math.floor(Math.random()*5)] : null,
-      alerts,
-      note: makeNote(),
-      rcStatus: ['RC','AF','HA',null,null,null][Math.floor(Math.random()*6)],
-      anchorPrice: Math.round(recRent * (0.96 + Math.random() * 0.06) / 10) * 10,
-    };
-  });
-}
+function _makePackage(destId, duration, idx, rand) {
+  const hotels = _HOTELS_BY_DEST[destId] || _HOTELS_BY_DEST.CUN;
+  const hotel = hotels[idx % hotels.length];
+  const roomCategory = _ROOM_CATEGORIES[Math.floor(rand() * _ROOM_CATEGORIES.length)];
 
-function makeRandomAlerts() {
-  const alertPool = ['concession', 'comp', 'optimizer', 'manual'];
-  return alertPool.filter(() => Math.random() > 0.65);
-}
+  // Total cost scales with duration and room category
+  const roomBump = { 'Standard': 0, 'Deluxe': 120, 'Ocean View': 240, 'Suite': 460 }[roomCategory];
+  const base = 780 + (duration - 7) * 85;
+  const totalCost = Math.round(base + roomBump + rand() * 220);
 
-const PRICING_DATA = COMMUNITIES.map(c => {
-  const baseRents = { '1 Bed': 1800, '2 Bed': 2400, '3 Bed': 3100 };
-  const totalUnits = Math.floor(Math.random() * 40) + 60;
-  const avail = (Math.random() * 6 + 2).toFixed(1);
+  const currentMargin = Math.round(120 + rand() * 180);
+  // Rec margin can be up or down
+  const margSwing = Math.round((rand() - 0.4) * 110);
+  const recMargin = Math.max(40, currentMargin + margSwing);
+  const deltaMargin = recMargin - currentMargin;
+
+  const currentPrice = totalCost + currentMargin;
+  const recPrice = totalCost + recMargin;
+
+  // Competitor prices cluster around rec price
+  const competitor1Price = Math.round(recPrice + (rand() - 0.35) * 220);
+  const competitor2Price = Math.round(recPrice + (rand() - 0.5) * 260);
+
+  // Departure date: 1..180 days out
+  const daysOut = Math.floor(rand() * 180) + 14;
+  const dep = new Date();
+  dep.setDate(dep.getDate() + daysOut);
+
+  // Flight number pool
+  const flightNum = 'WS' + (2000 + Math.floor(rand() * 800));
+
+  const lf = Math.round((0.42 + rand() * 0.55) * 100) / 100;
+  const bookingPace = _PACES[Math.floor(rand() * _PACES.length)];
+
+  const paddedIdx = String(idx + 1).padStart(3, '0');
+
   return {
-    ...c,
-    totalUnits,
-    availPct: avail,
-    alerts: makeRandomAlerts(),
-    bedTypes: UNIT_TYPES.map(bt => {
-      const units = makeUnits(c.id, bt, 2, baseRents[bt]);
-      return {
-        type: bt,
-        totalUnits: Math.floor(totalUnits / 3),
-        availPct: (Math.random() * 6 + 2).toFixed(1),
-        units,
-        recRent: baseRents[bt] + 20,
-        initialPrice: baseRents[bt],
-        priorPeriodPrice: baseRents[bt] - 40,
-        deltaInitial: -2.2,
-        deltaPrior: 1.1,
-        alerts: makeRandomAlerts(),
-        concsAmt: null,
-        note: null,
-      };
-    }),
+    id: `${destId}-${duration}N-${paddedIdx}`,
+    hotel,
+    roomCategory,
+    departureDate: _fmtDate(dep),
+    flightNum,
+    totalCost,
+    currentMargin,
+    recMargin,
+    deltaMargin,
+    currentPrice,
+    recPrice,
+    bookingPace,
+    lf,
+    competitor1Price,
+    competitor2Price,
+    locked: false,
+  };
+}
+
+function _makeDuration(destId, duration, count, rand) {
+  const packages = Array.from({ length: count }, (_, i) =>
+    _makePackage(destId, duration, i, rand)
+  );
+  return { duration, packages };
+}
+
+// Build PACKAGE_DATA (all 12 destinations seeded; richness varies)
+const PACKAGE_DATA = DESTINATIONS.map((d, destIdx) => {
+  const rand = _seededRandom((destIdx + 1) * 7919);
+  // First 3 destinations get full data, rest get slightly fewer packages
+  const counts = destIdx < 3
+    ? [7, 6, 6]
+    : destIdx < 6
+    ? [6, 5, 4]
+    : [5, 4, 3];
+
+  const durations = TRIP_DURATIONS.map((dur, i) =>
+    _makeDuration(d.id, dur, counts[i], rand)
+  );
+
+  const totalPackages = durations.reduce((s, g) => s + g.packages.length, 0);
+  const loadFactor = Math.round((0.52 + rand() * 0.44) * 100) / 100;
+
+  // Beds / seats contracted
+  const bedsBought = Math.round(800 + rand() * 1200);
+  const seatsMult = 0.85 + rand() * 0.4; // beds:seats between ~0.7 and 1.2
+  const seatsBought = Math.round(bedsBought / seatsMult);
+  const bedsToSeatsRatio = Math.round((bedsBought / seatsBought) * 100) / 100;
+
+  return {
+    ...d,
+    totalPackages,
+    loadFactor,
+    bedsBought,
+    seatsBought,
+    bedsToSeatsRatio,
+    durations,
   };
 });
 
-// Term availability (24 months × communities)
-const TERM_DATA = COMMUNITIES.map(c => {
-  const availability = Array.from({ length: 24 }, (_, i) => {
-    // months 1-3 and 12 are commonly available, others random
-    if (i < 3 || i === 11) return Math.random() > 0.2;
-    return Math.random() > 0.35;
-  });
-  const premiums = availability.map(a => a ? (Math.random() > 0.5 ? 50 : 35) : null);
-  return {
-    ...c,
-    availability,
-    premiums,
-    bedTypes: UNIT_TYPES.map(bt => ({
-      type: bt,
-      availability: Array.from({ length: 24 }, (_, i) => Math.random() > 0.3),
-      premiums: Array.from({ length: 24 }, () => Math.random() > 0.5 ? 50 : 35),
-    })),
-  };
-});
-
-// Expiration data — 24 months per bed type per community
-const EXPIRATION_DATA = COMMUNITIES.map(c => {
-  const commPricing = PRICING_DATA.find(p => p.id === c.id);
-  const totalUnits = commPricing?.totalUnits ?? 80;
-  return {
-    ...c,
-    totalUnits,
-    bedTypes: ['1 Bed', '2 Bed', '3 Bed'].map(bt => {
-      const btUnits = Math.floor(totalUnits / 3);
-      const baseRents = { '1 Bed': 1820, '2 Bed': 2420, '3 Bed': 3120 };
-      const baseRent = baseRents[bt];
-      const months = Array.from({ length: 24 }, (_, i) => {
-        const date = new Date(2025, 3 + i, 1);
-        const monthLabel = date.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-        const recAbs = Math.max(1, Math.round(btUnits * (0.06 + Math.random() * 0.05)));
-        const recRel = parseFloat((recAbs / btUnits * 100).toFixed(1));
-        const forecastedAbs = Math.max(0, recAbs + Math.floor(Math.random() * 9) - 3);
-        const forecastedRel = parseFloat((forecastedAbs / btUnits * 100).toFixed(1));
-        const delta = forecastedAbs - recAbs;
-        const rentForecast = Math.round(baseRent + (i * 6) + (Math.random() * 30 - 10));
-        return { monthLabel, date, recAbs, recRel, forecastedAbs, forecastedRel, delta, rentForecast, manualPremium: null, recOverride: null };
-      });
-      return { type: bt, totalUnits: btUnits, months };
-    }),
-  };
-});
-
-// Parameters data
-const PARAM_DEFAULTS = {
-  maxPriceChange:10, minPriceChange:-10, unitGroup:'Individual',
-  exposurePrio1:8, exposurePrio2:3, exposureMax:10, exposureMin:-45,
-  compCorrMax:10, compCorrMin:-45, compCorrPrio1:30, compCorrPrio2:40,
-  concessionTrigger:5, ltLower:12, ltUpper:24,
-  modelHoldDays:0, modelPriceDown:-0.5, modelPriceUp:5, manualHoldDays:1,
-  freeDaysOnNotice:2, freeDaysVacant:2, onNoticeMax:15, vacantMax:30,
-  onNoticeRecovery:100, vacantRecovery:100,
-  renewalLeadDays:90, relConcession:0, inheritBestPrice:false,
-  roundingMethod:'nearest', roundingAmount:10,
-};
-
-const COMPETITOR_EXCLUSIONS = [
-  { id:'excl-1', jurisdiction:'Texas',        level:'State', status:'Under Review', excluded:false, effectiveDate:'01/01/25', notes:'Monitoring TX AG guidance on RealPage litigation' },
-  { id:'excl-2', jurisdiction:'Georgia',      level:'State', status:'Active',       excluded:true,  effectiveDate:'06/01/24', notes:'Excluded per legal counsel recommendation' },
-  { id:'excl-3', jurisdiction:'New York City',level:'City',  status:'Active',       excluded:true,  effectiveDate:'01/01/24', notes:'NYC Local Law 102 compliance' },
+// ── Chart helpers ──────────────────────────────────────────
+const CHART_WEEKS = [
+  'Wk 1 Jan', 'Wk 2 Jan', 'Wk 3 Jan', 'Wk 4 Jan',
+  'Wk 5 Feb', 'Wk 6 Feb', 'Wk 7 Feb', 'Wk 8 Feb',
+  'Wk 9 Mar', 'Wk 10 Mar', 'Wk 11 Mar', 'Wk 12 Apr',
 ];
 
-const PARAMETERS_DATA = COMMUNITIES.map(c => ({
-  ...c,
-  params: { ...PARAM_DEFAULTS },
-  bedTypes: ['1 Bed','2 Bed','3 Bed'].map(bt => ({ type: bt, params: { ...PARAM_DEFAULTS } })),
-}));
+// Booking curve: actual-to-date + target curve over the 12-week window
+function makeBookingCurveData(baseLF) {
+  const target = [];
+  const actual = [];
+  const safeBase = Math.max(0.35, Math.min(0.95, baseLF || 0.7));
+  for (let i = 0; i < CHART_WEEKS.length; i++) {
+    // Target grows along an S-curve to ~safeBase
+    const t = i / (CHART_WEEKS.length - 1);
+    const s = 1 / (1 + Math.exp(-6 * (t - 0.5)));
+    target.push(Math.round(safeBase * s * 100));
+    // Actual wobbles around target; "behind" segments visible mid-range
+    const noise = (Math.sin(i * 1.3) + Math.cos(i * 0.7)) * 3.5;
+    const drift = i < 6 ? -2 : 3;
+    actual.push(Math.max(0, Math.round(safeBase * s * 100 + noise + drift)));
+  }
+  return { labels: CHART_WEEKS, target, actual };
+}
 
-// Renewals data
-const LEASE_TERMS = [6,9,10,11,12,13,14,15];
+// Competitor price chart: our price + 2 competitor series over 12 weeks
+function makeCompData(basePrice) {
+  const ours = [];
+  const comp1 = [];
+  const comp2 = [];
+  const bp = basePrice || 1200;
+  for (let i = 0; i < CHART_WEEKS.length; i++) {
+    const wobble = Math.sin(i * 0.9) * 35 + Math.cos(i * 0.4) * 20;
+    ours.push(Math.round(bp + wobble));
+    comp1.push(Math.round(bp + 90 + Math.sin(i * 1.1) * 50));
+    comp2.push(Math.round(bp + 140 + Math.cos(i * 0.75) * 60));
+  }
+  return { labels: CHART_WEEKS, ours, comp1, comp2 };
+}
 
-function makeRenewalUnits(commId, bedType, count, baseRent) {
-  return Array.from({ length: count }, (_, i) => {
-    const num = String(i+1).padStart(3,'0');
-    const leaseEndDays = Math.floor(Math.random()*180)+10;
-    const le = new Date(2025,3,8); le.setDate(le.getDate()+leaseEndDays);
-    const leaseEnd = (le.getMonth()+1).toString().padStart(2,'0')+'/'+le.getDate().toString().padStart(2,'0')+'/'+String(le.getFullYear()).slice(2);
-    const daysToOffer = leaseEndDays - 90;
-    const leaseTerm = LEASE_TERMS[Math.floor(Math.random()*LEASE_TERMS.length)];
-    const leasePrice = baseRent + Math.floor(Math.random()*100-50);
-    const concsAmt = Math.random()>0.6 ? [0,50,100,150,200][Math.floor(Math.random()*5)] : 0;
-    const netEffLeasePrice = leasePrice - concsAmt;
-    const renewalPricePct = parseFloat((Math.random()*6+1).toFixed(1));
-    const renewalOfferPrice = Math.round(leasePrice*(1+renewalPricePct/100));
-    const newLeasePrice = baseRent + 20;
-    const deltaToNewLease = parseFloat(((renewalOfferPrice-newLeasePrice)/newLeasePrice*100).toFixed(1));
-    const rcStatuses = ['RC','AF','HA',null,null,null,null];
-    let status;
-    if (daysToOffer > 0) { status = 'Pending'; }
-    else {
-      const openStatuses = ['Offer Sent','Offer Sent','Offer Sent','Accepted','Accepted','Declined','Negotiating','Pending'];
-      status = openStatuses[Math.floor(Math.random()*openStatuses.length)];
+// Demand forecast chart helpers (for demand.html)
+function makeDestinationPaceSeries(destIds) {
+  const ids = destIds || ['CUN', 'PUJ', 'SJD', 'MBJ'];
+  return ids.map((id, idx) => {
+    const p = PACKAGE_DATA.find(x => x.id === id);
+    const lf = p ? p.loadFactor : 0.7;
+    const rand = _seededRandom((idx + 3) * 1031);
+    const series = [];
+    for (let i = 0; i < CHART_WEEKS.length; i++) {
+      const t = i / (CHART_WEEKS.length - 1);
+      const s = 1 / (1 + Math.exp(-6 * (t - 0.5)));
+      series.push(Math.round((lf * s + (rand() - 0.5) * 0.08) * 100));
     }
     return {
-      id: commId+'-'+bedType.replace(' ','')+'-'+num,
-      leaseId: 'LSE-'+commId.slice(-3)+'-'+num,
-      bedType, rcStatus: rcStatuses[Math.floor(Math.random()*7)],
-      leaseEnd, leaseEndDays, daysToOffer, leaseTerm, leasePrice, concsAmt, netEffLeasePrice,
-      renewalOfferPrice, renewalOfferTerm: 12, renewalPricePct, deltaToNewLease, newLeasePrice,
-      status,
-      attValue: [80,100,120,150,175,200][Math.floor(Math.random()*6)],
-      floorplan: ['Studio','1BR/1BA','1BR/2BA','2BR/1BA','2BR/2BA','3BR/2BA'][Math.floor(Math.random()*6)],
-      area: Math.floor(Math.random()*600+450),
-      alerts: ['concession','comp','optimizer','manual'].filter(()=>Math.random()>0.7),
+      id,
+      name: p ? p.name : id,
+      data: series,
     };
   });
 }
 
-const RENEWALS_DATA = PRICING_DATA.map(comm => ({
-  ...comm,
-  bedTypes: comm.bedTypes.map(bt => ({
-    ...bt,
-    renewalUnits: makeRenewalUnits(comm.id, bt.type, Math.floor(Math.random()*4)+2, bt.recRent),
-  })),
-}));
-
-// Concession Management — priority-based stacking
-const CONCESSION_TYPE_OPTIONS=['Fixed Discount','Free Period','Waived Fee','Reduced Deposit','Gift Card','Percent Discount'];
-const CONCESSION_VALUE_TYPES = [
-  { id: 'absolute',     label: '$ Amount',          desc: 'One-time dollar discount' },
-  { id: 'relative',     label: '% of Monthly Rent', desc: 'Percentage off each month' },
-  { id: 'flat_monthly', label: 'Flat Monthly $',    desc: 'Fixed $ reduction per month for lease term' },
-  { id: 'free_period',  label: 'Months Free',       desc: 'X months free within the lease' },
-];
-const _fmtD=d=>(d.getMonth()+1).toString().padStart(2,'0')+'/'+d.getDate().toString().padStart(2,'0')+'/'+String(d.getFullYear()).slice(2);
-const _RM_NAMES = ['Sarah Mitchell','Tom Bridges','Priya Nair','Carlos Reyes','Amy Chen'];
-
-const MONTHLY_BY_TYPE = {
-  'Fixed Discount': true,
-  'Free Period': true,
-  'Percent Discount': true,
-  'Waived Application Fee': false,
-  'Waived Parking Fee': false,
-  'Waived Fee': false,
-  'Reduced Deposit': false,
-  'Gift Card': false,
-  'Look & Lease': false,
-};
-
-function computeUnitConcessions(baseRent,concessions){
-  const active=concessions.filter(c=>c.status==='Active').sort((a,b)=>a.priority-b.priority);
-  if(!active.length)return{totalAmount:0,effectiveRent:baseRent,stackedList:[]};
-  const ns=active.find(c=>!c.stackable);
-  let applied=ns?active.filter(c=>c.priority<ns.priority||c.id===ns.id):active;
-  const totalAmount=applied.reduce((sum,c)=>{
-    if(!c.monthly)return sum;
-    if(c.valueType==='relative')return sum+Math.round(baseRent*c.value/100);
-    if(c.valueType==='free_period')return sum+Math.round(baseRent*c.value/12);
-    if(c.valueType==='flat_monthly')return sum+c.value;
-    return sum+c.value;
-  },0);
-  return{totalAmount,effectiveRent:Math.max(0,baseRent-totalAmount),stackedList:applied};
+function makeForwardBookingsVsLY() {
+  const rand = _seededRandom(31337);
+  const ly = [];
+  const ty = [];
+  for (let i = 0; i < CHART_WEEKS.length; i++) {
+    const baseline = 4200 + Math.sin(i * 0.6) * 700 + i * 80;
+    ly.push(Math.round(baseline + rand() * 400));
+    ty.push(Math.round(baseline * (1.05 + rand() * 0.12)));
+  }
+  return { labels: CHART_WEEKS, lastYear: ly, thisYear: ty };
 }
 
-function generateConcessions(comm, bt, unitId, level) {
-  const baseRent = bt.recRent;
-  const typeOpts = {
-    community: ['Waived Fee','Reduced Deposit','Gift Card'],
-    bedtype:   ['Fixed Discount','Free Period','Percent Discount','Waived Fee'],
-    unit:      ['Fixed Discount','Free Period','Percent Discount','Waived Fee','Gift Card'],
-  };
-  const prob = { community: 0.5, bedtype: 0.55, unit: 0.4 };
-  if (Math.random() > prob[level]) return [];
-  const count = level === 'unit'
-    ? (Math.random() > 0.7 ? 2 : 1)
-    : (Math.random() > 0.6 ? 2 : 1);
+// ── Lookups ────────────────────────────────────────────────
+function getDestinationById(id) {
+  return PACKAGE_DATA.find(d => d.id === id);
+}
 
-  return Array.from({ length: count }, (_, i) => {
-    const type = typeOpts[level][Math.floor(Math.random() * typeOpts[level].length)];
-    // Pick valueType — Free Period maps to free_period; Percent Discount → relative;
-    // Fixed Discount can be absolute OR flat_monthly; everything else → absolute.
-    let valueType;
-    if (type === 'Free Period') valueType = 'free_period';
-    else if (type === 'Percent Discount') valueType = 'relative';
-    else if (type === 'Fixed Discount') valueType = Math.random() > 0.5 ? 'flat_monthly' : 'absolute';
-    else valueType = 'absolute';
-
-    let value;
-    if (valueType === 'relative') value = Math.floor(Math.random() * 8) + 2;
-    else if (valueType === 'free_period') value = Math.floor(Math.random() * 2) + 1;
-    else if (valueType === 'flat_monthly') value = [25, 50, 75, 100][Math.floor(Math.random() * 4)];
-    else value = [50, 75, 100, 150, 200, 250, 300][Math.floor(Math.random() * 7)];
-
-    let displayAmount;
-    if (valueType === 'relative') displayAmount = Math.round(baseRent * value / 100);
-    else if (valueType === 'free_period') displayAmount = Math.round(baseRent * value / 12);
-    else if (valueType === 'flat_monthly') displayAmount = value;
-    else displayAmount = value;
-
-    const priority = i + 1 + (level === 'community' ? 0 : level === 'bedtype' ? 2 : 4);
-    const stackable = Math.random() > 0.25;
-    const dr = Math.floor(Math.random() * 60) - 5;
-    const da = Math.floor(Math.random() * 40) + 5;
-    const status = dr < 0 ? 'Expired' : Math.random() > 0.85 ? 'Paused' : 'Active';
-    const leaseType = level === 'community' ? 'Both' : Math.random() > 0.5 ? 'New Lease' : 'Renewal';
-    const sd = new Date(2025, 2, 1);
-    const ed = new Date(2025, 3, 8);
-    ed.setDate(ed.getDate() + Math.max(0, dr));
-    const startDate = _fmtD(sd);
-    const endDate = _fmtD(ed);
-    const lo = level !== 'unit' ? Math.floor(Math.random() * 15) + 3 : null;
-    const lt = lo ? Math.floor(lo * (Math.random() * 0.5 + 0.15)) : null;
-
-    // Term-specific eligibility (~30% of concessions): list of enabled term lengths
-    const termSpecific = Math.random() > 0.7;
-    const termValues = termSpecific
-      ? [6, 9, 12, 15, 18, 24].filter(() => Math.random() > 0.3)
-      : null;
-
-    // Eligibility
-    const unitStatus = ['all', 'vacant', 'on_notice'][Math.floor(Math.random() * 3)];
-    const minVacancyDays = Math.random() > 0.6 ? Math.floor(Math.random() * 21 + 7) : null;
-
-    // Application: discount vs gross_up
-    const application = Math.random() > 0.8 ? 'gross_up' : 'discount';
-
-    // Audit trail
-    const createdBy = _RM_NAMES[Math.floor(Math.random() * _RM_NAMES.length)];
-    const daysAgo = Math.floor(Math.random() * 60 + 5);
-    const _fmtDate = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    const _createdAtDate = new Date();
-    _createdAtDate.setDate(_createdAtDate.getDate() - daysAgo);
-    const createdAt = _fmtDate(_createdAtDate);
-    const editedBy = Math.random() > 0.5 ? _RM_NAMES[Math.floor(Math.random() * _RM_NAMES.length)] : null;
-    let editedAt = null;
-    if (editedBy) {
-      const _ed = new Date();
-      _ed.setDate(_ed.getDate() - Math.floor(Math.random() * daysAgo));
-      editedAt = _fmtDate(_ed);
+function getPackageById(pkgId) {
+  for (const d of PACKAGE_DATA) {
+    for (const dur of d.durations) {
+      const hit = dur.packages.find(p => p.id === pkgId);
+      if (hit) return { destination: d, duration: dur.duration, package: hit };
     }
-    const history = Array.from({ length: Math.floor(Math.random() * 3) + 1 }, (_, hi) => {
-      const fields = ['amount', 'status', 'endDate', 'leaseType'];
-      const field = fields[Math.floor(Math.random() * fields.length)];
-      const hd = new Date();
-      hd.setDate(hd.getDate() - Math.max(0, daysAgo - hi * 7));
-      return {
-        date: _fmtDate(hd),
-        editedBy: _RM_NAMES[Math.floor(Math.random() * _RM_NAMES.length)],
-        field,
-        oldValue: field === 'amount' ? '$' + (value - 50)
-          : field === 'status' ? 'Paused'
-          : field === 'endDate' ? '03/31/25'
-          : 'New Lease',
-        newValue: field === 'amount' ? '$' + value
-          : field === 'status' ? 'Active'
-          : field === 'endDate' ? endDate
-          : leaseType,
-      };
-    });
-
-    return {
-      id: 'CONC-' + level.toUpperCase() + '-' + (unitId ?? bt.type) + '-' + comm.id + '-' + i,
-      level, commId: comm.id, commName: comm.name,
-      bedType: bt?.type ?? null, unitId: unitId ?? null,
-      leaseType, type, value, valueType, displayAmount,
-      monthly: MONTHLY_BY_TYPE[type] ?? true,
-      priority, stackable, status,
-      daysActive: da, daysRemaining: dr,
-      startDate, endDate,
-      excludeAffordable: Math.random() > 0.7,
-      excludeRC: Math.random() > 0.6,
-      leasesOfferedTo: lo, leasesTaken: lt,
-      uptakeRate: lo && lt ? parseFloat((lt / lo * 100).toFixed(1)) : null,
-      totalCost: lt ? lt * displayAmount : null,
-      taken: level === 'unit' ? Math.random() > 0.5 : null,
-      daysVacant: level === 'unit' ? Math.floor(Math.random() * 45) + 5 : null,
-      daysToSign: level === 'unit' && Math.random() > 0.5 ? Math.floor(Math.random() * 20) + 2 : null,
-      // New fields
-      termSpecific, termValues,
-      unitStatus, minVacancyDays,
-      application,
-      createdBy, createdAt, editedBy, editedAt, history,
-    };
-  });
+  }
+  return null;
 }
 
-
-const CONCESSIONS_DATA=PRICING_DATA.map(comm=>{
-  const cc=generateConcessions(comm,{recRent:comm.bedTypes[0]?.recRent??1800},null,'community');
-  const bedTypes=comm.bedTypes.map(bt=>{
-    const bc=generateConcessions(comm,bt,null,'bedtype');
-    const units=(bt.units||[]).map(unit=>{
-      const uc=generateConcessions(comm,bt,unit.id,'unit');
-      const allApp=[...cc,...bc,...uc].filter(c=>{if(c.excludeAffordable&&unit.rcStatus==='AF')return false;if(c.excludeRC&&unit.rcStatus==='RC')return false;return true;});
-      const{totalAmount,effectiveRent,stackedList}=computeUnitConcessions(unit.recRent??bt.recRent,allApp);
-      const concPct=unit.recRent?parseFloat((totalAmount/unit.recRent*100).toFixed(1)):0;
-      return{...unit,baseRent:unit.recRent??bt.recRent,concessions:uc,allApplicableConcessions:allApp,stackedList,totalConcessionAmount:totalAmount,effectiveNetRent:effectiveRent,concPctOfRent:concPct,hasConcession:totalAmount>0,stackCount:stackedList.length,daysOnMarket:Math.floor(Math.random()*45)+5};
-    });
-    const uwc=units.filter(u=>u.hasConcession);
-    const avgCA=uwc.length>0?Math.round(uwc.reduce((s,u)=>s+u.totalConcessionAmount,0)/uwc.length):0;
-    const avgCP=uwc.length>0?parseFloat((uwc.reduce((s,u)=>s+u.concPctOfRent,0)/uwc.length).toFixed(1)):0;
-    const avgNER=units.length>0?Math.round(units.reduce((s,u)=>s+u.effectiveNetRent,0)/units.length):0;
-    const covPct=units.length>0?parseFloat((uwc.length/units.length*100).toFixed(1)):0;
-    return{...bt,units,btConcessions:bc,coveragePct:covPct,unitsWithConc:uwc.length,avgConcAmt:avgCA,avgConcPct:avgCP,avgNetEffRent:avgNER};
-  });
-  const allU=bedTypes.flatMap(bt=>bt.units);const auwc=allU.filter(u=>u.hasConcession);
-  const cCov=allU.length>0?parseFloat((auwc.length/allU.length*100).toFixed(1)):0;
-  const cAvgCA=auwc.length>0?Math.round(auwc.reduce((s,u)=>s+u.totalConcessionAmount,0)/auwc.length):0;
-  const cAvgCP=auwc.length>0?parseFloat((auwc.reduce((s,u)=>s+u.concPctOfRent,0)/auwc.length).toFixed(1)):0;
-  const cAvgNER=allU.length>0?Math.round(allU.reduce((s,u)=>s+u.effectiveNetRent,0)/allU.length):0;
-  const tga=auwc.reduce((s,u)=>s+u.totalConcessionAmount,0);
-  const usc=allU.filter(u=>u.stackCount>=2).length;
-  return{...comm,commConcessions:cc,bedTypes,allUnits:allU,commCoveragePct:cCov,commAvgConcAmt:cAvgCA,commAvgConcPct:cAvgCP,commAvgNetEffRent:cAvgNER,totalGivenAway:tga,unitsStackedConc:usc};
-});
-
-function getConcessionKPIs(data){const allU=data.flatMap(c=>c.allUnits);const wc=allU.filter(u=>u.hasConcession);const stk=allU.filter(u=>u.stackCount>=2);const tga=data.reduce((s,c)=>s+c.totalGivenAway,0);const allC=data.flatMap(c=>[...c.commConcessions,...c.bedTypes.flatMap(bt=>bt.btConcessions),...c.bedTypes.flatMap(bt=>bt.units.flatMap(u=>u.concessions))]);const exp=allC.filter(c=>c.status==='Active'&&c.daysRemaining>=0&&c.daysRemaining<=14).length;return{totalActive:allC.filter(c=>c.status==='Active').length,coveragePct:allU.length>0?parseFloat((wc.length/allU.length*100).toFixed(1)):0,totalGivenAway:tga,stackedUnits:stk.length,expiringSoon:exp};}
-
-// Competitor concession data
-const COMPETITOR_NAMES=['Greystar Residences','Camden Properties','Aimco Apartments','Equity Residential','Post Apartments','MAA Communities','UDR Living','Broadstone','Cortland','Bell Partners'];
-const COMP_CONCESSION_TYPES=['Free Month','Move-in Special','Look & Lease','Reduced Deposit','Gift Card','Waived Fees'];
-const COMP_STATUSES=['Active','Active','Active','Expired','Unverified'];
-
-const COMPETITOR_DATA=COMMUNITIES.map(comm=>{
-  const cp=PRICING_DATA.find(p=>p.id===comm.id);
-  const baseRent=cp?.bedTypes[0]?.recRent??1800;
-  const numComp=Math.floor(Math.random()*3)+3;
-  const fmtD=d=>(d.getMonth()+1).toString().padStart(2,'0')+'/'+d.getDate().toString().padStart(2,'0')+'/'+String(d.getFullYear()).slice(2);
-  const competitors=Array.from({length:numComp},(_,i)=>{
-    const name=COMPETITOR_NAMES[Math.floor(Math.random()*10)];
-    const bedType=['1 Bed','2 Bed','3 Bed'][Math.floor(Math.random()*3)];
-    const concType=COMP_CONCESSION_TYPES[Math.floor(Math.random()*6)];
-    const amount=[100,150,200,250,300,500,0][Math.floor(Math.random()*7)];
-    const daysAgo=Math.floor(Math.random()*60);
-    const fs=new Date(2025,3,8);fs.setDate(fs.getDate()-daysAgo);
-    const vda=Math.floor(Math.random()*20);
-    const lv=new Date(2025,3,8);lv.setDate(lv.getDate()-vda);
-    const status=COMP_STATUSES[Math.floor(Math.random()*5)];
-    const wc=CONCESSIONS_DATA.find(c=>c.id===comm.id);
-    const wbt=wc?.bedTypes.find(b=>b.type===bedType);
-    const wAvg=wbt?.avgAmount??0;
-    let windsorResponse;
-    if(wAvg===0)windsorResponse='No concession';else if(wAvg>amount+50)windsorResponse='Exceeding';else if(Math.abs(wAvg-amount)<=50)windsorResponse='Matched';else windsorResponse='Below market';
-    const compBaseRent=Math.round(baseRent*(0.97+Math.random()*0.06));
-    const netEffRent=amount>0?compBaseRent-amount:compBaseRent;
-    const hLen=Math.floor(Math.random()*4)+2;
-    const history=Array.from({length:hLen},(_,h)=>{const hd=new Date(fs);hd.setDate(hd.getDate()-(h*15));return{date:fmtD(hd),amount:amount+Math.floor(Math.random()*100-50),type:COMP_CONCESSION_TYPES[Math.floor(Math.random()*6)],status:h===0?status:'Expired'};});
-    return{id:'COMP-'+comm.id+'-'+i,commId:comm.id,commName:comm.name,metro:comm.metro,name,bedType,concType,amount,baseRent:compBaseRent,netEffRent,firstSeen:fmtD(fs),lastVerified:fmtD(lv),verifiedDaysAgo:vda,status,windsorResponse,windsorAvgAmount:wAvg,flaggedForResponse:false,unitCoverage:parseFloat((Math.random()*50+15).toFixed(1)),history};
-  });
-  const activeComps=competitors.filter(c=>c.status==='Active');
-  const avgCompAmount=activeComps.length>0?Math.round(activeComps.reduce((s,c)=>s+c.amount,0)/activeComps.length):0;
-  const wComm=CONCESSIONS_DATA.find(c=>c.id===comm.id);
-  const windsorAvg=wComm?Math.round(wComm.bedTypes.reduce((s,bt)=>s+bt.avgAmount,0)/wComm.bedTypes.length):0;
-  const marketPosition=windsorAvg===0&&avgCompAmount>0?'No concession':windsorAvg>avgCompAmount+50?'Leading':Math.abs(windsorAvg-avgCompAmount)<=50?'At market':'Below market';
-  return{commId:comm.id,commName:comm.name,metro:comm.metro,state:comm.state,rm:comm.rm,cd:comm.cd,competitors,numActive:activeComps.length,numTotal:competitors.length,avgCompAmount,windsorAvg,marketPosition};
-});
-
-function getMarketKPIs(data){
-  const all=data.flatMap(c=>c.competitors);const active=all.filter(c=>c.status==='Active');
-  const moreAgg=data.filter(c=>c.avgCompAmount>c.windsorAvg+50).length;
-  const leading=data.filter(c=>c.marketPosition==='Leading').length;
-  const unverified=all.filter(c=>c.verifiedDaysAgo>14).length;
-  const tc={};active.forEach(c=>{tc[c.concType]=(tc[c.concType]||0)+1;});
-  const mc=Object.entries(tc).sort((a,b)=>b[1]-a[1])[0];
-  return{moreAggressive:moreAgg,windsorLeading:leading,mostCommonType:mc?mc[0]:'\u2014',mostCommonPct:mc?Math.round(mc[1]/active.length*100):0,unverified};
+function avgMargin(packages, field) {
+  if (!packages.length) return 0;
+  return Math.round(packages.reduce((s, p) => s + p[field], 0) / packages.length);
 }
 
-// Rent Control — full model
-const RC_PROGRAM_TYPES=[{code:'RS',label:'Rent Stabilized',description:'Annual increases set by Rent Guidelines Board',color:'#e8007d',bg:'rgba(232,0,125,0.1)',maxIncrease:{oneYear:2.75,twoYear:5.25},authority:'NYC Rent Guidelines Board'},{code:'RC',label:'Rent Controlled',description:'Maximum Base Rent system, pre-1947 buildings',color:'#e05252',bg:'rgba(248,113,113,0.12)',maxIncrease:{annual:7.5},authority:'NYS DHCR'},{code:'AB',label:'AB 1482',description:'CA Tenant Protection Act: 5% + CPI, max 10%',color:'#f5a623',bg:'rgba(245,166,35,0.12)',maxIncrease:{annual:10},authority:'CA Dept. of Housing'},{code:'S8',label:'Section 8',description:'HUD Housing Choice Voucher',color:'#60a5fa',bg:'rgba(96,165,250,0.12)',maxIncrease:null,authority:'HUD'},{code:'LI',label:'LIHTC',description:'Low Income Housing Tax Credit — rents capped at 30% AMI',color:'#a78bfa',bg:'rgba(167,139,250,0.12)',maxIncrease:null,authority:'IRS / State Housing Agency'},{code:'AF',label:'Affordable',description:'Local affordable housing program',color:'#4ade80',bg:'rgba(74,222,128,0.12)',maxIncrease:null,authority:'Local Housing Authority'},{code:'HA',label:'Housing Assistance',description:'Other government housing assistance',color:'#94a3b8',bg:'rgba(148,163,184,0.12)',maxIncrease:null,authority:'Various'}];
-function getProgramConfig(code){return RC_PROGRAM_TYPES.find(p=>p.code===code)??null;}
-
-const RENT_CONTROL_DATA=COMMUNITIES.map(comm=>{
-  const hasRC=Math.random()>0.3;const cp=PRICING_DATA.find(p=>p.id===comm.id);
-  const commProg=hasRC&&Math.random()>0.5?RC_PROGRAM_TYPES[Math.floor(Math.random()*RC_PROGRAM_TYPES.length)]:null;
-  const fd=d=>(d.getMonth()+1).toString().padStart(2,'0')+'/'+d.getDate().toString().padStart(2,'0')+'/'+String(d.getFullYear()).slice(2);
-  const bedTypes=(cp?.bedTypes??[]).map(bt=>{
-    const btProg=hasRC&&Math.random()>0.6?RC_PROGRAM_TYPES[Math.floor(Math.random()*7)]:null;
-    const units=(bt.units??[]).map(unit=>{
-      const uProg=hasRC&&Math.random()>0.65?RC_PROGRAM_TYPES[Math.floor(Math.random()*7)]:null;
-      const eff=uProg??btProg??commProg??null;
-      const maxInc=eff?.maxIncrease?.annual??eff?.maxIncrease?.oneYear??null;
-      const curInc=parseFloat((Math.random()*8+1).toFixed(1));
-      let cs='N/A',cc='var(--text-muted)';
-      if(eff&&maxInc){if(curInc<=maxInc*0.9){cs='Compliant';cc='#15803d';}else if(curInc<=maxInc){cs='At Limit';cc='#f5a623';}else{cs='Exceeds Limit';cc='#e05252';}}
-      const br=unit.recRent??bt.recRent??1800;const mar=maxInc?Math.round(br*(1+maxInc/100)):null;
-      const rd=new Date(2020,Math.floor(Math.random()*12),Math.floor(Math.random()*28)+1);
-      const nf=new Date(2025,Math.floor(Math.random()*12),Math.floor(Math.random()*28)+1);
-      return{...unit,baseRent:br,unitProgram:uProg,btProgram:btProg,commProgram:commProg,effectiveProgram:eff,maxIncrease:maxInc,currentIncrease:curInc,complianceStatus:cs,complianceColor:cc,maxAllowableRent:mar,registrationDate:eff?fd(rd):null,nextFilingDate:eff?fd(nf):null,notes:null};
-    });
-    const rcu=units.filter(u=>u.effectiveProgram);const ncu=units.filter(u=>u.complianceStatus==='Exceeds Limit');const alu=units.filter(u=>u.complianceStatus==='At Limit');
-    return{...bt,units,btProgram:btProg,rcUnits:rcu.length,totalUnits:units.length,nonCompliantUnits:ncu.length,atLimitUnits:alu.length};
-  });
-  const allU=bedTypes.flatMap(bt=>bt.units);const rcu=allU.filter(u=>u.effectiveProgram);const nc=allU.filter(u=>u.complianceStatus==='Exceeds Limit');const al=allU.filter(u=>u.complianceStatus==='At Limit');
-  return{...comm,commProgram:commProg,bedTypes,allUnits:allU,rcUnitCount:rcu.length,totalUnitCount:allU.length,nonCompliantCount:nc.length,atLimitCount:al.length,hasAnyRC:rcu.length>0};
-});
-
-function getRCKPIs(data){const allU=data.flatMap(c=>c.allUnits);const rcu=allU.filter(u=>u.effectiveProgram);const nc=allU.filter(u=>u.complianceStatus==='Exceeds Limit');const al=allU.filter(u=>u.complianceStatus==='At Limit');const cwrc=data.filter(c=>c.hasAnyRC);const byProg={};rcu.forEach(u=>{const c=u.effectiveProgram.code;byProg[c]=(byProg[c]||0)+1;});return{totalRCUnits:rcu.length,totalUnits:allU.length,nonCompliant:nc.length,atLimit:al.length,commWithRC:cwrc.length,byProgram:byProg};}
-
-// Chart data for exposure panel
-const CHART_MONTHS = ['Jan 25','Feb 25','Mar 25','Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25'];
-
-function makeExposureData() {
-  return CHART_MONTHS.map((m, i) => ({
-    month: m,
-    vacantExposure: +(Math.random() * 2.5 + 1.0).toFixed(2),
-    exp30:          +(Math.random() * 2.5 + 1.5).toFixed(2),
-    exp60:          +(Math.random() * 3.0 + 2.0).toFixed(2),
-  }));
-}
-
-function makePricingData(baseRent) {
-  return CHART_MONTHS.map(m => {
-    const compMedian = baseRent + 60 + Math.floor(Math.random() * 80 - 40);
-    return {
-      month: m,
-      windsorMedian: baseRent + Math.floor(Math.random() * 60 - 30),
-      compMedian,
-      compFloor:   compMedian - 150 + Math.floor(Math.random() * 40 - 20),
-      compCeiling: compMedian + 180 + Math.floor(Math.random() * 40 - 20),
-    };
-  });
+function avgLF(packages) {
+  if (!packages.length) return 0;
+  return Math.round((packages.reduce((s, p) => s + p.lf, 0) / packages.length) * 100) / 100;
 }
