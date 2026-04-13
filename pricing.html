@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pricing — Dynamica SmartRents</title>
+  <title>Pricing — Sunwing RMS</title>
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <script src="data.js"></script>
@@ -14,23 +14,20 @@
   <!-- ── Top Nav ── -->
   <nav class="topnav">
     <a href="pricing.html" class="logo">
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-        <rect x="17" y="1" width="13" height="13" rx="1.5" fill="#e8007d"/>
-        <rect x="2" y="16" width="13" height="13" rx="1.5" fill="#f06292"/>
-        <rect x="10" y="9" width="12" height="12" rx="1.5" fill="#c4005e" opacity="0.85"/>
-      </svg>
-      <div style="display:flex;flex-direction:column;line-height:1.1;margin-left:8px;">
-        <span style="font-size:11px;font-weight:500;color:#a0a0a0;letter-spacing:.02em;">Dynamica</span>
-        <span style="font-size:13px;font-weight:700;color:#e5e7eb;letter-spacing:.01em;">SmartRents</span>
-      </div>
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="4" fill="#fff"/>
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="logo-text">Sunwing RMS</span>
     </a>
 
     <div class="nav-tabs">
-      <a href="pricing.html"     class="nav-tab active">Pricing</a>
-      <a href="expiration.html"  class="nav-tab">Expiration Management</a>
-      <a href="term.html"        class="nav-tab">Term Management</a>
-      <a href="concessions.html" class="nav-tab">Concession Management</a>
-      <a href="rent-control.html" class="nav-tab">Rent Control</a>
+      <a href="pricing.html" class="nav-tab active">Pricing</a>
+      <a href="demand.html"  class="nav-tab">Demand Forecast</a>
+      <a href="#"            class="nav-tab">Rules &amp; Parameters</a>
+      <a href="#"            class="nav-tab">Audit Log</a>
     </div>
 
     <div class="nav-divider"></div>
@@ -40,13 +37,13 @@
         <span></span><span></span><span></span>
       </button>
       <div class="nav-dropdown" id="navDropdown">
-        <a href="parameters.html">
+        <a href="#">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/></svg>
-          Parameters
+          Settings
         </a>
-        <a href="demand.html">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2,12 6,7 9,10 14,4"/></svg>
-          Demand Forecast
+        <a href="#">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="1.5"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="9" x2="11" y2="9"/><line x1="5" y1="12" x2="9" y2="12"/></svg>
+          Reports
         </a>
       </div>
     </div>
@@ -54,36 +51,76 @@
 
   <!-- ── Filter Bar ── -->
   <div class="filter-bar" id="filterBar">
+    <div class="ms-wrap" id="fRegion">
+      <button class="ms-trigger" onclick="toggleFilter('fRegion')">
+        <span id="fRegionLabel">All Regions</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown">
+        <div class="ms-options" id="fRegionOptions"></div>
+      </div>
+    </div>
+
+    <div class="ms-wrap" id="fDestination">
+      <button class="ms-trigger" onclick="toggleFilter('fDestination')">
+        <span id="fDestinationLabel">All Destinations</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown">
+        <div class="ms-options" id="fDestinationOptions"></div>
+      </div>
+    </div>
+
+    <div class="ms-wrap" id="fDuration">
+      <button class="ms-trigger" onclick="toggleFilter('fDuration')">
+        <span id="fDurationLabel">All Durations</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown">
+        <div class="ms-options" id="fDurationOptions"></div>
+      </div>
+    </div>
+
+    <div class="ms-wrap" id="fRM">
+      <button class="ms-trigger" onclick="toggleFilter('fRM')">
+        <span id="fRMLabel">All RMs</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown">
+        <div class="ms-options" id="fRMOptions"></div>
+      </div>
+    </div>
+
+    <div class="ms-wrap" id="fGateway">
+      <button class="ms-trigger" onclick="toggleFilter('fGateway')">
+        <span id="fGatewayLabel">All Gateways</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown">
+        <div class="ms-options" id="fGatewayOptions"></div>
+      </div>
+    </div>
   </div>
 
   <!-- ── Sub-tab Bar ── -->
   <div class="subtab-bar">
-    <a href="pricing.html"          class="subtab active">New Lease</a>
-    <a href="pricing-renewals.html" class="subtab">Renewals</a>
+    <a href="#vacation" class="subtab active">Vacation Packages</a>
+    <a href="#hotel"    class="subtab">Hotel Only</a>
+    <a href="#flight"   class="subtab">Flight Only</a>
+    <a href="#groups"   class="subtab">Groups</a>
     <div class="subtab-spacer"></div>
-    <button class="btn-adv-filters" onclick="toggleAdvDrawer()">
-      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
-        <line x1="2" y1="4" x2="12" y2="4"/><line x1="4" y1="7" x2="10" y2="7"/><line x1="6" y1="10" x2="8" y2="10"/>
-      </svg>
-      Advanced filters
+    <button class="btn btn-primary" onclick="runEvaluation()" style="margin-right:8px;">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="3,2 12,7 3,12" fill="currentColor" stroke="none"/></svg>
+      Run Evaluation
     </button>
-    <button class="btn-save" id="saveBtn" onclick="saveChanges()" style="display:none;margin-left:8px;">Save changes</button>
-  </div>
-
-  <!-- ── Status Legend ── -->
-  <div class="status-legend">
-    <span class="status-legend-group">Unit Status:</span>
-    <span class="status-legend-item"><span style="background:#f87171;color:#fff;font-size:8px;font-weight:700;border-radius:3px;padding:0 3px;line-height:1.4;">VC</span>Vacant</span>
-    <span class="status-legend-item"><span style="background:#94a3b8;color:#fff;font-size:8px;font-weight:700;border-radius:3px;padding:0 3px;line-height:1.4;">ON</span>On Notice</span>
-    <span class="status-legend-sep">|</span>
-    <span class="status-legend-group">Rent Control:</span>
-    <span class="status-legend-item"><span style="background:#e05252;color:#fff;font-size:8px;font-weight:700;border-radius:3px;padding:0 3px;line-height:1.4;">RC</span>Rent Control</span>
-    <span class="status-legend-item"><span style="background:#f5a623;color:#fff;font-size:8px;font-weight:700;border-radius:3px;padding:0 3px;line-height:1.4;">AF</span>Affordable</span>
-    <span class="status-legend-item"><span style="background:#60a5fa;color:#1a1d23;font-size:8px;font-weight:700;border-radius:3px;padding:0 3px;line-height:1.4;">HA</span>Housing Assistance</span>
+    <button class="btn btn-ghost" onclick="publishChanges()">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7h10M7 2l5 5-5 5"/></svg>
+      Publish Changes
+    </button>
   </div>
 
   <!-- ── Stats Bar ── -->
-  <div id="pricingStatsBar" style="background:var(--surface);border-bottom:1px solid var(--border);padding:6px 20px;display:flex;gap:6px;align-items:center;flex-wrap:nowrap;overflow-x:auto;"></div>
+  <div id="pricingStatsBar" style="background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;gap:20px;align-items:center;flex-wrap:nowrap;overflow-x:auto;font-size:12px;"></div>
 
   <!-- ── Main ── -->
   <div class="main">
@@ -91,2228 +128,714 @@
       <table class="data-table" id="pricingTable">
         <thead>
           <tr>
-            <th style="min-width:160px;">Property <span class="th-sub">Available/total units</span></th>
-            <th>Avail. <span class="th-sub">60 days</span></th>
-            <th style="width:42px;text-align:center;">RC</th>
-            <th>Status</th>
-            <th>Move-out <span class="th-sub">Date</span></th>
-            <th>Avail. <span class="th-sub">Date</span></th>
-            <th style="width:50px;">Alerts</th>
-            <th>Prior Lease<br><span class="th-sub">Net Eff.</span></th>
-            <th style="text-align:right;">Anchor<br><span class="th-sub">Price</span></th>
-            <th>Rec. Rent<br><span class="th-sub">Expired</span></th>
-            <th>Rec. Rent<br><span class="th-sub">Current</span></th>
-            <th>Delta, <span class="th-sub">Prior Period</span></th>
-            <th class="price-change-abs" style="width:80px;min-width:80px;padding-left:8px;padding-right:4px;">Price Change <span class="th-sub">(abs.)</span></th>
-            <th class="price-change-pct" style="width:72px;min-width:72px;padding-left:4px;padding-right:8px;">Price Change <span class="th-sub">(%)</span></th>
-            <th style="width:36px;">LT</th>
-            <th style="width:70px;">Att. Value</th>
-            <th style="width:80px;">Net Eff. <span class="th-sub">Rent</span></th>
-            <th style="width:80px;">Concs. Amt</th>
-            <th style="width:60px;">Notes</th>
+            <th style="min-width:260px;">Destination / Duration / Package</th>
+            <th>Hotel<br><span class="th-sub">Room Category</span></th>
+            <th>Departure<br><span class="th-sub">Flight #</span></th>
+            <th style="text-align:right;">Total Cost<br><span class="th-sub">land + air</span></th>
+            <th style="text-align:right;width:90px;">Current<br><span class="th-sub">Margin $</span></th>
+            <th style="text-align:right;width:90px;">Rec.<br><span class="th-sub">Margin $</span></th>
+            <th style="text-align:right;width:70px;">Delta<br><span class="th-sub">$</span></th>
+            <th style="text-align:right;">Current<br><span class="th-sub">Price</span></th>
+            <th style="text-align:right;">Rec.<br><span class="th-sub">Price</span></th>
+            <th style="text-align:right;width:70px;">LF %</th>
+            <th style="text-align:right;">Comp 1</th>
+            <th style="text-align:right;">Comp 2</th>
+            <th style="width:110px;">Pace</th>
+            <th style="width:90px;">Actions</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
       </table>
     </div>
 
-    <!-- Panels Container -->
+    <!-- ── Slide-up panel: booking curve + competitor price ── -->
     <div class="panels-container" id="panelsContainer">
-
-      <!-- Unit Pricing Panel (top when both open) -->
-      <div class="unit-pricing-wrap" id="unitPricingWrap" style="display:none;">
-        <div class="panel-collapse-handle" onclick="toggleUnitPricing()">
-          <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,5 7,9 11,5"/></svg>
-        </div>
-        <div class="unit-pricing-panel" id="unitPricingPanel">
-          <div class="panel-header-bar">
-            <span style="font-size:14px;font-weight:600;color:#fff;">Unit Pricing History</span>
-            <span style="color:#3d4150;margin:0 10px;">|</span>
-            <span style="font-size:13px;color:#9ca3af;" id="unitPricingUnitId"></span>
-            <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
-              <span class="legend-item"><span class="legend-line" style="background:#e8007d"></span>Gross Rent</span>
-              <span class="legend-item"><span class="legend-line" style="background:#60a5fa;border-top:2px dashed #60a5fa;height:0;"></span>Net Eff. Rent</span>
-              <span class="legend-item"><span class="legend-dot" style="background:#fbbf24"></span>Override</span>
-              <button onclick="toggleUnitPricing()" title="Close panel" style="background:none;border:none;cursor:pointer;color:#6b7280;display:flex;align-items:center;padding:4px 8px;border-radius:4px;margin-left:8px;" onmouseover="this.style.color='#e5e7eb'" onmouseout="this.style.color='#6b7280'"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="3" x2="11" y2="11"/><line x1="11" y1="3" x2="3" y2="11"/></svg></button>
-            </div>
-          </div>
-          <div style="padding:12px 20px;flex:1;overflow:hidden;">
-            <div style="position:relative;width:100%;height:100%;">
-              <canvas id="unitPricingChart"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Exposure Panel (bottom) -->
       <div class="exposure-wrap" id="exposureWrap" style="display:none;">
         <div class="panel-collapse-handle" onclick="toggleExposure()">
           <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,5 7,9 11,5"/></svg>
         </div>
         <div class="exposure-panel" id="exposurePanel">
           <div class="panel-header-bar">
-            <span class="exposure-title">Exposure &amp; Price</span>
+            <span class="exposure-title">Package Analytics</span>
             <span style="color:#3d4150;margin:0 10px;">|</span>
-            <span class="exposure-prop" id="exposurePropName">Select a property</span>
-            <div style="display:flex;align-items:center;gap:4px;margin-left:auto;margin-right:12px;">
-              <button id="toggleDaily" onclick="setChartMode('daily')" style="padding:3px 10px;border-radius:4px;font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.15);color:#fff;font-weight:600;">Daily</button>
-              <button id="toggleMonthly" onclick="setChartMode('monthly')" style="padding:3px 10px;border-radius:4px;font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:none;color:#6b7280;font-weight:400;">Monthly</button>
-            </div>
-            <button onclick="toggleExposure()" title="Close panel" style="background:none;border:none;cursor:pointer;color:#6b7280;display:flex;align-items:center;padding:4px 8px;border-radius:4px;" onmouseover="this.style.color='#e5e7eb'" onmouseout="this.style.color='#6b7280'"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="3" x2="11" y2="11"/><line x1="11" y1="3" x2="3" y2="11"/></svg></button>
+            <span class="exposure-prop" id="exposurePropName">Select a package</span>
+            <button onclick="toggleExposure()" title="Close panel" style="background:none;border:none;cursor:pointer;color:#6b7280;display:flex;align-items:center;padding:4px 8px;border-radius:4px;margin-left:auto;" onmouseover="this.style.color='#e5e7eb'" onmouseout="this.style.color='#6b7280'">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="3" x2="11" y2="11"/><line x1="11" y1="3" x2="3" y2="11"/></svg>
+            </button>
           </div>
           <div class="exposure-inner">
-            <div class="exposure-dates">
-              <button class="date-picker-btn" id="startDateBtn" onclick="openCalendar('start', this)">
-                <span id="startDateLabel">Start Day</span>
-                <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="#6b7280" stroke-width="1.5"><rect x="1" y="2" width="12" height="11" rx="1.5"/><line x1="1" y1="6" x2="13" y2="6"/><line x1="4" y1="1" x2="4" y2="3"/><line x1="10" y1="1" x2="10" y2="3"/></svg>
-              </button>
-              <button class="date-picker-btn" id="endDateBtn" onclick="openCalendar('end', this)">
-                <span id="endDateLabel">End Day</span>
-                <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="#6b7280" stroke-width="1.5"><rect x="1" y="2" width="12" height="11" rx="1.5"/><line x1="1" y1="6" x2="13" y2="6"/><line x1="4" y1="1" x2="4" y2="3"/><line x1="10" y1="1" x2="10" y2="3"/></svg>
-              </button>
-            </div>
             <div class="exposure-charts">
               <div class="chart-box">
                 <div class="chart-label">
-                  Exposure <span style="font-size:10px;color:#6b7280;">in %</span>
+                  Booking Curve <span style="font-size:10px;color:#6b7280;">Load factor %</span>
                   <div class="chart-legend">
-                    <span class="legend-item"><span class="legend-dot" style="background:#f5a623"></span>Vacant</span>
-                    <span class="legend-item"><span class="legend-dot" style="background:#60a5fa"></span>30 Day</span>
-                    <span class="legend-item"><span class="legend-dot" style="background:#a78bfa"></span>60 Day</span>
+                    <span class="legend-item"><span class="legend-line" style="background:#e8007d"></span>Actual</span>
+                    <span class="legend-item"><span class="legend-line" style="background:#9ca3af;border-top:1px dashed #9ca3af;height:0;"></span>Target</span>
                   </div>
                 </div>
-                <div style="position:relative;width:100%;height:175px;">
-                  <canvas id="exposureChart"></canvas>
+                <div style="position:relative;width:100%;height:200px;">
+                  <canvas id="bookingCurveChart"></canvas>
                 </div>
               </div>
               <div class="chart-box">
                 <div class="chart-label">
-                  Pricing <span style="font-size:10px;color:#6b7280;">in $</span>
+                  Competitor Price <span style="font-size:10px;color:#6b7280;">CAD $</span>
                   <div class="chart-legend">
-                    <span class="legend-item"><span class="legend-line" style="background:#475569;border-top:1px dashed #475569;height:0;"></span>Comp Floor</span>
-                    <span class="legend-item"><span class="legend-line" style="background:#475569;border-top:1px dashed #475569;height:0;"></span>Comp Ceiling</span>
-                    <span class="legend-item"><span class="legend-line" style="background:#f472b6"></span>Competitor Median</span>
-                    <span class="legend-item"><span class="legend-line" style="background:#e8007d"></span>Windsor Median</span>
+                    <span class="legend-item"><span class="legend-line" style="background:#e8007d"></span>Sunwing</span>
+                    <span class="legend-item"><span class="legend-line" style="background:#60a5fa"></span>Competitor 1</span>
+                    <span class="legend-item"><span class="legend-line" style="background:#a78bfa"></span>Competitor 2</span>
                   </div>
                 </div>
-                <div style="position:relative;width:100%;height:175px;">
-                  <canvas id="compChart"></canvas>
+                <div style="position:relative;width:100%;height:200px;">
+                  <canvas id="compPriceChart"></canvas>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
     </div>
 
-    <!-- Advanced Filters Drawer -->
-    <div class="adv-drawer" id="advDrawer">
+    <!-- ── Right side drawer: package rules ── -->
+    <aside class="adv-drawer" id="rulesDrawer">
       <div class="adv-drawer-header">
-        <span class="adv-drawer-title">Advanced filters</span>
-        <button class="adv-close" onclick="toggleAdvDrawer()">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+        <span class="adv-drawer-title">Package Rules</span>
+        <button class="adv-close" onclick="toggleRulesDrawer()">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="3" x2="11" y2="11"/><line x1="11" y1="3" x2="3" y2="11"/></svg>
         </button>
       </div>
 
       <div class="adv-section">
-        <div class="adv-section-title">Unit ID</div>
-        <input type="text" id="unitIdSearch" placeholder="Search or paste unit ID..." oninput="renderTable()" style="width:100%;border:1px solid var(--border-mid);border-radius:var(--radius);padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text-primary);background:var(--surface);outline:none;">
-      </div>
-
-      <div class="adv-section" id="rcFilterSection">
-        <div class="adv-section-title">Rent Control Status</div>
-        <label class="ms-option"><input type="checkbox" value="RC" onchange="renderTable()"><span style="display:inline-flex;align-items:center;gap:6px;"><span style="background:#e05252;color:#fff;font-size:9px;font-weight:700;border-radius:3px;padding:1px 4px;">RC</span>Rent Control</span></label>
-        <label class="ms-option"><input type="checkbox" value="AF" onchange="renderTable()"><span style="display:inline-flex;align-items:center;gap:6px;"><span style="background:#f5a623;color:#fff;font-size:9px;font-weight:700;border-radius:3px;padding:1px 4px;">AF</span>Affordable</span></label>
-        <label class="ms-option"><input type="checkbox" value="HA" onchange="renderTable()"><span style="display:inline-flex;align-items:center;gap:6px;"><span style="background:#60a5fa;color:#1a1d23;font-size:9px;font-weight:700;border-radius:3px;padding:1px 4px;">HA</span>Housing Assistance</span></label>
-        <label class="ms-option"><input type="checkbox" value="null" onchange="renderTable()">Not Applicable</label>
+        <div class="adv-section-title">Package</div>
+        <div style="font-size:12.5px;color:var(--text-primary);font-family:'DM Mono',monospace;" id="rulesPkgId">—</div>
+        <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;" id="rulesPkgHotel">—</div>
       </div>
 
       <div class="adv-section">
-        <div class="adv-section-title">Unit details</div>
-        <select class="adv-full-select"><option value="">Unit ID</option></select>
-        <select class="adv-full-select"><option value="">Unit type</option><option>1 Bed</option><option>2 Bed</option><option>3 Bed</option></select>
-        <select class="adv-full-select"><option value="">Attributes</option><option>Walk-in closet</option><option>Balcony</option><option>Pool view</option></select>
+        <div class="adv-section-title">Price Rules</div>
+        <div class="adv-row">
+          <label>Min price ($)</label>
+          <input class="margin-input" id="ruleMinPrice" type="number" style="width:90px;" />
+        </div>
+        <div class="adv-row">
+          <label>Max price ($)</label>
+          <input class="margin-input" id="ruleMaxPrice" type="number" style="width:90px;" />
+        </div>
       </div>
 
       <div class="adv-section">
-        <div class="adv-section-title">Floorplan</div>
-        <select class="adv-full-select" id="floorplanFilter" onchange="renderTable()">
-          <option value="">All Floorplans</option>
-          <option>Studio</option>
-          <option>1BR/1BA</option>
-          <option>1BR/2BA</option>
-          <option>2BR/1BA</option>
-          <option>2BR/2BA</option>
-          <option>3BR/2BA</option>
-        </select>
+        <div class="adv-section-title">Margin Rules</div>
+        <div class="adv-row">
+          <label>Min margin ($)</label>
+          <input class="margin-input" id="ruleMinMargin" type="number" style="width:90px;" />
+        </div>
+        <div class="adv-row">
+          <label>Max margin ($)</label>
+          <input class="margin-input" id="ruleMaxMargin" type="number" style="width:90px;" />
+        </div>
       </div>
 
       <div class="adv-section">
-        <div class="adv-section-title">Community Class</div>
-        <div style="display:flex;gap:8px;">
-          <label class="ms-option" style="display:inline-flex;align-items:center;gap:6px;">
-            <input type="checkbox" value="A" id="classA" onchange="renderTable()">
-            <span id="classABadgeSlot"></span> Class A
-          </label>
-          <label class="ms-option" style="display:inline-flex;align-items:center;gap:6px;">
-            <input type="checkbox" value="B" id="classB" onchange="renderTable()">
-            <span id="classBBadgeSlot"></span> Class B
+        <div class="adv-section-title">Lock</div>
+        <div class="toggle-row">
+          <label style="font-size:12.5px;color:var(--text-secondary);">Lock current price</label>
+          <label class="toggle">
+            <input type="checkbox" id="ruleLockToggle" />
+            <span class="toggle-slider"></span>
           </label>
         </div>
-      </div>
-
-      <div class="adv-section">
-        <div class="adv-section-title">Alerts</div>
-        <select class="adv-full-select"><option value="">Price change</option><option>Increase</option><option>Decrease</option><option>No change</option></select>
-        <select class="adv-full-select"><option value="">Exposure</option><option>High</option><option>Medium</option><option>Low</option></select>
-      </div>
-
-      <div class="adv-section">
-        <div class="adv-section-title">Concessions</div>
-        <div class="adv-row">
-          <label>Rec. Concessions</label>
-          <select class="adv-select"><option value="">Select</option><option>Yes</option><option>No</option></select>
-        </div>
-        <div class="adv-row">
-          <label>Active Concessions</label>
-          <select class="adv-select"><option value="">Select</option><option>Yes</option><option>No</option></select>
-        </div>
-      </div>
-
-      <div class="adv-section">
-        <div class="adv-section-title">Comp</div>
-        <div class="adv-row">
-          <label>Floor</label>
-          <select class="adv-select"><option value="">Select</option><option>Below</option><option>At</option><option>Above</option></select>
-        </div>
-        <div class="adv-row">
-          <label>Ceiling</label>
-          <select class="adv-select"><option value="">Select</option><option>Below</option><option>At</option><option>Above</option></select>
-        </div>
-      </div>
-
-      <div class="adv-section">
-        <div class="adv-section-title">Optimizer</div>
-        <div class="adv-row">
-          <label>Floor</label>
-          <select class="adv-select"><option value="">Select</option><option>Below</option><option>At</option><option>Above</option></select>
-        </div>
-        <div class="adv-row">
-          <label>Ceiling</label>
-          <select class="adv-select"><option value="">Select</option><option>Below</option><option>At</option><option>Above</option></select>
-        </div>
-      </div>
-
-      <div class="adv-section">
-        <div class="adv-section-title">Manual Adjustment</div>
-        <select class="adv-full-select"><option value="">Select</option><option>Has adjustment</option><option>No adjustment</option></select>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:6px;" id="rulesLastMod">Last modified: —</div>
       </div>
 
       <div class="adv-footer">
-        <button class="btn-apply" onclick="renderTable();toggleAdvDrawer()">Apply</button>
+        <button class="btn-apply" onclick="saveRules()">Save rules</button>
       </div>
-    </div>
-  </div>
-</div>
+    </aside>
 
-<!-- ── Lease Term Modal ── -->
-<div class="modal-backdrop" id="leaseModal">
-  <div class="modal" style="width:90vw;max-width:90vw;max-height:92vh;display:flex;flex-direction:column;">
-    <div class="modal-header" style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);">
-      <div>
-        <div class="modal-title">Lease term</div>
-        <div class="modal-subtitle" id="leaseModalUnit"></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;">
-        <button id="ltMoveInBtn" onclick="openCalendarFor('ltMoveInBtn', onLTDateSelected, this)" style="display:flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--border-mid);border-radius:var(--radius);background:var(--surface);color:var(--text-secondary);font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;white-space:nowrap;">
-          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="12" height="11" rx="1.5"/><line x1="1" y1="5.5" x2="13" y2="5.5"/><line x1="4" y1="1" x2="4" y2="3.5"/><line x1="10" y1="1" x2="10" y2="3.5"/></svg>
-          <span id="ltMoveInLabel">Move-in date</span>
-        </button>
-        <button class="modal-close" onclick="closeModal('leaseModal')">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
-        </button>
-      </div>
-    </div>
-    <div class="modal-body" style="padding:20px 24px;overflow-y:auto;">
-      <div id="ltScrollContainer" style="overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:8px;">
-        <div id="ltChartWrap" style="position:relative;height:300px;overflow:hidden;">
-          <canvas id="ltChart"></canvas>
-        </div>
-        <table id="ltHorizTable" style="table-layout:fixed;width:max-content;border-collapse:collapse;font-size:12.5px;border-top:1px solid var(--border);"></table>
-      </div>
-      <style>
-        #ltScrollContainer::-webkit-scrollbar { height:6px; }
-        #ltScrollContainer::-webkit-scrollbar-track { background:var(--border); border-radius:3px; }
-        #ltScrollContainer::-webkit-scrollbar-thumb { background:var(--accent); border-radius:3px; }
-      </style>
-    </div>
-    <div class="modal-footer" style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--border);">
-      <div style="display:flex;align-items:center;gap:16px;">
-        <span style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Hold Settings:</span>
-        <div id="ltHoldInline" style="display:flex;align-items:center;gap:12px;"></div>
-      </div>
-      <button class="btn btn-ghost" onclick="closeModal('leaseModal')">Exit</button>
-    </div>
-  </div>
-</div>
+  </div><!-- /.main -->
 
-<!-- ── Attributes Modal ── -->
-<div class="modal-backdrop" id="attrModal">
-  <div class="modal" style="width:440px;">
-    <div class="modal-header">
-      <div>
-        <div class="modal-title">Attributes</div>
-        <div class="modal-subtitle" id="attrModalUnit"></div>
-      </div>
-      <button class="modal-close" onclick="closeModal('attrModal')">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div style="display:flex;gap:16px;padding:12px 14px;background:var(--body-bg);border-radius:8px;border:1px solid var(--border);margin-bottom:14px;">
-        <div>
-          <div style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Floorplan</div>
-          <div style="font-size:16px;font-weight:700;color:var(--text-primary);" id="attrFloorplan">1BR/1BA</div>
-        </div>
-        <div style="width:1px;background:var(--border);"></div>
-        <div>
-          <div style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Area</div>
-          <div style="font-size:16px;font-weight:700;color:var(--text-primary);" id="attrArea">750 sq ft</div>
-        </div>
-        <div style="width:1px;background:var(--border);"></div>
-        <div>
-          <div style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Floor</div>
-          <div style="font-size:16px;font-weight:700;color:var(--text-primary);" id="attrFloor">3</div>
-        </div>
-      </div>
-      <div style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Apartment attributes</div>
-      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">
-        <span style="font-size:13px;color:var(--text-secondary);">Walk in closet</span>
-        <span style="font-size:13px;color:var(--text-secondary);">Traffic proximity</span>
-        <span style="font-size:13px;color:var(--text-secondary);">Balcony</span>
-        <span style="font-size:13px;color:var(--text-secondary);">Floor number</span>
-      </div>
-      <div style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Community attributes</div>
-      <div style="display:flex;flex-direction:column;gap:6px;">
-        <span style="font-size:13px;color:var(--text-secondary);">Pool</span>
-        <span style="font-size:13px;color:var(--text-secondary);">Concierge</span>
-        <span style="font-size:13px;color:var(--text-secondary);">Parking garage</span>
-        <span style="font-size:13px;color:var(--text-secondary);">Co-working lounge</span>
-      </div>
-      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
-        <a href="javascript:void(0)" id="attrCommLink" style="color:var(--accent);font-size:13px;font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
-          View Community Attributes
-          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="2" y1="7" x2="12" y2="7"/><polyline points="8,3 12,7 8,11"/></svg>
-        </a>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('attrModal')">Exit</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── Community Attributes Modal ── -->
-<div class="modal-backdrop" id="commAttrModal">
-  <div class="modal" style="width:520px;">
-    <div class="modal-header">
-      <div>
-        <div class="modal-title">Community Attributes</div>
-        <div class="modal-subtitle" id="commAttrName"></div>
-      </div>
-      <button class="modal-close" onclick="closeModal('commAttrModal')">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div id="commAttrFacts" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;"></div>
-      <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Amenities</div>
-      <div id="commAttrAmenities" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('commAttrModal')">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── Concession Info Modal ── -->
-<div class="modal-backdrop" id="concInfoModal">
-  <div class="modal" style="width:min(95vw,860px);max-width:min(95vw,860px);max-height:85vh;">
-    <div class="modal-header"><div><div class="modal-title">Active Concessions</div><div class="modal-subtitle" id="concInfoSubtitle"></div></div><button class="modal-close" onclick="closeModal('concInfoModal')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg></button></div>
-    <div class="modal-body" style="overflow-y:auto;">
-      <div id="concInfoEmpty" style="display:none;padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">No active concessions</div>
-      <table class="modal-table" id="concInfoTable"><thead><tr><th>Level</th><th>Type</th><th>Amount</th><th style="text-align:center;">% Rent</th><th>Lease</th><th>Valid</th><th>Status</th><th style="text-align:center;">Stack</th><th style="text-align:center;cursor:help;" title="Priority order for stacking. Lower number = higher priority. If a concession is non-stackable, it overrides all lower priority concessions.">Priority</th></tr></thead><tbody id="concInfoBody"></tbody></table>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;margin-top:8px;border-top:2px solid var(--border);"><div><span style="font-size:12px;color:var(--text-muted);">Total stacked:</span><span style="font-size:16px;font-weight:700;color:var(--accent);margin-left:8px;" id="concInfoTotal"></span><span style="font-size:12px;color:var(--text-muted);margin-left:6px;" id="concInfoTotalPct"></span></div><div><span style="font-size:12px;color:var(--text-muted);">Net Eff. Rent:</span><span style="font-size:16px;font-weight:700;color:var(--text-primary);margin-left:8px;" id="concInfoNetEff"></span></div></div>
-    </div>
-    <div class="modal-footer"><div style="display:flex;justify-content:space-between;align-items:center;width:100%;"><a id="concInfoManageLink" href="concessions.html?tab=management" style="display:inline-flex;align-items:center;gap:6px;color:var(--accent);font-size:13px;font-weight:500;text-decoration:none;">Manage in Concession Manager<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="2" y1="7" x2="12" y2="7"/><polyline points="8,3 12,7 8,11"/></svg></a><button class="btn btn-ghost" onclick="closeModal('concInfoModal')">Close</button></div></div>
-  </div>
-</div>
-
-<!-- Alerts tooltip -->
-<div class="tooltip-popup" id="alertsTooltip">
-  <div class="tooltip-title">Alerts in effect</div>
-  <div id="alertsTooltipBody"></div>
-</div>
-
-<!-- Calendar popup -->
-<div id="calendarModal" class="calendar-popup">
-  <div class="calendar-header">
-    <button class="calendar-nav" id="calPrev" onclick="calNav(-1)">
-      <svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="7,1 3,5 7,9"/></svg>
-    </button>
-    <span class="calendar-month" id="calMonthLabel"></span>
-    <button class="calendar-nav" id="calNext" onclick="calNav(1)">
-      <svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3,1 7,5 3,9"/></svg>
-    </button>
-  </div>
-  <div class="calendar-weekdays">
-    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
-  </div>
-  <div class="calendar-days" id="calDays"></div>
-</div>
-
-<!-- ── Availability Range Picker ── -->
-<div id="availRangePicker" class="avail-range-picker">
-  <div class="ar-calendars">
-    <div class="ar-cal">
-      <div class="ar-cal-header">
-        <button class="calendar-nav" onclick="arNav(-1)">
-          <svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="7,1 3,5 7,9"/></svg>
-        </button>
-        <span class="calendar-month" id="arMonth1Label"></span>
-        <span style="width:24px;"></span>
-      </div>
-      <div class="ar-weekdays"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
-      <div class="ar-days" id="arCal1"></div>
-    </div>
-    <div class="ar-cal">
-      <div class="ar-cal-header">
-        <span style="width:24px;"></span>
-        <span class="calendar-month" id="arMonth2Label"></span>
-        <button class="calendar-nav" onclick="arNav(1)">
-          <svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3,1 7,5 3,9"/></svg>
-        </button>
-      </div>
-      <div class="ar-weekdays"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
-      <div class="ar-days" id="arCal2"></div>
-    </div>
-  </div>
-  <div class="ar-footer">
-    <span class="ar-range-text" id="arRangeText">Select start date</span>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-ghost" style="padding:5px 12px;font-size:11px;" onclick="clearAvailRange()">Clear</button>
-      <button class="btn btn-primary" style="padding:5px 12px;font-size:11px;" onclick="applyAvailRange()">Apply</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── Att. Value Modal ── -->
-<div class="modal-backdrop" id="attValueModal">
-  <div class="modal" style="width:420px;">
-    <div class="modal-header">
-      <div>
-        <div class="modal-title">Attribute Value Breakdown</div>
-        <div class="modal-subtitle" id="attValueModalUnit"></div>
-      </div>
-      <button class="modal-close" onclick="closeModal('attValueModal')">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div style="display:flex;gap:16px;padding:10px 14px;background:var(--body-bg);border-radius:8px;border:1px solid var(--border);margin-bottom:14px;">
-        <div>
-          <div style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Floorplan</div>
-          <div style="font-size:15px;font-weight:700;color:var(--text-primary);" id="attFloorplan">1BR/1BA</div>
-        </div>
-        <div style="width:1px;background:var(--border);"></div>
-        <div>
-          <div style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Area</div>
-          <div style="font-size:15px;font-weight:700;color:var(--text-primary);" id="attArea">750 sq ft</div>
-        </div>
-      </div>
-      <table class="modal-table">
-        <thead>
-          <tr>
-            <th>Attribute</th>
-            <th>Value ($)</th>
-          </tr>
-        </thead>
-        <tbody id="attValueTableBody"></tbody>
-      </table>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('attValueModal')">Exit</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── Note Modal ── -->
-<div class="modal-backdrop" id="noteModal">
-  <div class="modal" style="width:440px;">
-    <div class="modal-header">
-      <div>
-        <div class="modal-title">Notes</div>
-        <div class="modal-subtitle" id="noteModalUnit"></div>
-      </div>
-      <button class="modal-close" onclick="closeModal('noteModal')">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div style="margin-bottom:14px;">
-        <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Note</label>
-        <textarea id="noteTextarea" rows="4" class="note-textarea" placeholder="Add a note..."></textarea>
-      </div>
-      <div>
-        <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Expires</label>
-        <button class="date-picker-btn" id="noteExpiryBtn" onclick="openCalendar('noteExpiry', this)" style="background:var(--surface);border:1px solid var(--border-mid);color:var(--text-primary);">
-          <span id="noteExpiryLabel">Select date</span>
-          <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="#6b7280" stroke-width="1.5"><rect x="1" y="2" width="12" height="11" rx="1.5"/><line x1="1" y1="6" x2="13" y2="6"/><line x1="4" y1="1" x2="4" y2="3"/><line x1="10" y1="1" x2="10" y2="3"/></svg>
-        </button>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('noteModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveNote()">Save</button>
-    </div>
-  </div>
-</div>
-
+</div><!-- /.app -->
 
 <script>
-// ── State ─────────────────────────────────────────────────
-let expandedProperties = new Set();
-let expandedBedTypes = {};
-let exposureOpen = false;
-let exposurePropId = null;
-let advDrawerOpen = false;
-let exposureChartInst = null;
-let compChartInst = null;
-let unitPricingChartInst = null;
-let unitPricingOpen = false;
-const rcConfig = {
-  RC: { label: 'RC', bg: '#e05252', color: '#fff' },
-  AF: { label: 'AF', bg: '#f5a623', color: '#fff' },
-  HA: { label: 'HA', bg: '#60a5fa', color: '#1a1d23' },
-};
+// ── State ───────────────────────────────────────────────────
+const expandedDests = new Set();      // destination IDs currently expanded
+const expandedDurations = new Set();  // `${destId}-${duration}` keys currently expanded
+const marginOverrides = {};           // { pkgId: newMargin } — inline edits
 
-function getSelectedRcFilters() {
-  const cbs = document.querySelectorAll('#rcFilterSection input[type=checkbox]:checked');
-  return [...cbs].map(c => c.value);
+// Start with the first destination expanded
+if (PACKAGE_DATA.length) {
+  expandedDests.add(PACKAGE_DATA[0].id);
+  PACKAGE_DATA[0].durations.forEach(d => expandedDurations.add(`${PACKAGE_DATA[0].id}-${d.duration}`));
 }
 
-// ── Anchor Prices ─────────────────────────────────────────
-function findUnit(unitId) {
-  for (const c of PRICING_DATA) {
-    for (const bt of c.bedTypes) {
-      const u = bt.units?.find(u => u.id === unitId);
-      if (u) return u;
-    }
-  }
-  return null;
+// ── Formatters / badge helpers ──────────────────────────────
+function fmt$(n) {
+  if (n == null || isNaN(n)) return '—';
+  return '$' + Math.round(n).toLocaleString('en-CA');
 }
 
-function editAnchorPrice(unitId, el) {
-  const targetUnit = findUnit(unitId);
-  if (!targetUnit) return;
-  const current = targetUnit.anchorPrice ?? '';
-  const td = el.closest('td');
-  td.innerHTML = `<input type="text" value="${current}" onkeydown="if(event.key==='Enter'){saveAnchorFromInput('${unitId}',this);}" onblur="saveAnchorFromInput('${unitId}',this)" style="width:72px;border:none;border-bottom:1px solid var(--accent);background:transparent;font-family:'DM Sans',sans-serif;font-size:12.5px;padding:2px 0;outline:none;text-align:right;" autofocus>`;
-  const inp = td.querySelector('input');
-  inp.focus();
-  inp.select();
+function fmtPct(n) {
+  if (n == null || isNaN(n)) return '—';
+  return Math.round(n * 100) + '%';
 }
 
-function saveAnchorFromInput(unitId, input) {
-  const num = parseFloat(input.value.replace(/[^0-9.]/g, ''));
-  const u = findUnit(unitId);
-  if (u) u.anchorPrice = isNaN(num) ? null : num;
-  if (typeof renderTableInPlace === 'function') renderTableInPlace();
-  else renderTable();
+function regionBadge(region) {
+  const cls = 'region-' + region.toLowerCase().replace(/[^a-z]/g, '');
+  return `<span class="region-badge ${cls}">${region}</span>`;
 }
 
-// ── Price Override System ────────────────────────────────
-const priceOverrides = {};
-
-function computeRecRent(originalRecRent, overrideKey) {
-  const o = priceOverrides[overrideKey];
-  if (!o) return originalRecRent;
-  let rent = originalRecRent;
-  if (o.absChange != null) rent = rent + o.absChange;
-  if (o.pctChange != null) rent = rent * (1 + o.pctChange / 100);
-  return Math.round(rent);
+function gatewayChip(gw) {
+  return `<span class="gateway-chip">${gw}</span>`;
 }
 
-function computeDelta(newRecRent, priorPeriodPrice) {
-  if (!priorPeriodPrice) return 0;
-  return ((newRecRent - priorPeriodPrice) / priorPeriodPrice * 100).toFixed(1);
+function paceBadge(pace) {
+  const map = {
+    'ahead':    { cls: 'pace-ahead',   label: 'Ahead' },
+    'on track': { cls: 'pace-ontrack', label: 'On Track' },
+    'behind':   { cls: 'pace-behind',  label: 'Behind' },
+  };
+  const p = map[pace] || map['on track'];
+  return `<span class="pace-badge ${p.cls}">${p.label}</span>`;
 }
 
-function computeNetEff(newRecRent, unitOrConcsAmt) {
-  // Backwards compat: if a number is passed, treat as raw concsAmt subtraction
-  if (typeof unitOrConcsAmt === 'number' || unitOrConcsAmt == null) {
-    return newRecRent - (unitOrConcsAmt ?? 0);
-  }
-  const unit = unitOrConcsAmt;
-  const concUnit = (typeof CONCESSIONS_DATA !== 'undefined' ? CONCESSIONS_DATA : [])
-    ?.find(c => c.id === unit.commId)
-    ?.bedTypes.find(b => b.type === unit.bedType)
-    ?.units.find(u => u.id === unit.id);
-  const monthlyConcs = (concUnit?.allApplicableConcessions ?? [])
-    .filter(c => c.status === 'Active' && c.monthly);
-  const totalMonthly = monthlyConcs.reduce((s, c) => s + c.displayAmount, 0);
-  return Math.max(0, newRecRent - totalMonthly);
+function paceDot(pace) {
+  const cls = pace === 'ahead' ? 'pace-ahead' : pace === 'behind' ? 'pace-behind' : 'pace-ontrack';
+  return `<span class="pace-dot ${cls}" title="${pace}"></span>`;
 }
 
-function onPriceChange(rowKey, type, rawValue, rowLevel, parentKeys) {
-  const num = parseFloat(rawValue.replace(/[^0-9.\-]/g, ''));
-  if (isNaN(num)) {
-    if (priceOverrides[rowKey]) {
-      priceOverrides[rowKey][type === 'abs' ? 'absChange' : 'pctChange'] = null;
-    }
+function ratioBadge(ratio) {
+  let cls = 'ratio-balanced';
+  let title = 'Beds:seats balanced';
+  if (ratio < 0.92) { cls = 'ratio-underbed'; title = 'Under-bedded (more seats than beds)'; }
+  else if (ratio > 1.08) { cls = 'ratio-overbed'; title = 'Over-bedded (more beds than seats)'; }
+  return `<span class="ratio-badge ${cls}" title="${title}">B:S ${ratio.toFixed(2)}</span>`;
+}
+
+function lfPill(lf) {
+  const pct = Math.round(lf * 100);
+  let cls = 'lf-mid';
+  if (pct >= 75) cls = 'lf-high';
+  else if (pct < 50) cls = 'lf-low';
+  return `<span class="lf-pill ${cls}">${pct}%</span>`;
+}
+
+function deltaCell(delta) {
+  if (!delta) return `<span class="text-muted">$0</span>`;
+  const cls = delta > 0 ? 'delta-pos' : 'delta-neg';
+  const sign = delta > 0 ? '+' : '';
+  return `<span class="${cls}">${sign}${fmt$(delta)}</span>`;
+}
+
+function chevron(open) {
+  return `<svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" style="transform:${open ? 'rotate(90deg)' : 'none'};transition:transform .15s;"><polyline points="4,2 8,6 4,10"/></svg>`;
+}
+
+// Aggregate a destination across all its packages
+function aggregateDestination(dest) {
+  const all = dest.durations.flatMap(d => d.packages);
+  if (!all.length) return null;
+  const currentMargin = all.reduce((s, p) => s + getEffectiveMargin(p), 0) / all.length;
+  const recMargin     = all.reduce((s, p) => s + p.recMargin, 0) / all.length;
+  const totalCost     = all.reduce((s, p) => s + p.totalCost, 0) / all.length;
+  const lf            = all.reduce((s, p) => s + p.lf, 0) / all.length;
+  // Dominant pace: pick the worst (behind > on track > ahead)
+  const paceCount = { ahead: 0, 'on track': 0, behind: 0 };
+  all.forEach(p => paceCount[p.bookingPace]++);
+  let pace = 'on track';
+  if (paceCount.behind >= paceCount.ahead && paceCount.behind > 0) pace = 'behind';
+  else if (paceCount.ahead > paceCount.behind) pace = 'ahead';
+  return {
+    currentMargin,
+    recMargin,
+    deltaMargin: recMargin - currentMargin,
+    currentPrice: totalCost + currentMargin,
+    recPrice: totalCost + recMargin,
+    lf,
+    pace,
+    count: all.length,
+  };
+}
+
+function aggregateDuration(durationGroup) {
+  const packages = durationGroup.packages;
+  if (!packages.length) return null;
+  const currentMargin = packages.reduce((s, p) => s + getEffectiveMargin(p), 0) / packages.length;
+  const recMargin     = packages.reduce((s, p) => s + p.recMargin, 0) / packages.length;
+  const totalCost     = packages.reduce((s, p) => s + p.totalCost, 0) / packages.length;
+  const lf            = packages.reduce((s, p) => s + p.lf, 0) / packages.length;
+  return {
+    currentMargin,
+    recMargin,
+    deltaMargin: recMargin - currentMargin,
+    currentPrice: totalCost + currentMargin,
+    recPrice: totalCost + recMargin,
+    lf,
+    count: packages.length,
+  };
+}
+
+function getEffectiveMargin(pkg) {
+  return marginOverrides[pkg.id] != null ? marginOverrides[pkg.id] : pkg.currentMargin;
+}
+
+function getEffectivePrice(pkg) {
+  return pkg.totalCost + getEffectiveMargin(pkg);
+}
+
+// ── Table rendering ─────────────────────────────────────────
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const rows = [];
+
+  PACKAGE_DATA.forEach(dest => {
+    const isOpen = expandedDests.has(dest.id);
+    const agg = aggregateDestination(dest);
+
+    // Destination row
+    rows.push(`
+      <tr class="row-property" data-dest="${dest.id}" onclick="toggleDest('${dest.id}')" style="cursor:pointer;">
+        <td>
+          <button class="expand-btn ${isOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleDest('${dest.id}')">${chevron(isOpen)}</button>
+          <span style="font-weight:600;">${dest.name}</span>
+          ${regionBadge(dest.region)}
+          ${gatewayChip(dest.departureGateway)}
+          <span style="color:var(--text-muted);margin-left:8px;font-size:11px;">${dest.totalPackages} pkgs</span>
+        </td>
+        <td><span class="text-muted">${ratioBadge(dest.bedsToSeatsRatio)}</span></td>
+        <td class="text-muted" style="font-size:11px;">${dest.bedsBought.toLocaleString()} beds<br>${dest.seatsBought.toLocaleString()} seats</td>
+        <td class="text-right text-muted">${fmt$(agg.currentPrice - agg.currentMargin)}</td>
+        <td class="text-right">${fmt$(agg.currentMargin)}</td>
+        <td class="text-right highlight-teal">${fmt$(agg.recMargin)}</td>
+        <td class="text-right">${deltaCell(agg.deltaMargin)}</td>
+        <td class="text-right">${fmt$(agg.currentPrice)}</td>
+        <td class="text-right highlight-teal">${fmt$(agg.recPrice)}</td>
+        <td class="text-right">${lfPill(dest.loadFactor)}</td>
+        <td class="text-right text-muted">—</td>
+        <td class="text-right text-muted">—</td>
+        <td>${paceBadge(agg.pace)}</td>
+        <td></td>
+      </tr>
+    `);
+
+    if (!isOpen) return;
+
+    // Duration rows
+    dest.durations.forEach(durGroup => {
+      const durKey = `${dest.id}-${durGroup.duration}`;
+      const durOpen = expandedDurations.has(durKey);
+      const durAgg = aggregateDuration(durGroup);
+      if (!durAgg) return;
+
+      rows.push(`
+        <tr class="row-bedtype clickable" data-dest="${dest.id}" data-duration="${durGroup.duration}" onclick="toggleDuration('${durKey}')" style="cursor:pointer;">
+          <td>
+            <button class="expand-btn ${durOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleDuration('${durKey}')">${chevron(durOpen)}</button>
+            <span style="font-weight:500;">${durGroup.duration} Nights</span>
+            <span style="color:var(--text-muted);margin-left:8px;font-size:11px;">${durGroup.packages.length} pkgs</span>
+          </td>
+          <td class="text-muted">—</td>
+          <td class="text-muted">—</td>
+          <td class="text-right text-muted">${fmt$(durAgg.currentPrice - durAgg.currentMargin)}</td>
+          <td class="text-right">${fmt$(durAgg.currentMargin)}</td>
+          <td class="text-right highlight-teal">${fmt$(durAgg.recMargin)}</td>
+          <td class="text-right">${deltaCell(durAgg.deltaMargin)}</td>
+          <td class="text-right">${fmt$(durAgg.currentPrice)}</td>
+          <td class="text-right highlight-teal">${fmt$(durAgg.recPrice)}</td>
+          <td class="text-right">${lfPill(durAgg.lf)}</td>
+          <td class="text-right text-muted">—</td>
+          <td class="text-right text-muted">—</td>
+          <td></td>
+          <td></td>
+        </tr>
+      `);
+
+      if (!durOpen) return;
+
+      // Package rows (leaves)
+      durGroup.packages.forEach(pkg => {
+        const effMargin = getEffectiveMargin(pkg);
+        const effPrice  = pkg.totalCost + effMargin;
+        const effDelta  = pkg.recMargin - effMargin;
+
+        rows.push(`
+          <tr class="row-unit" data-pkg="${pkg.id}">
+            <td>
+              <span class="font-mono" style="font-size:11.5px;color:var(--text-secondary);">${pkg.id}</span>
+              ${pkg.locked ? '<svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--accent);margin-left:6px;vertical-align:middle;"><rect x="3" y="6" width="8" height="6" rx="1"/><path d="M5 6V4a2 2 0 0 1 4 0v2"/></svg>' : ''}
+            </td>
+            <td>
+              <div style="font-weight:500;">${pkg.hotel}</div>
+              <div style="font-size:11px;color:var(--text-muted);">${pkg.roomCategory}</div>
+            </td>
+            <td>
+              <div>${pkg.departureDate}</div>
+              <div class="font-mono" style="font-size:10.5px;color:var(--text-muted);">${pkg.flightNum}</div>
+            </td>
+            <td class="text-right font-mono">${fmt$(pkg.totalCost)}</td>
+            <td class="text-right">
+              <input class="margin-input" type="number" value="${effMargin}" data-pkg="${pkg.id}" onchange="updateMargin('${pkg.id}', this.value)" onclick="event.stopPropagation()" />
+            </td>
+            <td class="text-right">
+              <span class="rec-margin-cell" onclick="event.stopPropagation();acceptRec('${pkg.id}')" title="Click to accept">${fmt$(pkg.recMargin)}</span>
+            </td>
+            <td class="text-right">${deltaCell(effDelta)}</td>
+            <td class="text-right font-mono">${fmt$(effPrice)}</td>
+            <td class="text-right font-mono highlight-teal">${fmt$(pkg.recPrice)}</td>
+            <td class="text-right">${lfPill(pkg.lf)}</td>
+            <td class="text-right font-mono text-muted">${fmt$(pkg.competitor1Price)}</td>
+            <td class="text-right font-mono text-muted">${fmt$(pkg.competitor2Price)}</td>
+            <td>${paceBadge(pkg.bookingPace)}</td>
+            <td>
+              <span class="pkg-action-icons">
+                <button title="Booking curve" onclick="event.stopPropagation();openPackagePanel('${pkg.id}')">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="1,12 5,7 8,9 13,3"/><line x1="1" y1="13" x2="13" y2="13"/></svg>
+                </button>
+                <button title="Rules" onclick="event.stopPropagation();openPackageRules('${pkg.id}')">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="2"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2M2.5 2.5l1.4 1.4M10.1 10.1l1.4 1.4M2.5 11.5l1.4-1.4M10.1 3.9l1.4-1.4"/></svg>
+                </button>
+                <button class="${pkg.locked ? 'locked' : ''}" title="${pkg.locked ? 'Unlock price' : 'Lock price'}" onclick="event.stopPropagation();toggleLock('${pkg.id}')">
+                  ${pkg.locked
+                    ? '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="8" height="6" rx="1"/><path d="M5 6V4a2 2 0 0 1 4 0v2"/></svg>'
+                    : '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="8" height="6" rx="1"/><path d="M5 6V4a2 2 0 0 1 3.5-.8"/></svg>'}
+                </button>
+              </span>
+            </td>
+          </tr>
+        `);
+      });
+    });
+  });
+
+  tbody.innerHTML = rows.join('');
+}
+
+// ── Expand / collapse ──────────────────────────────────────
+function toggleDest(destId) {
+  if (expandedDests.has(destId)) {
+    expandedDests.delete(destId);
   } else {
-    if (!priceOverrides[rowKey]) priceOverrides[rowKey] = { absChange: null, pctChange: null };
-    if (type === 'abs') {
-      priceOverrides[rowKey].absChange = num;
-      priceOverrides[rowKey].pctChange = null;
-    } else {
-      priceOverrides[rowKey].pctChange = num;
-      priceOverrides[rowKey].absChange = null;
-    }
-    if (rowLevel === 'bedtype' || rowLevel === 'property') {
-      cascadeOverride(rowKey, rowLevel, num, type, parentKeys);
-    }
+    expandedDests.add(destId);
   }
-  renderTableInPlace();
-  checkSaveVisibility();
-}
-
-function checkSaveVisibility() {
-  const hasChanges = Object.values(priceOverrides).some(o => o.absChange != null || o.pctChange != null);
-  const btn = document.getElementById('saveBtn');
-  if (btn) btn.style.display = hasChanges ? 'inline-flex' : 'none';
-}
-
-function saveChanges() {
-  const changedCount = Object.keys(priceOverrides).filter(k => priceOverrides[k].absChange != null || priceOverrides[k].pctChange != null).length;
-  Object.keys(priceOverrides).forEach(k => delete priceOverrides[k]);
-  document.getElementById('saveBtn').style.display = 'none';
   renderTable();
-  showToast(changedCount + ' price change' + (changedCount !== 1 ? 's' : '') + ' saved successfully');
 }
 
-function showToast(message) {
-  const existing = document.getElementById('toast');
-  if (existing) existing.remove();
-  const el = document.createElement('div');
-  el.id = 'toast';
-  el.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1d23;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;border:1px solid var(--accent);box-shadow:0 8px 32px rgba(0,0,0,.18);z-index:9999;opacity:0;transition:opacity .2s;display:flex;align-items:center;gap:8px;';
-  el.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="2,7 5.5,10.5 12,3"/></svg>' + message;
-  document.body.appendChild(el);
-  requestAnimationFrame(() => { el.style.opacity = '1'; });
-  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 200); }, 2500);
-}
-
-function cascadeOverride(sourceKey, level, num, type, parentKeys) {
-  for (const prop of PRICING_DATA) {
-    if (level === 'property' && prop.id === sourceKey) {
-      for (const bt of prop.bedTypes) {
-        const btKey = prop.id + bt.type;
-        priceOverrides[btKey] = { absChange: type==='abs'?num:null, pctChange: type==='pct'?num:null, inherited: true };
-        for (const u of bt.units) {
-          priceOverrides[u.id] = { absChange: type==='abs'?num:null, pctChange: type==='pct'?num:null, inherited: true };
-        }
-      }
-    }
-    if (level === 'bedtype') {
-      for (const bt of prop.bedTypes) {
-        if (prop.id + bt.type === sourceKey) {
-          for (const u of bt.units) {
-            priceOverrides[u.id] = { absChange: type==='abs'?num:null, pctChange: type==='pct'?num:null, inherited: true };
-          }
-        }
-      }
-    }
+function toggleDuration(durKey) {
+  if (expandedDurations.has(durKey)) {
+    expandedDurations.delete(durKey);
+  } else {
+    expandedDurations.add(durKey);
   }
-}
-
-function renderTableInPlace() {
-  const wrap = document.getElementById('tableWrap');
-  const scrollTop = wrap.scrollTop;
   renderTable();
-  wrap.scrollTop = scrollTop;
 }
 
-// ── Nav menu ──────────────────────────────────────────────
+// ── Inline margin edit ─────────────────────────────────────
+function updateMargin(pkgId, value) {
+  const v = Number(value);
+  if (isNaN(v)) return;
+  marginOverrides[pkgId] = v;
+  renderTable();
+}
+
+function acceptRec(pkgId) {
+  const hit = getPackageById(pkgId);
+  if (!hit) return;
+  marginOverrides[pkgId] = hit.package.recMargin;
+  renderTable();
+}
+
+function toggleLock(pkgId) {
+  const hit = getPackageById(pkgId);
+  if (!hit) return;
+  hit.package.locked = !hit.package.locked;
+  renderTable();
+}
+
+// ── Stats bar ──────────────────────────────────────────────
+function renderStatsBar() {
+  const el = document.getElementById('pricingStatsBar');
+  const totalPkgs = PACKAGE_DATA.reduce((s, d) => s + d.totalPackages, 0);
+  const avgLoad = PACKAGE_DATA.reduce((s, d) => s + d.loadFactor, 0) / PACKAGE_DATA.length;
+  const allPkgs = PACKAGE_DATA.flatMap(d => d.durations.flatMap(g => g.packages));
+  const behind = allPkgs.filter(p => p.bookingPace === 'behind').length;
+  const ahead  = allPkgs.filter(p => p.bookingPace === 'ahead').length;
+  const totalDelta = allPkgs.reduce((s, p) => s + p.deltaMargin, 0);
+
+  el.innerHTML = `
+    <span style="font-weight:600;color:var(--text-primary);">${PACKAGE_DATA.length}</span>
+    <span style="color:var(--text-muted);">destinations</span>
+    <span style="color:var(--border-mid);">|</span>
+    <span style="font-weight:600;color:var(--text-primary);">${totalPkgs}</span>
+    <span style="color:var(--text-muted);">packages on sale</span>
+    <span style="color:var(--border-mid);">|</span>
+    <span style="color:var(--text-muted);">Avg load factor</span>
+    <span style="font-weight:600;">${Math.round(avgLoad * 100)}%</span>
+    <span style="color:var(--border-mid);">|</span>
+    <span style="color:var(--text-muted);">Pace</span>
+    <span class="pace-dot pace-ahead"></span><span>${ahead}</span>
+    <span class="pace-dot pace-behind" style="margin-left:6px;"></span><span>${behind}</span>
+    <span style="color:var(--border-mid);">|</span>
+    <span style="color:var(--text-muted);">Net margin uplift</span>
+    <span class="${totalDelta >= 0 ? 'delta-pos' : 'delta-neg'}" style="font-weight:600;">${totalDelta >= 0 ? '+' : ''}${fmt$(totalDelta)}</span>
+  `;
+}
+
+// ── Filter / menu stubs (wired fully in Part 4) ────────────
+function toggleFilter(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const open = el.classList.contains('open');
+  document.querySelectorAll('.ms-wrap.open').forEach(w => w.classList.remove('open'));
+  if (!open) el.classList.add('open');
+}
 function toggleMenu() {
   document.getElementById('navDropdown').classList.toggle('open');
 }
-document.addEventListener('click', e => {
-  if (!e.target.closest('.nav-menu-btn') && !e.target.closest('.nav-dropdown')) {
+function runEvaluation() { /* TODO */ }
+function publishChanges() { /* TODO */ }
+
+// ── Booking Curve / Competitor Price Panel ─────────────────
+let bookingCurveChart = null;
+let compPriceChart = null;
+let activePanelPkgId = null;
+
+const CHART_DARK_GRID = 'rgba(255,255,255,0.06)';
+const CHART_DARK_TICK = '#6b7280';
+
+function baseChartOptions(yLabel, yFormat) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#16181d',
+        borderColor: '#2a2d35',
+        borderWidth: 1,
+        titleColor: '#e5e7eb',
+        bodyColor: '#cbd5e1',
+        padding: 10,
+        callbacks: {
+          label: (ctx) => `${ctx.dataset.label}: ${yFormat ? yFormat(ctx.parsed.y) : ctx.parsed.y}`,
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: { color: CHART_DARK_GRID, drawBorder: false },
+        ticks: { color: CHART_DARK_TICK, font: { size: 10, family: 'DM Sans' } },
+      },
+      y: {
+        grid: { color: CHART_DARK_GRID, drawBorder: false },
+        ticks: {
+          color: CHART_DARK_TICK,
+          font: { size: 10, family: 'DM Sans' },
+          callback: (v) => yFormat ? yFormat(v) : v,
+        },
+        title: yLabel ? { display: true, text: yLabel, color: CHART_DARK_TICK, font: { size: 10 } } : undefined,
+      },
+    },
+  };
+}
+
+function renderBookingCurveChart(pkg) {
+  const { labels, target, actual } = makeBookingCurveData(pkg.lf);
+  const ctx = document.getElementById('bookingCurveChart').getContext('2d');
+  if (bookingCurveChart) bookingCurveChart.destroy();
+  bookingCurveChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Target',
+          data: target,
+          borderColor: '#9ca3af',
+          borderDash: [5, 4],
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          pointRadius: 0,
+          tension: 0.35,
+        },
+        {
+          label: 'Actual',
+          data: actual,
+          borderColor: '#e8007d',
+          backgroundColor: 'rgba(232, 0, 125, 0.12)',
+          borderWidth: 2.5,
+          pointRadius: 3,
+          pointBackgroundColor: '#e8007d',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 1,
+          fill: true,
+          tension: 0.35,
+        },
+      ],
+    },
+    options: baseChartOptions(null, (v) => v + '%'),
+  });
+}
+
+function renderCompPriceChart(pkg) {
+  const basePrice = getEffectivePrice(pkg);
+  // Override ours with flat current + rec for context, but use helper for comps
+  const { labels, ours, comp1, comp2 } = makeCompData(basePrice);
+  const ctx = document.getElementById('compPriceChart').getContext('2d');
+  if (compPriceChart) compPriceChart.destroy();
+  compPriceChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Sunwing',
+          data: ours,
+          borderColor: '#e8007d',
+          backgroundColor: 'rgba(232, 0, 125, 0.10)',
+          borderWidth: 2.5,
+          pointRadius: 0,
+          fill: true,
+          tension: 0.3,
+        },
+        {
+          label: 'Competitor 1',
+          data: comp1,
+          borderColor: '#60a5fa',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.3,
+        },
+        {
+          label: 'Competitor 2',
+          data: comp2,
+          borderColor: '#a78bfa',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.3,
+        },
+      ],
+    },
+    options: baseChartOptions(null, (v) => '$' + v),
+  });
+}
+
+function openPackagePanel(pkgId) {
+  const hit = getPackageById(pkgId);
+  if (!hit) return;
+  activePanelPkgId = pkgId;
+
+  const wrap = document.getElementById('exposureWrap');
+  wrap.style.display = 'block';
+  document.getElementById('exposurePanel').classList.remove('panel-closed');
+
+  document.getElementById('exposurePropName').textContent =
+    `${hit.destination.name} · ${hit.package.hotel} · ${hit.package.id}`;
+
+  // Render charts after the panel is visible so the canvas has layout
+  requestAnimationFrame(() => {
+    renderBookingCurveChart(hit.package);
+    renderCompPriceChart(hit.package);
+  });
+}
+
+function toggleExposure() {
+  const wrap = document.getElementById('exposureWrap');
+  if (wrap.style.display === 'none' || !wrap.style.display) {
+    if (activePanelPkgId) {
+      openPackagePanel(activePanelPkgId);
+    } else {
+      wrap.style.display = 'block';
+    }
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+// ── Rules drawer ───────────────────────────────────────────
+// packageRules[pkgId] = { minPrice, maxPrice, minMargin, maxMargin, lock, lastModified }
+const packageRules = {};
+let activeRulesPkgId = null;
+
+function getRulesFor(pkg) {
+  if (packageRules[pkg.id]) return packageRules[pkg.id];
+  // Sensible defaults centered on current values
+  return {
+    minPrice:  Math.round(pkg.totalCost + 40),
+    maxPrice:  Math.round(pkg.currentPrice + 220),
+    minMargin: 60,
+    maxMargin: Math.round(pkg.currentMargin + 180),
+    lock:      !!pkg.locked,
+    lastModified: null,
+  };
+}
+
+function openPackageRules(pkgId) {
+  const hit = getPackageById(pkgId);
+  if (!hit) return;
+  activeRulesPkgId = pkgId;
+  const rules = getRulesFor(hit.package);
+
+  document.getElementById('rulesPkgId').textContent = pkgId;
+  document.getElementById('rulesPkgHotel').textContent =
+    `${hit.package.hotel} · ${hit.package.roomCategory}`;
+  document.getElementById('ruleMinPrice').value  = rules.minPrice;
+  document.getElementById('ruleMaxPrice').value  = rules.maxPrice;
+  document.getElementById('ruleMinMargin').value = rules.minMargin;
+  document.getElementById('ruleMaxMargin').value = rules.maxMargin;
+  document.getElementById('ruleLockToggle').checked = rules.lock;
+  document.getElementById('rulesLastMod').textContent =
+    'Last modified: ' + (rules.lastModified || 'never');
+
+  document.getElementById('rulesDrawer').classList.add('open');
+}
+
+function toggleRulesDrawer() {
+  document.getElementById('rulesDrawer').classList.toggle('open');
+}
+
+function saveRules() {
+  if (!activeRulesPkgId) { toggleRulesDrawer(); return; }
+  const hit = getPackageById(activeRulesPkgId);
+  if (!hit) { toggleRulesDrawer(); return; }
+
+  const minPrice  = Number(document.getElementById('ruleMinPrice').value)  || 0;
+  const maxPrice  = Number(document.getElementById('ruleMaxPrice').value)  || 0;
+  const minMargin = Number(document.getElementById('ruleMinMargin').value) || 0;
+  const maxMargin = Number(document.getElementById('ruleMaxMargin').value) || 0;
+  const lock      = document.getElementById('ruleLockToggle').checked;
+
+  const now = new Date();
+  const stamp = now.toLocaleDateString('en-CA') + ' ' +
+                String(now.getHours()).padStart(2, '0') + ':' +
+                String(now.getMinutes()).padStart(2, '0');
+
+  packageRules[activeRulesPkgId] = {
+    minPrice, maxPrice, minMargin, maxMargin, lock,
+    lastModified: stamp,
+  };
+  hit.package.locked = lock;
+
+  document.getElementById('rulesLastMod').textContent = 'Last modified: ' + stamp;
+  document.getElementById('rulesDrawer').classList.remove('open');
+  renderTable();
+}
+
+// Close filter dropdowns on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.ms-wrap')) {
+    document.querySelectorAll('.ms-wrap.open').forEach(w => w.classList.remove('open'));
+  }
+  if (!e.target.closest('#menuBtn') && !e.target.closest('#navDropdown')) {
     document.getElementById('navDropdown').classList.remove('open');
   }
 });
 
-// ── Multi-Select Filters ──────────────────────────────────
-function buildMultiSelect(config) {
-  const wrap = document.createElement('div');
-  wrap.className = 'ms-wrap';
-  wrap.id = 'ms-' + config.id;
-  wrap.innerHTML = `
-    <button class="ms-trigger" onclick="toggleMs('${config.id}')">
-      <span class="ms-label">${config.defaultLabel}</span>
-      <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 1l4 4 4-4"/></svg>
-    </button>
-    <div class="ms-dropdown">
-      <div class="ms-search">
-        <input type="text" placeholder="Search..." oninput="filterMsOptions('${config.id}', this.value)">
-      </div>
-      <div class="ms-options">
-        <label class="ms-option ms-all">
-          <input type="checkbox" value="__all__" checked onchange="toggleMsAll('${config.id}', this)"> All
-        </label>
-        ${config.items.map(item => `<label class="ms-option"><input type="checkbox" value="${item}" onchange="onMsChange('${config.id}')"> ${item}</label>`).join('')}
-      </div>
-    </div>
-  `;
-  return wrap;
-}
-
-function toggleMs(id) {
-  document.querySelectorAll('.ms-wrap').forEach(w => {
-    if (w.id !== 'ms-' + id) w.classList.remove('open');
-  });
-  document.getElementById('ms-' + id).classList.toggle('open');
-  const el = document.getElementById('availRangePicker');
-  if (el) el.classList.remove('open');
-}
-
-function filterMsOptions(id, query) {
-  const opts = document.querySelectorAll('#ms-' + id + ' .ms-option:not(.ms-all)');
-  const q = query.toLowerCase();
-  opts.forEach(o => { o.style.display = o.textContent.toLowerCase().includes(q) ? '' : 'none'; });
-}
-
-function toggleMsAll(id, allCb) {
-  const cbs = document.querySelectorAll('#ms-' + id + ' .ms-option:not(.ms-all) input');
-  cbs.forEach(cb => cb.checked = false);
-  allCb.checked = true;
-  onMsChange(id);
-  saveFilterState(); updateClearBtn();
-}
-
-function onMsChange(id) {
-  const wrap = document.getElementById('ms-' + id);
-  const allCb = wrap.querySelector('.ms-all input');
-  const cbs = wrap.querySelectorAll('.ms-option:not(.ms-all) input');
-  const checked = [...cbs].filter(c => c.checked);
-  if (checked.length === 0) { allCb.checked = true; }
-  else { allCb.checked = false; }
-  updateMsLabel(id);
-  saveFilterState(); updateClearBtn();
-  renderTable();
-}
-
-function getMsValues(id) {
-  const wrap = document.getElementById('ms-' + id);
-  const allCb = wrap.querySelector('.ms-all input');
-  if (allCb.checked) return [];
-  return [...wrap.querySelectorAll('.ms-option:not(.ms-all) input:checked')].map(c => c.value);
-}
-
-function updateMsLabel(id) {
-  const wrap = document.getElementById('ms-' + id);
-  const label = wrap.querySelector('.ms-label');
-  const trigger = wrap.querySelector('.ms-trigger');
-  const defaultLabel = trigger.dataset.default;
-  const vals = getMsValues(id);
-  if (vals.length === 0) { label.textContent = defaultLabel; }
-  else if (vals.length === 1) { label.textContent = vals[0]; }
-  else if (vals.length === 2) { label.textContent = vals.join(', '); }
-  else {
-    const noun = defaultLabel.replace('All ', '');
-    label.textContent = vals.length + ' ' + noun;
-  }
-}
-
-function saveFilterState() {
-  const state = {};
-  ['state','metro','community','rm','cd'].forEach(id => { state[id] = getMsValues(id); });
-  localStorage.setItem('smartrents_filters', JSON.stringify(state));
-}
-
-function restoreFilterState() {
-  try {
-    const saved = localStorage.getItem('smartrents_filters');
-    if (!saved) return;
-    const st = JSON.parse(saved);
-    ['state','metro','community','rm','cd'].forEach(filterId => {
-      const values = st[filterId];
-      if (!values || !values.length) return;
-      const wrap = document.getElementById('ms-' + filterId);
-      if (!wrap) return;
-      wrap.querySelectorAll('.ms-options input[type="checkbox"]').forEach(cb => {
-        if (cb.value === '__all__') return;
-        cb.checked = values.includes(cb.value);
-      });
-      const allCb = wrap.querySelector('input[value="__all__"]');
-      if (allCb) allCb.checked = false;
-      updateMsLabel(filterId);
-    });
-  } catch(e) { console.warn('Could not restore filters:', e); }
-}
-
-function clearAllFilters() {
-  ['state','metro','community','rm','cd'].forEach(filterId => {
-    const wrap = document.getElementById('ms-' + filterId);
-    if (!wrap) return;
-    wrap.querySelectorAll('.ms-options input').forEach(cb => cb.checked = false);
-    const allCb = wrap.querySelector('input[value="__all__"]');
-    if (allCb) allCb.checked = true;
-    updateMsLabel(filterId);
-  });
-  localStorage.removeItem('smartrents_filters');
-  const btn = document.getElementById('clearFiltersBtn');
-  if (btn) btn.style.display = 'none';
-  renderPage();
-}
-
-function updateClearBtn() {
-  const hasFilters = ['state','metro','community','rm','cd'].some(id => getMsValues(id).length > 0);
-  const btn = document.getElementById('clearFiltersBtn');
-  if (btn) btn.style.display = hasFilters ? 'inline-block' : 'none';
-}
-
-function renderPage() { renderTable(); }
-
-function populateFilters() {
-  const bar = document.getElementById('filterBar');
-  bar.innerHTML = '';
-  const configs = [
-    { id: 'state', defaultLabel: 'All States', items: ['Texas','Florida','Georgia','North Carolina','Virginia','Arizona','Colorado'] },
-    { id: 'metro', defaultLabel: 'All Metros', items: [...new Set(COMMUNITIES.map(c => c.metro))] },
-    { id: 'community', defaultLabel: 'All Communities', items: COMMUNITIES.map(c => c.name) },
-    { id: 'rm', defaultLabel: 'All Revenue Managers', items: [...new Set(COMMUNITIES.map(c => c.rm))] },
-    { id: 'cd', defaultLabel: 'All Community Directors', items: [...new Set(COMMUNITIES.map(c => c.cd))] },
-  ];
-  configs.forEach(cfg => {
-    const el = buildMultiSelect(cfg);
-    el.querySelector('.ms-trigger').dataset.default = cfg.defaultLabel;
-    bar.appendChild(el);
-  });
-  // Add clear filters button
-  const clearBtn = document.createElement('button');
-  clearBtn.id = 'clearFiltersBtn';
-  clearBtn.onclick = clearAllFilters;
-  clearBtn.style.cssText = 'display:none;background:none;border:none;color:#6b7280;font-family:DM Sans,sans-serif;font-size:11.5px;cursor:pointer;padding:0 8px;text-decoration:underline;text-underline-offset:2px;white-space:nowrap;';
-  clearBtn.textContent = 'Clear filters';
-  bar.appendChild(clearBtn);
-  // Availability date range button
-  const arBtn = document.createElement('div');
-  arBtn.className = 'ms-wrap';
-  arBtn.id = 'ms-availRange';
-  arBtn.innerHTML = `
-    <button class="ms-trigger avail-range-btn" id="availRangeBtn" onclick="openAvailRange(this)">
-      <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="12" height="11" rx="1.5"/><line x1="1" y1="6" x2="13" y2="6"/><line x1="4" y1="1" x2="4" y2="3"/><line x1="10" y1="1" x2="10" y2="3"/></svg>
-      <span class="ms-label" id="availRangeLabel">Availability</span>
-      <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 1l4 4 4-4"/></svg>
-    </button>
-  `;
-  bar.appendChild(arBtn);
-}
-
-// Close all multi-selects and avail range on outside click
-document.addEventListener('click', e => {
-  if (!e.target.closest('.ms-wrap') && !e.target.closest('.avail-range-picker')) {
-    document.querySelectorAll('.ms-wrap').forEach(w => w.classList.remove('open'));
-    const arp = document.getElementById('availRangePicker');
-    if (arp) arp.classList.remove('open');
-  }
-});
-
-// ── Availability Date Range ──────────────────────────────
-let availRangeStart = null;
-let availRangeEnd = null;
-let arYear, arMonth;
-
-function openAvailRange(btn) {
-  document.querySelectorAll('.ms-wrap').forEach(w => w.classList.remove('open'));
-  const picker = document.getElementById('availRangePicker');
-  if (picker.classList.contains('open')) { picker.classList.remove('open'); return; }
-  const rect = btn.getBoundingClientRect();
-  picker.style.top = (rect.bottom + 4) + 'px';
-  picker.style.right = (window.innerWidth - rect.right) + 'px';
-  picker.style.left = 'auto';
-  const now = new Date();
-  arYear = now.getFullYear();
-  arMonth = now.getMonth();
-  renderAvailRange();
-  picker.classList.add('open');
-}
-
-function renderAvailRange() {
-  const mn = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const m2y = arMonth + 1 > 11 ? arYear + 1 : arYear;
-  const m2m = (arMonth + 1) % 12;
-  document.getElementById('arMonth1Label').textContent = mn[arMonth] + ' ' + arYear;
-  document.getElementById('arMonth2Label').textContent = mn[m2m] + ' ' + m2y;
-  document.getElementById('arCal1').innerHTML = buildCalGrid(arYear, arMonth);
-  document.getElementById('arCal2').innerHTML = buildCalGrid(m2y, m2m);
-  const smn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  if (availRangeStart && availRangeEnd) {
-    const s = availRangeStart, e = availRangeEnd;
-    document.getElementById('arRangeText').textContent = smn[s.getMonth()] + ' ' + s.getDate() + ', ' + s.getFullYear() + ' \u2192 ' + smn[e.getMonth()] + ' ' + e.getDate() + ', ' + e.getFullYear();
-  } else if (availRangeStart) {
-    const s = availRangeStart;
-    document.getElementById('arRangeText').textContent = smn[s.getMonth()] + ' ' + s.getDate() + ', ' + s.getFullYear() + ' \u2192 Select end date';
-  } else {
-    document.getElementById('arRangeText').textContent = 'Select start date';
-  }
-}
-
-function buildCalGrid(yr, mo) {
-  const firstDay = new Date(yr, mo, 1).getDay();
-  const dim = new Date(yr, mo + 1, 0).getDate();
-  const today = new Date(); today.setHours(0,0,0,0);
-  let html = '';
-  for (let i = 0; i < firstDay; i++) html += '<span class="ar-day empty"></span>';
-  for (let d = 1; d <= dim; d++) {
-    const dt = new Date(yr, mo, d);
-    let cls = 'ar-day';
-    if (dt.getTime() === today.getTime()) cls += ' today';
-    if (availRangeStart && dt.getTime() === availRangeStart.getTime()) cls += ' range-start';
-    if (availRangeEnd && dt.getTime() === availRangeEnd.getTime()) cls += ' range-end';
-    if (availRangeStart && availRangeEnd && dt > availRangeStart && dt < availRangeEnd) cls += ' in-range';
-    html += `<span class="${cls}" onclick="pickAvailDay(${yr},${mo},${d})">${d}</span>`;
-  }
-  return html;
-}
-
-function pickAvailDay(yr, mo, d) {
-  const dt = new Date(yr, mo, d);
-  if (!availRangeStart || availRangeEnd) {
-    availRangeStart = dt;
-    availRangeEnd = null;
-  } else {
-    if (dt < availRangeStart) { availRangeEnd = availRangeStart; availRangeStart = dt; }
-    else { availRangeEnd = dt; }
-  }
-  renderAvailRange();
-}
-
-function arNav(dir) {
-  arMonth += dir;
-  if (arMonth > 11) { arMonth = 0; arYear++; }
-  if (arMonth < 0) { arMonth = 11; arYear--; }
-  renderAvailRange();
-}
-
-function applyAvailRange() {
-  document.getElementById('availRangePicker').classList.remove('open');
-  const smn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  if (availRangeStart && availRangeEnd) {
-    document.getElementById('availRangeLabel').textContent = smn[availRangeStart.getMonth()] + ' ' + availRangeStart.getDate() + ' \u2013 ' + smn[availRangeEnd.getMonth()] + ' ' + availRangeEnd.getDate();
-  }
-  renderTable();
-}
-
-function clearAvailRange() {
-  availRangeStart = null;
-  availRangeEnd = null;
-  document.getElementById('availRangeLabel').textContent = 'Availability';
-  renderAvailRange();
-  renderTable();
-}
-
-// ── Input Formatting ──────────────────────────────────────
-function handleAbsInput(input, rowKey, rowLevel, parentKeys) {
-  let raw = input.value.replace(/[^0-9.\-]/g, '');
-  onPriceChange(rowKey, 'abs', raw, rowLevel, parentKeys);
-}
-
-function handlePctInput(input, rowKey, rowLevel, parentKeys) {
-  let raw = input.value.replace(/[^0-9.\-]/g, '');
-  onPriceChange(rowKey, 'pct', raw, rowLevel, parentKeys);
-}
-
-function applyDollarFormat(input) {
-  const val = parseFloat(input.value.replace(/[^0-9.\-]/g, ''));
-  input.value = isNaN(val) ? '' : '$' + val;
-}
-function applyPctFormat(input) {
-  const val = parseFloat(input.value.replace(/[^0-9.\-]/g, ''));
-  input.value = isNaN(val) ? '' : val + '%';
-}
-
-// ── Stats Bar ─────────────────────────────────────────────
-function renderStatsBar(filteredData) {
-  const allUnits = filteredData.flatMap(c => c.bedTypes.flatMap(bt => bt.units));
-  const availUnits = allUnits.filter(u => u.status === 'vacant' || u.status === 'on notice');
-
-  const avgVacantExp = filteredData.length > 0
-    ? (filteredData.reduce((s,c) => s + parseFloat(c.availPct), 0) / filteredData.length).toFixed(1)
-    : '0';
-  const avgExp30 = (parseFloat(avgVacantExp) * 1.4).toFixed(1);
-  const avgExp60 = (parseFloat(avgVacantExp) * 2.1).toFixed(1);
-
-  const concData = typeof CONCESSIONS_DATA !== 'undefined' ? CONCESSIONS_DATA : [];
-  const concUnitIds = new Set(
-    concData.flatMap(c => c.allUnits ?? []).filter(u => u.hasConcession).map(u => u.id)
-  );
-  const concssedCount = availUnits.filter(u => concUnitIds.has(u.id)).length;
-  const concssedPct = availUnits.length > 0
-    ? (concssedCount / availUnits.length * 100).toFixed(1)
-    : '0';
-
-  const concUnits = concData.flatMap(c => c.allUnits ?? []).filter(u => u.hasConcession && u.concPctOfRent > 0);
-  const avgConcPct = concUnits.length > 0
-    ? (concUnits.reduce((s,u) => s + u.concPctOfRent, 0) / concUnits.length).toFixed(1)
-    : '0';
-
-  const overrideCount = Object.keys(priceOverrides).filter(k =>
-    priceOverrides[k].absChange != null || priceOverrides[k].pctChange != null
-  ).length;
-  const overridePct = availUnits.length > 0
-    ? (overrideCount / availUnits.length * 100).toFixed(1)
-    : '0';
-
-  const avgRecRent = availUnits.length > 0
-    ? availUnits.reduce((s,u) => s + (u.recRent ?? 0), 0) / availUnits.length
-    : 0;
-  const avgPriorRent = availUnits.length > 0
-    ? availUnits.reduce((s,u) => s + (u.priorRent ?? 0), 0) / availUnits.length
-    : 0;
-  const yoyChange = avgPriorRent > 0
-    ? ((avgRecRent - avgPriorRent) / avgPriorRent * 100).toFixed(1)
-    : '0';
-
-  const stats = [
-    { label: 'Vacant Exp.', value: avgVacantExp + '%', color: 'var(--text-primary)' },
-    { label: '30-Day Exp.', value: avgExp30 + '%', color: 'var(--text-primary)' },
-    { label: '60-Day Exp.', value: avgExp60 + '%', color: 'var(--text-primary)' },
-    { label: 'Concessed Units', value: concssedPct + '%', color: parseFloat(concssedPct) > 30 ? '#f5a623' : 'var(--text-primary)' },
-    { label: 'Avg. Conc.', value: avgConcPct + '% of rent', color: 'var(--text-primary)' },
-    { label: 'Price Overrides', value: overridePct + '%', color: parseFloat(overridePct) > 0 ? 'var(--accent)' : 'var(--text-muted)' },
-    { label: 'YoY Net Eff.', value: (parseFloat(yoyChange) > 0 ? '+' : '') + yoyChange + '%', color: parseFloat(yoyChange) >= 0 ? '#15803d' : '#e05252' },
-  ];
-
-  const el = document.getElementById('pricingStatsBar');
-  if (!el) return;
-  el.innerHTML = stats.map((s, i) => `
-    ${i > 0 ? '<div style="width:1px;height:24px;background:var(--border);flex-shrink:0;"></div>' : ''}
-    <div style="display:flex;flex-direction:column;align-items:center;padding:0 12px;flex-shrink:0;">
-      <div style="font-size:10px;color:var(--text-muted);white-space:nowrap;margin-bottom:1px;">${s.label}</div>
-      <div style="font-size:13px;font-weight:700;color:${s.color};white-space:nowrap;">${s.value}</div>
-    </div>
-  `).join('');
-}
-
-// ── Class Badge ───────────────────────────────────────────
-function classBadge(cls) {
-  const safeCls = (cls === 'A' || cls === 'B') ? cls : 'B';
-  const config = {
-    A: { bg: 'rgba(245,158,11,0.12)', color: '#92400e', border: 'rgba(245,158,11,0.3)' },
-    B: { bg: 'rgba(100,116,139,0.1)', color: '#475569', border: 'rgba(100,116,139,0.25)' },
-  };
-  const c = config[safeCls];
-  return `<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;font-size:10px;font-weight:800;background:${c.bg};color:${c.color};border:1px solid ${c.border};flex-shrink:0;">${safeCls}</span>`;
-}
-
-// ── Table Rendering ───────────────────────────────────────
-function fmt(n) { return n != null ? '$' + n.toLocaleString() : ''; }
-function fmtPct(n) { return n != null ? (n > 0 ? '+' : '') + n + '%' : ''; }
-
-function alertBell(alerts) {
-  if (!alerts || alerts.length === 0) return '';
-  const alertsJson = JSON.stringify(alerts).replace(/"/g, '&quot;');
-  const badge = alerts.length > 1 ? `<span style="position:absolute;top:-4px;right:-6px;background:#f5a623;color:#fff;font-size:8px;font-weight:700;border-radius:8px;min-width:14px;height:14px;display:flex;align-items:center;justify-content:center;padding:0 3px;line-height:1;">${alerts.length}</span>` : '';
-  return `<div style="position:relative;display:inline-flex;"><button class="alert-bell" title="Alerts" onclick="showAlerts(event, ${alertsJson})" style="background:none;border:none;cursor:pointer;padding:0;display:inline-flex;align-items:center;">
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#f5a623" stroke-width="1.5" stroke-linecap="round"><path d="M8 2a5 5 0 0 1 5 5c0 3.5 1.5 4.5 1.5 4.5h-13S3 10.5 3 7a5 5 0 0 1 5-5z"/><line x1="6.5" y1="14" x2="9.5" y2="14"/></svg>
-  </button>${badge}</div>`;
-}
-
-function noteCell(id, note) {
-  if (!note) {
-    return `<button class="add-concs-btn" onclick="openNoteModal('${id}', null)"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><line x1="7" y1="5" x2="7" y2="9"/><line x1="5" y1="7" x2="9" y2="7"/></svg>Add</button>`;
-  }
-  const noteJson = JSON.stringify(note).replace(/"/g, '&quot;');
-  return `<button title="${note.text}" onclick="openNoteModal('${id}', ${noteJson})" style="background:none;border:none;cursor:pointer;color:var(--accent);display:inline-flex;align-items:center;padding:0;">
-    <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="10" height="12" rx="1.5"/><line x1="4.5" y1="4.5" x2="9.5" y2="4.5"/><line x1="4.5" y1="7" x2="9.5" y2="7"/><line x1="4.5" y1="9.5" x2="7" y2="9.5"/></svg>
-  </button>`;
-}
-
-function renderTable() {
-  const tb = document.getElementById('tableBody');
-  tb.innerHTML = '';
-
-  const stateF = getMsValues('state');
-  const metroF = getMsValues('metro');
-  const commF = getMsValues('community');
-  const rmF = getMsValues('rm');
-  const cdF = getMsValues('cd');
-  const unitIdQuery = document.getElementById('unitIdSearch')?.value.trim().toLowerCase() ?? '';
-
-  const classFilter = ['A','B'].filter(cl => document.getElementById('class'+cl)?.checked);
-
-  let data = PRICING_DATA.filter(c => {
-    if (stateF.length && !stateF.includes(c.state)) return false;
-    if (metroF.length && !metroF.includes(c.metro)) return false;
-    if (commF.length && !commF.includes(c.name)) return false;
-    if (rmF.length && !rmF.includes(c.rm)) return false;
-    if (cdF.length && !cdF.includes(c.cd)) return false;
-    if (classFilter.length && !classFilter.includes(c.class)) return false;
-    return true;
-  });
-
-  // If unit ID search is active, auto-expand matching trees and filter
-  if (unitIdQuery) {
-    data = data.filter(prop => {
-      let hasMatch = false;
-      for (const bt of prop.bedTypes) {
-        const btKey = prop.id + bt.type;
-        for (const u of bt.units) {
-          if (u.id.toLowerCase().includes(unitIdQuery)) {
-            hasMatch = true;
-            expandedProperties.add(prop.id);
-            expandedBedTypes[btKey] = true;
-          }
-        }
-      }
-      return hasMatch;
-    });
-  }
-
-  data.forEach(prop => {
-    const propOpen = expandedProperties.has(prop.id);
-
-    // Property row
-    const tr = document.createElement('tr');
-    tr.className = 'row-property';
-    tr.innerHTML = `
-      <td>
-        <button class="expand-btn ${propOpen ? 'open' : ''}" onclick="toggleProp('${prop.id}')">
-          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="4,2 8,6 4,10"/></svg>
-        </button>
-        ${classBadge(prop.class ?? COMMUNITIES.find(c => c.id === prop.id)?.class ?? 'B')}
-        <strong style="margin-left:6px;">${prop.name}</strong>
-        <button onclick="openCommAttrModal('${prop.id}')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);display:inline-flex;align-items:center;padding:0 4px;vertical-align:middle;" title="View community attributes">
-          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><line x1="7" y1="6" x2="7" y2="10"/><circle cx="7" cy="4.5" r=".6" fill="currentColor"/></svg>
-        </button>
-        <span style="font-size:11px;color:var(--text-muted);margin-left:6px;">${Math.round(prop.totalUnits * prop.availPct / 100)}/${prop.totalUnits}</span>
-      </td>
-      <td>
-        <span class="avail-pct" style="cursor:pointer;text-decoration:underline;" onclick="event.stopPropagation();toggleExposureForProp('${prop.id}','${prop.name.replace(/'/g,"\\'")}',${prop.bedTypes[0].recRent})">
-          ${prop.availPct}%${parseFloat(prop.availPct) > 5.0 ? ' <span class="warn-icon">⚠</span>' : ''}
-        </span>
-      </td>
-      <td style="text-align:center"></td><td></td><td></td><td></td>
-      <td>${alertBell(prop.alerts)}</td>
-      <td></td><td></td><td></td><td></td><td></td>
-      <td class="price-change-abs" style="padding-left:8px;padding-right:4px;"><input class="price-input" type="text" value="${priceOverrides[prop.id]?.absChange!=null?priceOverrides[prop.id].absChange:''}" placeholder="$" oninput="this.value=this.value.replace(/[^0-9.-]/g,'')" onkeydown="if(event.key==='Enter'){applyDollarFormat(this);handleAbsInput(this,'${prop.id}','property',{});this.blur();}" onblur="applyDollarFormat(this)"></td>
-      <td class="price-change-pct" style="padding-left:4px;padding-right:8px;"><input class="price-input" type="text" value="${priceOverrides[prop.id]?.pctChange!=null?priceOverrides[prop.id].pctChange:''}" placeholder="%" oninput="this.value=this.value.replace(/[^0-9.-]/g,'')" onkeydown="if(event.key==='Enter'){applyPctFormat(this);handlePctInput(this,'${prop.id}','property',{});this.blur();}" onblur="applyPctFormat(this)"></td>
-      <td></td><td></td><td></td>
-      <td>${(()=>{const cc=typeof CONCESSIONS_DATA!=='undefined'?CONCESSIONS_DATA.find(c=>c.id===prop.id):null;const ac=(cc?.commConcessions?.filter(c=>c.status==='Active').length??0)+(cc?.bedTypes?.reduce((s,bt)=>s+bt.btConcessions.filter(c=>c.status==='Active').length,0)??0);return ac>0?`<button onclick="openConcInfoModal('community','${prop.id}',null,null)" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:12px;font-weight:500;text-decoration:underline;text-underline-offset:2px;padding:0;">${ac} active</button>`:'<span style="color:var(--text-muted);font-size:12px;">\u2014</span>';})()}</td>
-      <td></td>
-    `;
-    tb.appendChild(tr);
-
-    if (!propOpen) return;
-
-    // Bed type rows
-    prop.bedTypes.forEach(bt => {
-      const btKey = prop.id + bt.type;
-      const btOpen = expandedBedTypes[btKey];
-
-      const btr = document.createElement('tr');
-      btr.className = 'row-bedtype';
-      btr.innerHTML = `
-        <td>
-          <button class="expand-btn ${btOpen ? 'open' : ''}" onclick="toggleBedType('${btKey}')">
-            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="4,2 8,6 4,10"/></svg>
-          </button>
-          ${bt.type}
-          <span style="font-size:11px;color:var(--text-muted);margin-left:6px;">${Math.round(bt.totalUnits * bt.availPct / 100)}/${bt.totalUnits}</span>
-        </td>
-        <td><span class="avail-pct" style="cursor:pointer;text-decoration:underline;" onclick="event.stopPropagation();toggleExposureForProp('${btKey}','${prop.name.replace(/'/g,"\\'")} &middot; ${bt.type}',${bt.recRent})">${bt.availPct}%${parseFloat(bt.availPct) > 5.0 ? ' <span class="warn-icon">⚠</span>' : ''}</span></td>
-        <td style="text-align:center"></td><td></td><td></td><td></td>
-        <td>${alertBell(bt.alerts)}</td>
-        <td></td>
-        <td style="text-align:right;color:var(--text-secondary);font-size:12px;">${(()=>{const arr=(bt.units??[]).map(u=>u.anchorPrice).filter(p=>p!=null);return arr.length>0?'$'+Math.round(arr.reduce((s,p)=>s+p,0)/arr.length).toLocaleString():'\u2014';})()}</td>
-        <td>${fmt(bt.priorPeriodPrice)}</td>
-        <td>${fmt(computeRecRent(bt.recRent, btKey))}</td>
-        <td>${fmtPct(computeDelta(computeRecRent(bt.recRent, btKey), bt.priorPeriodPrice))}</td>
-        <td class="price-change-abs" style="padding-left:8px;padding-right:4px;"><input class="price-input" type="text" value="${priceOverrides[btKey]?.absChange!=null?priceOverrides[btKey].absChange:''}" placeholder="$" oninput="this.value=this.value.replace(/[^0-9.-]/g,'')" onkeydown="if(event.key==='Enter'){applyDollarFormat(this);handleAbsInput(this,'${btKey}','bedtype',{propId:'${prop.id}'});this.blur();}" onblur="applyDollarFormat(this)"></td>
-        <td class="price-change-pct" style="padding-left:4px;padding-right:8px;"><input class="price-input" type="text" value="${priceOverrides[btKey]?.pctChange!=null?priceOverrides[btKey].pctChange:''}" placeholder="%" oninput="this.value=this.value.replace(/[^0-9.-]/g,'')" onkeydown="if(event.key==='Enter'){applyPctFormat(this);handlePctInput(this,'${btKey}','bedtype',{propId:'${prop.id}'});this.blur();}" onblur="applyPctFormat(this)"></td>
-        <td></td><td></td><td>${fmt(computeNetEff(computeRecRent(bt.recRent, btKey), bt.concsAmt))}</td>
-        <td>
-          ${(()=>{const cc=typeof CONCESSIONS_DATA!=='undefined'?CONCESSIONS_DATA.find(c=>c.id===prop.id):null;const abc=[...(cc?.commConcessions??[]),...(cc?.bedTypes.find(b=>b.type===bt.type)?.btConcessions??[])].filter(c=>c.status==='Active');return abc.length>0?`<button onclick="openConcInfoModal('bedtype','${prop.id}','${bt.type}',null)" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:12px;font-weight:500;text-decoration:underline;text-underline-offset:2px;padding:0;">${abc.length} active</button>`:'<span style="color:var(--text-muted);font-size:12px;">\u2014</span>';})()}
-        </td>
-        <td>${noteCell(btKey, bt.note)}</td>
-      `;
-      tb.appendChild(btr);
-
-      if (!btOpen) return;
-
-      const sorted = [...bt.units].sort((a, b) => {
-        if (!a.availDate) return 1;
-        if (!b.availDate) return -1;
-        return new Date(a.availDate) - new Date(b.availDate);
-      });
-
-      const rcFilter = getSelectedRcFilters();
-      const floorplanF = document.getElementById('floorplanFilter')?.value;
-      const filteredUnits = sorted.filter(unit => {
-        if (unitIdQuery && !unit.id.toLowerCase().includes(unitIdQuery)) return false;
-        if (availRangeStart && availRangeEnd && unit.availDate) {
-          const parts = unit.availDate.split('/');
-          const ud = new Date(2000 + parseInt(parts[2]), parseInt(parts[0]) - 1, parseInt(parts[1]));
-          if (ud < availRangeStart || ud > availRangeEnd) return false;
-        }
-        if (rcFilter.length > 0 && !rcFilter.includes(unit.rcStatus ?? 'null')) return false;
-        if (floorplanF && unit.floorplan !== floorplanF) return false;
-        return true;
-      });
-
-      filteredUnits.forEach(unit => {
-        const utr = document.createElement('tr');
-        utr.className = 'row-unit';
-        const statusCfg = { vacant: { label: 'VC', bg: '#f87171', color: '#fff' }, 'on notice': { label: 'ON', bg: '#94a3b8', color: '#fff' } };
-        const sCfg = statusCfg[unit.status] || statusCfg.vacant;
-        const statusBadge = `<span style="display:inline-flex;align-items:center;justify-content:center;background:${sCfg.bg};color:${sCfg.color};font-size:9px;font-weight:700;letter-spacing:.03em;border-radius:3px;padding:1px 4px;min-width:20px;">${sCfg.label}</span>`;
-        const rcLink = unit.rcStatus && ['RC','AF','HA'].includes(unit.rcStatus)
-          ? `<a href="rent-control.html?tab=management&commId=${prop.id}&bedType=${encodeURIComponent(bt.type)}&unitId=${encodeURIComponent(unit.id)}" title="Configure rent control for this unit" style="display:inline-flex;align-items:center;margin-left:4px;color:var(--text-muted);text-decoration:none;vertical-align:middle;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'"><svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2H3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8"/><polyline points="9,1 13,1 13,5"/><line x1="7" y1="7" x2="13" y2="1"/></svg></a>`
-          : '';
-        const rcBadge = unit.rcStatus && rcConfig[unit.rcStatus]
-          ? `<span style="display:inline-flex;align-items:center;justify-content:center;background:${rcConfig[unit.rcStatus].bg};color:${rcConfig[unit.rcStatus].color};font-size:9px;font-weight:700;letter-spacing:.03em;border-radius:3px;padding:1px 4px;min-width:20px;">${unit.rcStatus}</span>${rcLink}`
-          : '';
-        const ov = priceOverrides[unit.id];
-        const hasOverride = ov && (ov.absChange != null || ov.pctChange != null);
-        const effRec = computeRecRent(unit.recRent, unit.id);
-        const effDelta = hasOverride ? computeDelta(effRec, unit.priorPeriodPrice) : unit.deltaPrior;
-        const effNetEff = computeNetEff(effRec, {commId: prop.id, bedType: bt.type, id: unit.id});
-        const isInherited = ov?.inherited === true;
-        const deltaClass = hasOverride ? (parseFloat(effDelta) >= 0 ? 'delta-pos' : 'delta-neg') : '';
-        const recRentCell = unit.recRent
-          ? (hasOverride
-            ? `<span style="background:rgba(232,0,125,0.08);border-radius:3px;padding:2px 4px;display:inline-block;">
-                <a href="javascript:void(0)" onclick="openUnitPricingPanel(this)" data-prior="${unit.priorRent||0}" data-rec="${effRec}" data-id="${unit.id}" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${fmt(effRec)}</a>
-                ${isInherited ? '<svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="vertical-align:middle;margin-left:2px;" title="Inherited from parent"><path d="M5 9a3 3 0 0 0 4 0l2-2a3 3 0 0 0-4-4L6 4"/><path d="M9 5a3 3 0 0 0-4 0L3 7a3 3 0 0 0 4 4l1-1"/></svg>' : ''}
-                <span style="text-decoration:line-through;color:var(--text-muted);font-size:10.5px;display:block;">${fmt(unit.recRent)}</span>
-              </span>`
-            : `<a href="javascript:void(0)" onclick="openUnitPricingPanel(this)" data-prior="${unit.priorRent||0}" data-rec="${unit.recRent}" data-id="${unit.id}" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${fmt(unit.recRent)}</a>`)
-          : '';
-        utr.innerHTML = `
-          <td>${unit.id}</td>
-          <td></td>
-          <td style="text-align:center">${rcBadge}</td>
-          <td>${statusBadge}</td>
-          <td>${unit.moveOut}</td>
-          <td>${unit.availDate}</td>
-          <td>${alertBell(unit.alerts)}</td>
-          <td>
-            ${unit.priorRent ? `<span style="display:inline-flex;align-items:center;gap:4px;">$${unit.priorRent.toLocaleString()}${unit.hasPriorConcession ? `<svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="var(--accent)" stroke-width="1.5" style="cursor:help;flex-shrink:0;"><title>Gross rent: $${unit.grossRent?.toLocaleString()} — concession applied</title><circle cx="7" cy="7" r="5"/><line x1="7" y1="6" x2="7" y2="10"/><circle cx="7" cy="4.5" r=".6" fill="var(--accent)"/></svg>` : ''}</span>` : ''}
-          </td>
-          <td style="text-align:right;"><span style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;border-bottom:1px dashed var(--border-mid);padding-bottom:1px;" onclick="editAnchorPrice('${unit.id}', this)" title="Click to edit">$${unit.anchorPrice.toLocaleString()}<svg width="9" height="9" viewBox="0 0 14 14" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><path d="M9 2l3 3-7 7H2v-3L9 2z"/></svg></span></td>
-          <td>${fmt(unit.priorPeriodPrice)}</td>
-          <td>${recRentCell}</td>
-          <td class="${deltaClass}">${hasOverride ? (parseFloat(effDelta)>0?'+':'') + effDelta + '%' : fmtPct(unit.deltaPrior)}</td>
-          <td class="price-change-abs" style="padding-left:8px;padding-right:4px;"><input class="price-input" type="text" value="${ov?.absChange!=null?ov.absChange:''}" placeholder="$" oninput="this.value=this.value.replace(/[^0-9.-]/g,'')" onkeydown="if(event.key==='Enter'){applyDollarFormat(this);handleAbsInput(this,'${unit.id}','unit',{});this.blur();}" onblur="applyDollarFormat(this)"></td>
-          <td class="price-change-pct" style="padding-left:4px;padding-right:8px;"><input class="price-input" type="text" value="${ov?.pctChange!=null?ov.pctChange:''}" placeholder="%" oninput="this.value=this.value.replace(/[^0-9.-]/g,'')" onkeydown="if(event.key==='Enter'){applyPctFormat(this);handlePctInput(this,'${unit.id}','unit',{});this.blur();}" onblur="applyPctFormat(this)"></td>
-          <td class="highlight-teal">${unit.lt ? `<a href="javascript:void(0)" onclick="openLeaseModal('${unit.id}')" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${unit.lt}</a>` : ''}</td>
-          <td class="highlight-teal">${unit.attValue ? `<a href="javascript:void(0)" onclick="openAttValueModal('${unit.id}', ${unit.attValue})" style="color:var(--accent);text-decoration:underline;cursor:pointer;">$${unit.attValue}</a>` : ''}</td>
-          <td>${fmt(effNetEff)}</td>
-          <td>
-            ${(()=>{const cc=typeof CONCESSIONS_DATA!=='undefined'?CONCESSIONS_DATA.find(c=>c.id===prop.id):null;const cu=cc?.bedTypes.find(b=>b.type===bt.type)?.units.find(u=>u.id===unit.id);const tc=cu?.totalConcessionAmount??0;return tc>0?`<button onclick="openConcInfoModal('unit','${prop.id}','${bt.type}','${unit.id}')" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:12.5px;font-weight:500;text-decoration:underline;text-underline-offset:2px;padding:0;">$${tc}</button>`:'<span style="color:var(--text-muted);font-size:12px;">\u2014</span>';})()}
-          </td>
-          <td>${noteCell(unit.id, unit.note)}</td>
-        `;
-        tb.appendChild(utr);
-      });
-    });
-  });
-
-  renderStatsBar(data);
-}
-
-function toggleProp(id) {
-  if (expandedProperties.has(id)) expandedProperties.delete(id);
-  else expandedProperties.add(id);
-  renderTable();
-}
-
-function toggleBedType(key) {
-  expandedBedTypes[key] = !expandedBedTypes[key];
-  renderTable();
-}
-
-let currentExposureBaseRent = 1800;
-let chartMode = 'daily'; // 'daily' | 'monthly'
-
-function toggleExposureForProp(key, label, baseRent) {
-  if (exposureOpen && !document.getElementById('exposurePanel').classList.contains('panel-closed') && exposurePropId === key) {
-    toggleExposure();
-    exposurePropId = null;
-    return;
-  }
-  // Auto-close unit pricing panel to avoid stacking
-  if (unitPricingOpen) toggleUnitPricing();
-  document.getElementById('exposurePropName').textContent = label;
-  exposurePropId = key;
-  currentExposureBaseRent = baseRent;
-  if (!exposureOpen) toggleExposure();
-  else {
-    document.getElementById('exposurePanel').classList.remove('panel-closed');
-    document.getElementById('exposureWrap').classList.remove('panel-closed');
-  }
-  renderCharts(baseRent);
-  updatePanelState();
-}
-
-function setChartMode(mode) {
-  chartMode = mode;
-  const dBtn = document.getElementById('toggleDaily');
-  const mBtn = document.getElementById('toggleMonthly');
-  if (dBtn) {
-    dBtn.style.background = mode === 'daily' ? 'rgba(255,255,255,0.15)' : 'none';
-    dBtn.style.color = mode === 'daily' ? '#fff' : '#6b7280';
-    dBtn.style.fontWeight = mode === 'daily' ? '600' : '400';
-  }
-  if (mBtn) {
-    mBtn.style.background = mode === 'monthly' ? 'rgba(255,255,255,0.15)' : 'none';
-    mBtn.style.color = mode === 'monthly' ? '#fff' : '#6b7280';
-    mBtn.style.fontWeight = mode === 'monthly' ? '600' : '400';
-  }
-  renderCharts(currentExposureBaseRent);
-}
-
-// ── Exposure Panel ────────────────────────────────────────
-function toggleExposure() {
-  const wrap = document.getElementById('exposureWrap');
-  const panel = document.getElementById('exposurePanel');
-  if (!exposureOpen) {
-    exposureOpen = true;
-    wrap.style.display = '';
-    panel.classList.remove('panel-closed');
-    wrap.classList.remove('panel-closed');
-  } else {
-    exposureOpen = false;
-    panel.classList.add('panel-closed');
-    wrap.classList.add('panel-closed');
-    setTimeout(() => { if (!exposureOpen) wrap.style.display = 'none'; }, 300);
-  }
-  updatePanelState();
-}
-
-function renderCharts(baseRent) {
-  // Build labels + data based on chartMode
-  let labels, n;
-  if (chartMode === 'daily') {
-    labels = [];
-    for (let i = 89; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-    }
-    n = 90;
-  } else {
-    labels = CHART_MONTHS;
-    n = 12;
-  }
-
-  // Generate exposure series for n points
-  const expData = Array.from({ length: n }, () => ({
-    vacant: +(Math.random() * 2.5 + 1.0).toFixed(2),
-    exp30:  +(Math.random() * 2.5 + 1.5).toFixed(2),
-    exp60:  +(Math.random() * 3.0 + 2.0).toFixed(2),
-  }));
-
-  // Generate competitor pricing series for n points
-  const pricingSeries = Array.from({ length: n }, () => {
-    const compMedian = baseRent + 60 + Math.floor(Math.random() * 80 - 40);
-    return {
-      windsorMedian: baseRent + Math.floor(Math.random() * 60 - 30),
-      compMedian,
-      compFloor: compMedian - 150 + Math.floor(Math.random() * 40 - 20),
-      compCeiling: compMedian + 180 + Math.floor(Math.random() * 40 - 20),
-    };
-  });
-
-  const darkTooltip = {
-    mode: 'index',
-    intersect: false,
-    backgroundColor: '#1e2028',
-    borderColor: '#3d4150',
-    borderWidth: 1,
-    titleColor: '#e5e7eb',
-    bodyColor: '#9ca3af',
-    padding: 10,
-    titleFont: { family: 'DM Sans', size: 12, weight: '600' },
-    bodyFont: { family: 'DM Sans', size: 11 },
-    footerFont: { family: 'DM Sans', size: 11 },
-    callbacks: {
-      label: function(ctx) {
-        const isExposure = ctx.chart.canvas.id === 'exposureChart';
-        const suffix = isExposure ? '%' : '';
-        const prefix = !isExposure ? '$' : '';
-        return ' ' + ctx.dataset.label + ': ' + prefix + ctx.parsed.y.toFixed(isExposure ? 1 : 0) + suffix;
-      }
-    }
-  };
-
-  const xTickOpts = {
-    color: '#9ca3af',
-    font: { family: 'DM Sans', size: 9 },
-    maxRotation: 0,
-    maxTicksLimit: 12,
-    autoSkip: true,
-  };
-  const yTickOpts = {
-    color: '#9ca3af',
-    font: { family: 'DM Sans', size: 9 },
-  };
-  const gridColor = 'rgba(255,255,255,0.06)';
-
-  if (exposureChartInst) exposureChartInst.destroy();
-  exposureChartInst = new Chart(document.getElementById('exposureChart'), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { label: '60 Day', data: expData.map(d => d.exp60),    borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,0.3)',  fill: true, stack: 'exp', tension: .4, pointRadius: 0 },
-        { label: '30 Day', data: expData.map(d => d.exp30),    borderColor: '#60a5fa', backgroundColor: 'rgba(96,165,250,0.35)',  fill: true, stack: 'exp', tension: .4, pointRadius: 0 },
-        { label: 'Vacant', data: expData.map(d => d.vacant),   borderColor: '#f5a623', backgroundColor: 'rgba(245,166,35,0.5)',   fill: true, stack: 'exp', tension: .4, pointRadius: 0 },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: false,
-      plugins: { tooltip: darkTooltip, legend: { display: false } },
-      scales: {
-        x: { display: true, stacked: true, ticks: xTickOpts, grid: { color: gridColor } },
-        y: { display: true, stacked: true, min: 0, ticks: { ...yTickOpts, callback: v => v + '%' }, grid: { color: gridColor } },
-      },
-    },
-  });
-
-  if (compChartInst) compChartInst.destroy();
-  compChartInst = new Chart(document.getElementById('compChart'), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        // Order matters for fill: floor → median → ceiling so '+1'/'-1' shade between them
-        {
-          label: 'Comp Floor',
-          data: pricingSeries.map(d => d.compFloor),
-          borderColor: 'rgba(232,0,125,0.3)',
-          borderWidth: 1,
-          borderDash: [4,3],
-          pointRadius: 0,
-          tension: .4,
-          fill: '+1',
-          backgroundColor: 'rgba(232,0,125,0.05)',
-        },
-        {
-          label: 'Windsor Median',
-          data: pricingSeries.map(d => d.windsorMedian),
-          borderColor: '#e8007d',
-          borderWidth: 2,
-          pointRadius: 0,
-          tension: .4,
-          fill: false,
-        },
-        {
-          label: 'Comp Ceiling',
-          data: pricingSeries.map(d => d.compCeiling),
-          borderColor: 'rgba(232,0,125,0.3)',
-          borderWidth: 1,
-          borderDash: [4,3],
-          pointRadius: 0,
-          tension: .4,
-          fill: '-1',
-          backgroundColor: 'rgba(232,0,125,0.05)',
-        },
-        {
-          label: 'Competitor Median',
-          data: pricingSeries.map(d => d.compMedian),
-          borderColor: '#f472b6',
-          borderWidth: 2,
-          pointRadius: 0,
-          tension: .4,
-          fill: false,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: false,
-      plugins: { tooltip: darkTooltip, legend: { display: false }, filler: { propagate: true } },
-      scales: {
-        x: { display: true, ticks: xTickOpts, grid: { color: gridColor } },
-        y: { display: true, ticks: { ...yTickOpts, callback: v => '$' + v.toLocaleString() }, grid: { color: gridColor } },
-      },
-    },
-  });
-}
-
-// ── Modals ────────────────────────────────────────────────
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-// Close modal on backdrop click
-document.querySelectorAll('.modal-backdrop').forEach(el => {
-  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
-});
-
-let selectedLTMoveInDate = null;
-let currentLTUnit = null;
-let ltConcessions = [];
-
-function openLeaseModal(unitId) {
-  // Find unit + community
-  let foundUnit = null, foundComm = null;
-  for (const prop of PRICING_DATA) {
-    for (const bt of prop.bedTypes) {
-      const u = bt.units.find(u => u.id === unitId);
-      if (u) { foundUnit = u; foundComm = prop; break; }
-    }
-    if (foundUnit) break;
-  }
-  if (!foundUnit) return;
-  currentLTUnit = { ...foundUnit, commId: foundComm.id, lt: foundUnit.lt || 12 };
-  selectedLTMoveInDate = null;
-  document.getElementById('leaseModalUnit').textContent = unitId;
-  document.getElementById('ltMoveInLabel').textContent = 'Select move-in date';
-
-  // Hold & Recovery — only show settings for the unit's status
-  const commParams = (typeof PARAMETERS_DATA !== 'undefined') ? PARAMETERS_DATA.find(c => c.id === foundComm.id) : null;
-  const p = commParams?.params ?? (typeof PARAM_DEFAULTS !== 'undefined' ? PARAM_DEFAULTS : {});
-  const isVacant = foundUnit.status === 'vacant';
-  const isOnNotice = foundUnit.status === 'on notice';
-  const settings = isVacant ? [
-    { label: 'Free Vacant', value: (p.freeDaysVacant ?? 0) + 'd' },
-    { label: 'Max',         value: (p.vacantMax ?? 0) + 'd' },
-    { label: 'Recovery',    value: (p.vacantRecovery ?? 0) + '%' },
-  ] : isOnNotice ? [
-    { label: 'Free On Notice', value: (p.freeDaysOnNotice ?? 0) + 'd' },
-    { label: 'Max',            value: (p.onNoticeMax ?? 0) + 'd' },
-    { label: 'Recovery',       value: (p.onNoticeRecovery ?? 0) + '%' },
-  ] : [
-    { label: 'Free Vacant', value: (p.freeDaysVacant ?? 0) + 'd' },
-    { label: 'Max',         value: (p.vacantMax ?? 0) + 'd' },
-    { label: 'Recovery',    value: (p.vacantRecovery ?? 0) + '%' },
-  ];
-  document.getElementById('ltHoldInline').innerHTML = settings.map((s, i) => `
-    ${i > 0 ? '<span style="color:var(--border-mid);">·</span>' : ''}
-    <span style="font-size:12px;color:var(--text-secondary);">${s.label}: <strong style="color:var(--text-primary);">${s.value}</strong></span>
-  `).join('');
-
-  rebuildLTModal(currentLTUnit);
-  openModal('leaseModal');
-}
-
-function onLTDateSelected(dateStr, dateObj) {
-  selectedLTMoveInDate = dateObj;
-  document.getElementById('ltMoveInLabel').textContent = dateStr;
-  rebuildLTModal(currentLTUnit);
-}
-
-function rebuildLTModal(unit) {
-  if (!unit) return;
-  const base = unit.recRent || 1800;
-  const lt = unit.lt || 12;
-  const terms = Array.from({length: 23}, (_, i) => i + 2); // 2..24
-
-  const prices = [];
-  const concessions = [];
-  const netEffs = [];
-  terms.forEach(term => {
-    let premium = 0, conc = 0;
-    const noise = Math.floor(Math.random() * 30) - 15;
-    if (term <= 3) { premium = 350 + Math.floor(Math.random() * 50); conc = 0; }
-    else if (term <= 5) { premium = 200 + Math.floor(Math.random() * 80); conc = 0; }
-    else if (term <= 8) { premium = 60 + Math.floor(Math.random() * 40); conc = 100 + Math.floor(Math.random() * 100); }
-    else if (term <= 11) { premium = 10 + Math.floor(Math.random() * 20); conc = 100 + Math.floor(Math.random() * 100); }
-    else if (term === 12) { premium = 0; conc = 100 + Math.floor(Math.random() * 100); }
-    else if (term <= 18) { premium = -(20 + Math.floor(Math.random() * 30)); conc = 150 + Math.floor(Math.random() * 150); }
-    else { premium = -(40 + Math.floor(Math.random() * 40)); conc = 150 + Math.floor(Math.random() * 150); }
-    const price = base + premium + noise;
-    prices.push(Math.round(price));
-    concessions.push(conc);
-    netEffs.push(Math.round(price - conc));
-  });
-  ltConcessions = concessions;
-
-  // Recommended term = lowest net effective rent
-  const recTermIndex = netEffs.indexOf(Math.min(...netEffs));
-  const recTerm = terms[recTermIndex];
-
-  const moveIn = selectedLTMoveInDate ?? new Date();
-  const expiryLabels = terms.map(t => {
-    const exp = new Date(moveIn);
-    exp.setMonth(exp.getMonth() + t);
-    return exp.toLocaleString('en-US', { month: 'short', year: '2-digit' });
-  });
-
-  // Layout constants — shared between chart and table
-  const labelColW = 130;
-  const isWide = window.innerWidth > 1600;
-  const dataColW = isWide ? 88 : 80;
-
-  // Highlights for the recommended term column
-  const recColCellBg = 'rgba(232,0,125,0.05)';
-  const recHeadBg = 'rgba(232,0,125,0.12)';
-  const neBg = 'rgba(232,0,125,0.04)';
-  const stickyLabel = `position:sticky;left:0;background:var(--surface);z-index:2;`;
-  const recHeadStyle = `background:${recHeadBg};color:var(--accent);border-top:2px solid var(--accent);`;
-
-  // Build horizontal table
-  const thead = `
-    <thead>
-      <tr style="height:36px;">
-        <th style="${stickyLabel}width:auto;padding:8px 12px;font-size:13px;font-weight:700;color:var(--text-primary);text-align:left;border-bottom:2px solid var(--border);vertical-align:middle;">Term</th>
-        ${terms.map(t => {
-          const isRec = t === recTerm;
-          return `<th style="width:${dataColW}px;min-width:${dataColW}px;padding:7px 4px;text-align:center;font-size:13px;font-weight:700;border-bottom:2px solid var(--border);vertical-align:middle;${isRec ? recHeadStyle : 'color:var(--text-primary);'}">${t}${isRec ? '<div style="font-size:9px;color:var(--accent);font-weight:600;margin-top:1px;">★ Rec</div>' : ''}</th>`;
-        }).join('')}
-      </tr>
-      <tr style="height:36px;">
-        <th style="${stickyLabel}width:auto;padding:8px 12px;font-size:11px;color:var(--text-muted);font-weight:400;text-align:left;border-bottom:1px solid var(--border);vertical-align:middle;">Expiry Date</th>
-        ${expiryLabels.map((l, i) => `<th style="width:${dataColW}px;min-width:${dataColW}px;padding:7px 4px;text-align:center;font-size:11px;color:var(--text-muted);font-weight:400;border-bottom:1px solid var(--border);vertical-align:middle;${terms[i] === recTerm ? 'background:'+recColCellBg+';' : ''}">${l}</th>`).join('')}
-      </tr>
-    </thead>`;
-
-  const tbody = `
-    <tbody>
-      <tr style="height:36px;">
-        <td style="${stickyLabel}width:auto;padding:8px 12px;font-size:12.5px;font-weight:600;vertical-align:middle;">Price / mo</td>
-        ${prices.map((p, i) => `<td style="width:${dataColW}px;min-width:${dataColW}px;padding:7px 4px;text-align:center;font-size:12.5px;font-weight:600;vertical-align:middle;${terms[i] === recTerm ? 'background:'+recColCellBg+';' : ''}">$${p.toLocaleString()}</td>`).join('')}
-      </tr>
-      <tr style="height:36px;">
-        <td style="${stickyLabel}width:auto;padding:8px 12px;font-size:12px;color:var(--accent);font-weight:500;vertical-align:middle;">Concs. Amt</td>
-        ${concessions.map((c, i) => `<td style="width:${dataColW}px;min-width:${dataColW}px;padding:7px 4px;text-align:center;font-size:12px;color:var(--accent);vertical-align:middle;${terms[i] === recTerm ? 'background:'+recColCellBg+';' : ''}">${c > 0 ? '-$' + c : '—'}</td>`).join('')}
-      </tr>
-      <tr style="height:36px;">
-        <td style="${stickyLabel}width:auto;padding:8px 12px;font-size:13px;font-weight:700;color:var(--text-primary);border-top:2px solid var(--border);background:${neBg};vertical-align:middle;">Net Eff.</td>
-        ${netEffs.map((n, i) => `<td style="width:${dataColW}px;min-width:${dataColW}px;padding:7px 4px;text-align:center;font-size:13px;font-weight:700;color:var(--text-primary);border-top:2px solid var(--border);vertical-align:middle;background:${terms[i] === recTerm ? recColCellBg : neBg};">$${n.toLocaleString()}</td>`).join('')}
-      </tr>
-    </tbody>`;
-  const tableEl = document.getElementById('ltHorizTable');
-  tableEl.innerHTML = thead + tbody;
-
-  // Defer chart sizing until the table has actually rendered so we can
-  // measure the real label-column width and total table width.
-  if (window.ltChartInst) window.ltChartInst.destroy();
-  setTimeout(() => {
-    const table = document.getElementById('ltHorizTable');
-    const canvas = document.getElementById('ltChart');
-    const wrap = document.getElementById('ltChartWrap');
-    if (!table || !canvas || !wrap) return;
-    const labelTh = table.querySelector('th:first-child');
-    const labelW = labelTh ? labelTh.getBoundingClientRect().width : labelColW;
-    const tableScrollW = table.scrollWidth || (labelColW + dataColW * terms.length);
-
-    wrap.style.width = tableScrollW + 'px';
-    wrap.style.height = '300px';
-    canvas.width = tableScrollW;
-    canvas.height = 300;
-    canvas.style.width = tableScrollW + 'px';
-    canvas.style.height = '300px';
-
-    const termLabels = terms.map(t => String(t));
-
-    window.ltChartInst = new Chart(canvas, {
-    type: 'line',
-    data: {
-      labels: termLabels,
-      datasets: [
-        {
-          label: 'Gross Rent',
-          data: prices.map((p, i) => ({ x: termLabels[i], y: p })),
-          borderColor: '#e8007d',
-          backgroundColor: '#e8007d',
-          pointBackgroundColor: '#e8007d',
-          borderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          tension: 0.3,
-          fill: false,
-        },
-        {
-          label: 'Net Effective',
-          data: netEffs.map((n, i) => ({ x: termLabels[i], y: n })),
-          borderColor: '#60a5fa',
-          backgroundColor: '#60a5fa',
-          pointBackgroundColor: '#60a5fa',
-          borderWidth: 2,
-          borderDash: [4,3],
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          tension: 0.3,
-          fill: false,
-        },
-      ],
-    },
-    options: {
-      animation: false,
-      responsive: false,
-      maintainAspectRatio: false,
-      layout: {
-        padding: {
-          left: 0,
-          right: 0,
-          top: 4,
-          bottom: 0,
-        }
-      },
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { display: true, position: 'top', align: 'end', labels: { boxWidth: 10, font: { family: 'DM Sans', size: 11 }, color: '#6b7280' } },
-        tooltip: {
-          backgroundColor: '#1a1d23',
-          borderColor: '#2a2d35',
-          borderWidth: 1,
-          titleColor: '#e5e7eb',
-          bodyColor: '#9ca3af',
-          padding: 10,
-          titleFont: { family: 'DM Sans', size: 12 },
-          bodyFont: { family: 'DM Sans', size: 11 },
-          callbacks: {
-            title: items => `Term ${items[0].label} months`,
-            label: ctx => {
-              const label = ctx.dataset.label;
-              const val = '$' + ctx.parsed.y.toLocaleString();
-              return ` ${label}: ${val}`;
-            },
-            afterBody: items => {
-              const i = items[0].dataIndex;
-              const conc = ltConcessions[i];
-              return conc > 0 ? [` Concession: -$${conc.toLocaleString()}`] : [];
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          type: 'category',
-          labels: termLabels,
-          display: true,
-          offset: true,
-          bounds: 'data',
-          ticks: { display: false, align: 'center' },
-          grid: { display: true, color: '#e4e6eb', offset: true },
-          border: { display: false },
-        },
-        y: {
-          min: Math.min(...netEffs, ...prices) - 100,
-          max: Math.max(...netEffs, ...prices) + 80,
-          ticks: { color: '#6b7280', font: { family: 'DM Sans', size: 10 }, callback: v => '$' + v.toLocaleString() },
-          grid: { color: '#e4e6eb' },
-        }
-      }
-    }
-    });
-
-    // After chart has rendered, measure its actual plot area left
-    // (which depends on the y-axis label widths) and resize the table's
-    // sticky label column to match it exactly.
-    setTimeout(() => {
-      if (!window.ltChartInst) return;
-      const chartArea = window.ltChartInst.chartArea;
-      const actualPlotLeft = chartArea.left;
-      const labelCol = document.getElementById('ltHorizTable')?.querySelector('th:first-child');
-      if (labelCol) {
-        labelCol.style.width = actualPlotLeft + 'px';
-        labelCol.style.minWidth = actualPlotLeft + 'px';
-        document.querySelectorAll('#ltHorizTable td:first-child, #ltHorizTable th:first-child').forEach(c => {
-          c.style.width = actualPlotLeft + 'px';
-          c.style.minWidth = actualPlotLeft + 'px';
-        });
-      }
-    }, 40);
-  }, 80);
-}
-
-function openAttrModal(unitId) {
-  document.getElementById('attrModalUnit').textContent = unitId;
-  // Find unit + community
-  let foundUnit = null, foundComm = null;
-  for (const prop of PRICING_DATA) {
-    for (const bt of prop.bedTypes) {
-      const u = bt.units.find(u => u.id === unitId);
-      if (u) { foundUnit = u; foundComm = prop; break; }
-    }
-    if (foundUnit) break;
-  }
-  if (foundUnit) {
-    document.getElementById('attrFloorplan').textContent = foundUnit.floorplan ?? '—';
-    document.getElementById('attrArea').textContent = (foundUnit.area ?? '—') + ' sq ft';
-    document.getElementById('attrFloor').textContent = foundUnit.floor ?? '—';
-  }
-  const link = document.getElementById('attrCommLink');
-  if (foundComm) {
-    link.onclick = () => { closeModal('attrModal'); openCommunityAttrModal(foundComm.id); };
-  }
-  openModal('attrModal');
-}
-
-const AMENITY_ICONS = {
-  'Pool': '<path d="M2 10c2-3 4-3 5 0s3 3 5 0"/>',
-  'Concierge': '<circle cx="7" cy="4" r="2.5"/><path d="M2 13c0-3 2.5-5 5-5s5 2 5 5"/>',
-  'Parking Garage': '<rect x="2" y="5" width="10" height="7" rx="1"/><path d="M5 12v2M9 12v2M2 8h10"/>',
-  'Co-working Lounge': '<rect x="2" y="4" width="10" height="7" rx="1"/><line x1="5" y1="11" x2="5" y2="13"/><line x1="9" y1="11" x2="9" y2="13"/><line x1="3" y1="13" x2="11" y2="13"/>',
-  'Fitness Center': '<circle cx="4" cy="7" r="1.5"/><circle cx="10" cy="7" r="1.5"/><line x1="5.5" y1="7" x2="8.5" y2="7"/>',
-  'Pet Friendly': '<circle cx="4" cy="4" r="1.2"/><circle cx="10" cy="4" r="1.2"/><circle cx="7" cy="9" r="2.5"/>',
-  'Rooftop Deck': '<path d="M2 8l5-5 5 5"/><rect x="4" y="8" width="6" height="5"/>',
-  'EV Charging': '<path d="M8 2L5 8h4l-3 6"/><path d="M4 5h2M8 11h2"/>',
-  'Dog Park': '<path d="M4 13V8M4 8C4 5 7 3 7 3s3 2 3 5v5"/><circle cx="10" cy="5" r="1.5"/>',
-  'Package Lockers': '<rect x="2" y="4" width="10" height="8" rx="1"/><line x1="7" y1="4" x2="7" y2="12"/><circle cx="5" cy="8" r=".8" fill="currentColor"/><circle cx="9" cy="8" r=".8" fill="currentColor"/>',
-  'Business Center': '<rect x="3" y="5" width="8" height="7" rx="1"/><path d="M5 5V4a2 2 0 0 1 4 0v1"/>',
-  'Bike Storage': '<circle cx="4" cy="9" r="2.5"/><circle cx="10" cy="9" r="2.5"/><path d="M4 9l3-4 3 4"/><line x1="7" y1="5" x2="9" y2="5"/>',
-};
-
-function openCommAttrModal(commId) {
-  const comm = COMMUNITIES.find(c => c.id === commId);
-  if (!comm) return;
-  const cp = PRICING_DATA.find(p => p.id === commId);
-  document.getElementById('commAttrName').textContent = comm.name;
-  const facts = [
-    { label: 'Year Built', value: comm.yearBuilt ?? '—' },
-    { label: 'Total Units', value: cp?.totalUnits ?? '—' },
-    { label: 'Class', value: classBadge(comm.class) },
-    { label: 'State', value: comm.state },
-    { label: 'Metro', value: comm.metro },
-    { label: 'Revenue Manager', value: comm.rm },
-  ];
-  document.getElementById('commAttrFacts').innerHTML = facts.map(f => `
-    <div style="background:var(--body-bg);border-radius:6px;border:1px solid var(--border);padding:8px 10px;">
-      <div style="font-size:10px;color:var(--text-muted);margin-bottom:3px;">${f.label}</div>
-      <div style="font-size:13px;font-weight:600;color:var(--text-primary);">${f.value}</div>
-    </div>
-  `).join('');
-  document.getElementById('commAttrAmenities').innerHTML =
-    (comm.amenities ?? []).map(a => `
-      <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(232,0,125,0.07);color:var(--accent);border:1px solid rgba(232,0,125,0.2);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:500;">
-        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">${AMENITY_ICONS[a] ?? '<circle cx="7" cy="7" r="5"/>'}</svg>
-        ${a}
-      </span>
-    `).join('');
-  openModal('commAttrModal');
-}
-// Backwards-compat alias
-const openCommunityAttrModal = openCommAttrModal;
-
-function openConcInfoModal(scope,commId,bedType,unitId){
-  if(typeof CONCESSIONS_DATA==='undefined')return;
-  const comm=CONCESSIONS_DATA.find(c=>c.id===commId);if(!comm)return;
-  let subtitle='',concs=[],baseRent=0;
-  if(scope==='unit'){const bt=comm.bedTypes.find(b=>b.type===bedType);const unit=bt?.units.find(u=>u.id===unitId);subtitle=unitId;concs=unit?.allApplicableConcessions??[];baseRent=unit?.baseRent??0;}
-  else if(scope==='bedtype'){const bt=comm.bedTypes.find(b=>b.type===bedType);subtitle=comm.name+' \u00B7 '+bedType;concs=[...comm.commConcessions,...(bt?.btConcessions??[])];baseRent=bt?.recRent??0;}
-  else{subtitle=comm.name+' \u2014 all levels';concs=[...comm.commConcessions,...comm.bedTypes.flatMap(bt=>bt.btConcessions)];baseRent=comm.bedTypes[0]?.recRent??0;}
-  const active=concs.filter(c=>c.status==='Active');
-  document.getElementById('concInfoSubtitle').textContent=subtitle;
-  const mLink=document.getElementById('concInfoManageLink');if(mLink)mLink.href='concessions.html?tab=management&commId='+commId+(bedType?'&bedType='+encodeURIComponent(bedType):'')+(unitId?'&unitId='+encodeURIComponent(unitId):'');
-  const emptyEl=document.getElementById('concInfoEmpty');const tableEl=document.getElementById('concInfoTable');
-  if(!active.length){emptyEl.style.display='block';tableEl.style.display='none';document.getElementById('concInfoTotal').textContent='-$0';document.getElementById('concInfoTotalPct').textContent='(0%)';document.getElementById('concInfoNetEff').textContent='$'+baseRent.toLocaleString();openModal('concInfoModal');return;}
-  emptyEl.style.display='none';tableEl.style.display='table';
-  const totalAmt=active.reduce((s,c)=>s+c.displayAmount,0);const totalPct=baseRent>0?parseFloat((totalAmt/baseRent*100).toFixed(1)):0;const netEff=Math.max(0,baseRent-totalAmt);
-  const lc={community:{l:'COMMUNITY',bg:'rgba(167,139,250,0.15)',c:'#6d28d9'},bedtype:{l:'BED TYPE',bg:'rgba(96,165,250,0.12)',c:'#1d4ed8'},unit:{l:'UNIT',bg:'rgba(232,0,125,0.1)',c:'var(--accent)'}};
-  const ltc={'New Lease':{bg:'rgba(232,0,125,0.08)',c:'var(--accent)'},'Renewal':{bg:'rgba(96,165,250,0.1)',c:'#1d4ed8'},'Both':{bg:'rgba(148,163,184,0.1)',c:'#475569'}};
-  const stc={'Active':{bg:'rgba(74,222,128,0.12)',c:'#15803d'},'Paused':{bg:'rgba(148,163,184,0.12)',c:'#475569'},'Expired':{bg:'rgba(148,163,184,0.1)',c:'#6b7280'}};
-  document.getElementById('concInfoBody').innerHTML=active.map(c=>{const l=lc[c.level]||lc.unit;const lt=ltc[c.leaseType]||ltc.Both;const s=stc[c.status]||stc.Active;const amtD=c.valueType==='relative'?c.value+'% (\u2248$'+c.displayAmount+')':c.valueType==='free_period'?c.value+' mo. free (\u2248$'+c.displayAmount+'/mo)':'$'+c.displayAmount;const pctD=baseRent>0?parseFloat((c.displayAmount/baseRent*100).toFixed(1))+'%':'\u2014';const lvlHtml=c.level==='bedtype'&&c.bedType?`<span style="background:${l.bg};color:${l.c};font-size:9px;font-weight:700;border-radius:3px;padding:1px 5px;display:block;">${l.l}</span><span style="font-size:10px;color:var(--text-muted);margin-top:2px;display:block;">${c.bedType}</span>`:`<span style="background:${l.bg};color:${l.c};font-size:9px;font-weight:700;border-radius:3px;padding:1px 5px;">${l.l}</span>`;return`<tr style="border-bottom:1px solid var(--border);"><td>${lvlHtml}</td><td style="font-weight:500;">${c.type}</td><td style="font-weight:600;">${amtD}</td><td style="text-align:center;color:var(--text-secondary);">${pctD}</td><td><span style="background:${lt.bg};color:${lt.c};font-size:10px;font-weight:500;border-radius:10px;padding:2px 7px;">${c.leaseType}</span></td><td style="font-size:11.5px;color:var(--text-secondary);white-space:nowrap;">${c.startDate} \u2192 ${c.endDate}</td><td><span style="background:${s.bg};color:${s.c};font-size:11px;font-weight:500;border-radius:10px;padding:2px 7px;">${c.status}</span></td><td style="text-align:center;font-size:13px;">${c.stackable?'<span style="color:#15803d;">\u2713</span>':'<span style="color:#e05252;">\u2717</span>'}</td><td style="text-align:center;"><span style="background:var(--body-bg);border:1px solid var(--border-mid);border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600;cursor:help;" title="Priority ${c.priority} \u2014 ${c.stackable?'stackable with other concessions':'non-stackable: overrides lower priority concessions'}">${c.priority}</span></td></tr>`;}).join('');
-  document.getElementById('concInfoTotal').textContent='-$'+totalAmt;document.getElementById('concInfoTotalPct').textContent='('+totalPct+'% of rent)';document.getElementById('concInfoNetEff').textContent='$'+netEff.toLocaleString();
-  openModal('concInfoModal');
-}
-
-// ── Alerts tooltip ────────────────────────────────────────
-const alertConfig = {
-  concession: { label: 'Concession', icon: '<path d="M7 2a4 4 0 0 1 4 4c0 3 1.5 4 1.5 4H1.5S3 9 3 6a4 4 0 0 1 4-4z"/><line x1="7" y1="12" x2="7" y2="13"/>' },
-  comp:       { label: 'Comp (floor/ceiling)', icon: '<polyline points="2,10 5,6 8,8 12,4"/>' },
-  optimizer:  { label: 'Optimizer (floor/ceiling)', icon: '<rect x="2" y="2" width="10" height="10" rx="2"/><line x1="5" y1="7" x2="9" y2="7"/><line x1="7" y1="5" x2="7" y2="9"/>' },
-  manual:     { label: 'Manual adjustment', icon: '<path d="M2 12l3-3 2 2 5-7"/>' },
-};
-
-function showAlerts(e, alerts) {
-  e.stopPropagation();
-  if (!alerts || alerts.length === 0) return;
-  const tt = document.getElementById('alertsTooltip');
-  const body = document.getElementById('alertsTooltipBody');
-  body.innerHTML = alerts.map(a => {
-    const cfg = alertConfig[a];
-    if (!cfg) return '';
-    return `<div class="tooltip-item"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">${cfg.icon}</svg> ${cfg.label}</div>`;
-  }).join('');
-  tt.style.left = (e.clientX - 10) + 'px';
-  tt.style.top = (e.clientY + 16) + 'px';
-  tt.classList.toggle('open');
-}
-
-// ── Att. Value Modal ─────────────────────────────────────
-function openAttValueModal(unitId, totalValue) {
-  document.getElementById('attValueModalUnit').textContent = unitId;
-  // Find unit
-  let foundUnit = null;
-  for (const prop of PRICING_DATA) {
-    for (const bt of prop.bedTypes) {
-      const u = bt.units.find(u => u.id === unitId);
-      if (u) { foundUnit = u; break; }
-    }
-    if (foundUnit) break;
-  }
-  document.getElementById('attFloorplan').textContent = foundUnit?.floorplan ?? '1BR/1BA';
-  document.getElementById('attArea').textContent = (foundUnit?.area ?? 750) + ' sq ft';
-  const attrs = ['Floor Premium', 'Balcony', 'Walk-in Closet', 'Traffic Proximity', 'Pool Access', 'Parking'];
-  // Generate random values that sum to totalValue
-  const rawVals = attrs.map(() => Math.random());
-  const rawSum = rawVals.reduce((a, b) => a + b, 0);
-  const values = rawVals.map(v => Math.round(v / rawSum * totalValue));
-  // Adjust rounding difference on last item
-  const diff = totalValue - values.reduce((a, b) => a + b, 0);
-  values[values.length - 1] += diff;
-
-  const tb = document.getElementById('attValueTableBody');
-  tb.innerHTML = attrs.map((attr, i) => `
-    <tr>
-      <td>${attr}</td>
-      <td>$${values[i]}</td>
-    </tr>
-  `).join('') + `
-    <tr style="font-weight:600;border-top:2px solid var(--border);">
-      <td>Total</td>
-      <td>$${totalValue}</td>
-    </tr>
-  `;
-  openModal('attValueModal');
-}
-
-document.addEventListener('click', e => {
-  if (!e.target.closest('.alert-bell')) {
-    document.getElementById('alertsTooltip').classList.remove('open');
-  }
-});
-
-// ── Unit Pricing Panel ────────────────────────────────────
-function updatePanelState() {
-  const container = document.getElementById('panelsContainer');
-  container.classList.toggle('both-open', exposureOpen && unitPricingOpen);
-}
-
-function toggleUnitPricing() {
-  const wrap = document.getElementById('unitPricingWrap');
-  const panel = document.getElementById('unitPricingPanel');
-  if (unitPricingOpen) {
-    unitPricingOpen = false;
-    panel.classList.add('panel-closed');
-    wrap.classList.add('panel-closed');
-    setTimeout(() => {
-      if (!unitPricingOpen) { wrap.style.display = 'none'; }
-    }, 300);
-    if (unitPricingChartInst) { unitPricingChartInst.destroy(); unitPricingChartInst = null; }
-  } else {
-    unitPricingOpen = true;
-    wrap.style.display = '';
-    panel.classList.remove('panel-closed');
-    wrap.classList.remove('panel-closed');
-  }
-  updatePanelState();
-}
-
-function makeUnitPricingHistory(baseRent) {
-  const days = 90;
-  const labels = [];
-  const grossRents = [];
-  const netEffRents = [];
-
-  let currentGross = baseRent * (0.94 + Math.random() * 0.04);
-  let currentNet = currentGross - Math.floor(Math.random() * 150);
-
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-
-    currentGross += (Math.random() - 0.48) * 8;
-    currentGross = Math.max(baseRent * 0.9, Math.min(baseRent * 1.08, currentGross));
-
-    const concessionStep = Math.random() > 0.95 ? (Math.random() - 0.5) * 50 : 0;
-    currentNet += (Math.random() - 0.48) * 6 + concessionStep;
-    currentNet = Math.max(baseRent * 0.8, Math.min(currentGross, currentNet));
-
-    grossRents.push(Math.round(currentGross));
-    netEffRents.push(Math.round(currentNet));
-  }
-
-  return { labels, grossRents, netEffRents };
-}
-
-function openUnitPricingPanel(el) {
-  const unitId = el.dataset.id;
-  const priorRent = +el.dataset.prior;
-  const recRent = +el.dataset.rec;
-
-  // Auto-close exposure panel to avoid stacking
-  if (exposureOpen) toggleExposure();
-
-  document.getElementById('unitPricingUnitId').textContent = unitId;
-
-  const wrap = document.getElementById('unitPricingWrap');
-  const panel = document.getElementById('unitPricingPanel');
-  wrap.style.display = '';
-  panel.classList.remove('panel-closed');
-  wrap.classList.remove('panel-closed');
-  unitPricingOpen = true;
-  updatePanelState();
-
-  const baseRent = recRent || priorRent || 1800;
-  const { labels, grossRents: grossData, netEffRents: netData } = makeUnitPricingHistory(baseRent);
-  const numPoints = labels.length;
-
-  // Seed 2-4 override events at random day indices
-  const overrideIndices = [];
-  const numOverrides = Math.floor(Math.random() * 3) + 2;
-  while (overrideIndices.length < numOverrides) {
-    const idx = Math.floor(Math.random() * 70) + 5;
-    if (!overrideIndices.includes(idx)) overrideIndices.push(idx);
-  }
-
-  // Override markers on the gross rent line
-  const ptRadius = grossData.map((_, i) => overrideIndices.includes(i) ? 7 : 0);
-  const ptBg = grossData.map((_, i) => overrideIndices.includes(i) ? '#fbbf24' : '#e8007d');
-  const ptBorder = grossData.map((_, i) => overrideIndices.includes(i) ? '#fbbf24' : 'transparent');
-
-  if (unitPricingChartInst) unitPricingChartInst.destroy();
-  unitPricingChartInst = new Chart(document.getElementById('unitPricingChart'), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Gross Rent',
-          data: grossData,
-          borderColor: '#e8007d',
-          borderWidth: 2,
-          pointRadius: ptRadius,
-          pointBackgroundColor: ptBg,
-          pointBorderColor: ptBorder,
-          pointHoverRadius: 5,
-          tension: 0.3,
-          fill: false,
-        },
-        {
-          label: 'Net Effective Rent',
-          data: netData,
-          borderColor: '#60a5fa',
-          borderWidth: 1.5,
-          borderDash: [4, 3],
-          pointRadius: 0,
-          pointHoverRadius: 4,
-          tension: 0.3,
-          fill: false,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          mode: 'index',
-          intersect: false,
-          backgroundColor: '#1e2028',
-          borderColor: '#3d4150',
-          borderWidth: 1,
-          titleColor: '#e5e7eb',
-          bodyColor: '#9ca3af',
-          padding: 10,
-          titleFont: { family: 'DM Sans', size: 12, weight: '600' },
-          bodyFont: { family: 'DM Sans', size: 11 },
-          footerFont: { family: 'DM Sans', size: 11 },
-          callbacks: {
-            label: function(ctx) {
-              const isOverride = ctx.datasetIndex === 0 && overrideIndices.includes(ctx.dataIndex);
-              let line = ' ' + ctx.dataset.label + ': $' + ctx.parsed.y.toLocaleString();
-              if (isOverride) line += '  \u26A1 Override';
-              return line;
-            }
-          }
-        },
-      },
-      scales: {
-        x: {
-          display: true,
-          ticks: { color: '#9ca3af', font: { family: 'DM Sans', size: 9 }, maxTicksLimit: 10, maxRotation: 0, autoSkip: true },
-          grid: { color: 'rgba(255,255,255,0.06)' },
-        },
-        y: {
-          display: true,
-          ticks: { color: '#9ca3af', font: { family: 'DM Sans', size: 9 }, callback: v => '$' + v.toLocaleString() },
-          grid: { color: 'rgba(255,255,255,0.06)' },
-        },
-      },
-    },
-  });
-}
-
-// ── Note Modal ───────────────────────────────────────────
-let noteModalId = null;
-let noteExpiryDate = null;
-
-function openNoteModal(id, existingNote) {
-  noteModalId = id;
-  document.getElementById('noteModalUnit').textContent = id;
-  const ta = document.getElementById('noteTextarea');
-  if (existingNote) {
-    ta.value = existingNote.text;
-    noteExpiryDate = existingNote.expires;
-    document.getElementById('noteExpiryLabel').textContent = existingNote.expires;
-  } else {
-    ta.value = '';
-    noteExpiryDate = null;
-    document.getElementById('noteExpiryLabel').textContent = 'Select date';
-  }
-  openModal('noteModal');
-}
-
-function saveNote() {
-  const text = document.getElementById('noteTextarea').value.trim();
-  const noteObj = text ? { text, expires: noteExpiryDate || '' } : null;
-
-  // Find and update in PRICING_DATA
-  for (const prop of PRICING_DATA) {
-    for (const bt of prop.bedTypes) {
-      const btKey = prop.id + bt.type;
-      if (btKey === noteModalId) { bt.note = noteObj; break; }
-      for (const unit of bt.units) {
-        if (unit.id === noteModalId) { unit.note = noteObj; break; }
-      }
-    }
-  }
-  closeModal('noteModal');
-  renderTable();
-}
-
-// ── Calendar Date Picker ──────────────────────────────────
-let calTarget = null;  // 'start', 'end', or 'noteExpiry'
-let calAnchor = null;  // the button element
-let calYear = new Date().getFullYear();
-let calMonth = new Date().getMonth();
-let calSelectedStart = null;
-let calSelectedEnd = null;
-
-function openCalendar(target, btnEl) {
-  calTarget = target;
-  calAnchor = btnEl;
-  calendarCallback = null;
-  const cal = document.getElementById('calendarModal');
-  const rect = btnEl.getBoundingClientRect();
-  cal.style.left = rect.left + 'px';
-  cal.style.top = (rect.bottom + 6) + 'px';
-  renderCalendar();
-  cal.classList.add('open');
-}
-
-let calendarCallback = null;
-let calendarTargetBtn = null;
-
-function openCalendarFor(btnId, callback, btnEl) {
-  calTarget = '__custom__';
-  calendarTargetBtn = btnId;
-  calendarCallback = callback ?? null;
-  calAnchor = btnEl;
-  const cal = document.getElementById('calendarModal');
-  const rect = btnEl.getBoundingClientRect();
-  cal.style.left = rect.left + 'px';
-  cal.style.top = (rect.bottom + 6) + 'px';
-  renderCalendar();
-  cal.classList.add('open');
-}
-
-function closeCalendar() {
-  document.getElementById('calendarModal').classList.remove('open');
-  calTarget = null;
-}
-
-function calNav(dir) {
-  calMonth += dir;
-  if (calMonth > 11) { calMonth = 0; calYear++; }
-  if (calMonth < 0) { calMonth = 11; calYear--; }
-  renderCalendar();
-}
-
-function renderCalendar() {
-  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('calMonthLabel').textContent = monthNames[calMonth] + ' ' + calYear;
-
-  const firstDay = new Date(calYear, calMonth, 1).getDay();
-  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-  const today = new Date();
-  const todayStr = today.getFullYear() + '-' + today.getMonth() + '-' + today.getDate();
-
-  const selected = calTarget === 'start' ? calSelectedStart : calSelectedEnd;
-
-  let html = '';
-  for (let i = 0; i < firstDay; i++) {
-    html += '<button class="empty"></button>';
-  }
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = calYear + '-' + calMonth + '-' + d;
-    const isToday = dateStr === todayStr;
-    const isSel = selected && selected === dateStr;
-    const cls = (isToday ? ' today' : '') + (isSel ? ' selected' : '');
-    html += `<button class="${cls}" onclick="selectCalDay(${d})">${d}</button>`;
-  }
-  document.getElementById('calDays').innerHTML = html;
-}
-
-function selectCalDay(day) {
-  const dateStr = calYear + '-' + calMonth + '-' + day;
-  const mm = String(calMonth + 1).padStart(2, '0');
-  const dd = String(day).padStart(2, '0');
-  const yy = String(calYear).slice(-2);
-  const usDate = mm + '/' + dd + '/' + yy;
-
-  if (calTarget === 'start') {
-    calSelectedStart = dateStr;
-    document.getElementById('startDateLabel').textContent = usDate;
-  } else if (calTarget === 'end') {
-    calSelectedEnd = dateStr;
-    document.getElementById('endDateLabel').textContent = usDate;
-  } else if (calTarget === 'noteExpiry') {
-    noteExpiryDate = usDate;
-    document.getElementById('noteExpiryLabel').textContent = usDate;
-  } else if (calTarget === '__custom__' && typeof calendarCallback === 'function') {
-    const dateObj = new Date(calYear, calMonth, day);
-    calendarCallback(usDate, dateObj);
-  }
-  closeCalendar();
-}
-
-document.addEventListener('click', e => {
-  if (!e.target.closest('.calendar-popup') && !e.target.closest('.date-picker-btn')) {
-    closeCalendar();
-  }
-});
-
-// ── Advanced Drawer ───────────────────────────────────────
-function toggleAdvDrawer() {
-  advDrawerOpen = !advDrawerOpen;
-  document.getElementById('advDrawer').classList.toggle('open', advDrawerOpen);
-}
-
-// ── Init ──────────────────────────────────────────────────
-populateFilters();
-restoreFilterState();
-updateClearBtn();
-const _slotA = document.getElementById('classABadgeSlot');
-const _slotB = document.getElementById('classBBadgeSlot');
-if (_slotA) _slotA.innerHTML = classBadge('A');
-if (_slotB) _slotB.innerHTML = classBadge('B');
+// ── Init ───────────────────────────────────────────────────
+renderStatsBar();
 renderTable();
 </script>
+
 </body>
 </html>
