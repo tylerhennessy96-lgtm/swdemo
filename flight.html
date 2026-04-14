@@ -74,6 +74,135 @@
     .legend-bar .legend-sep { color: var(--border-mid); }
     .legend-bar .ros-up   { color: #047857; font-weight: 600; }
     .legend-bar .ros-down { color: var(--danger); font-weight: 600; }
+
+    /* ── View mode toggle (List / Calendar) ─────────────────── */
+    .view-toggle {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      height: 28px;
+    }
+    .vt-btn {
+      background: var(--surface);
+      border: none;
+      padding: 0 12px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-family: 'Archivo', sans-serif;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .vt-btn + .vt-btn { border-left: 1px solid var(--border); }
+    .vt-btn.vt-active { background: var(--accent); color: #fff; }
+    .vt-btn:not(.vt-active):hover { background: #f5f6f8; color: var(--text-primary); }
+
+    /* ── Calendar view ───────────────────────────────────────── */
+    .cal-pane { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .cal-pane.hidden { display: none; }
+    .cal-wrap { flex: 1; overflow: auto; background: #fff; }
+    table.cal-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: max-content;
+      min-width: 100%;
+      table-layout: fixed;
+    }
+    table.cal-table thead th {
+      position: sticky;
+      top: 0;
+      background: var(--nav-bg);
+      color: #fff;
+      font-weight: 600;
+      text-align: center;
+      padding: 8px 10px;
+      height: 48px;
+      box-sizing: border-box;
+      border-bottom: 1px solid var(--nav-border);
+      border-right: 1px solid rgba(255,255,255,0.08);
+      z-index: 19;
+    }
+    table.cal-table thead th.cal-corner {
+      left: 0;
+      z-index: 21;
+      text-align: left;
+      padding-left: 16px;
+      font-size: 11.5px;
+      min-width: 220px;
+      width: 220px;
+    }
+    table.cal-table thead th.cal-wk-hd { min-width: 130px; width: 130px; }
+    table.cal-table thead th .cal-wk-lbl { font-size: 12px; font-weight: 600; }
+    table.cal-table thead th .cal-wk-sub { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+
+    table.cal-table td.cal-name {
+      position: sticky;
+      left: 0;
+      z-index: 10;
+      min-width: 220px;
+      width: 220px;
+      background: #fff;
+      padding: 10px 10px 10px 16px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 12.5px;
+    }
+    table.cal-table tr.cal-dest td.cal-name {
+      background: #fafbfc;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    table.cal-table tr.cal-route td.cal-name {
+      padding-left: 32px;
+      font-weight: 500;
+    }
+    table.cal-table tr.cal-date td.cal-name {
+      padding-left: 56px;
+      color: var(--text-secondary);
+    }
+
+    table.cal-table td.cal-cell {
+      min-width: 130px;
+      width: 130px;
+      height: 68px;
+      text-align: center;
+      padding: 8px 6px;
+      box-sizing: border-box;
+      border-bottom: 1px solid rgba(255,255,255,0.18);
+      border-right: 1px solid rgba(255,255,255,0.18);
+      color: #fff;
+      vertical-align: middle;
+      position: relative;
+    }
+    table.cal-table td.cal-cell.cal-hi   { background: #1a7a4a; }
+    table.cal-table td.cal-cell.cal-mid  { background: #c47a1e; }
+    table.cal-table td.cal-cell.cal-lo   { background: #b03030; }
+    table.cal-table td.cal-cell.cal-none {
+      background: #f3f4f6;
+      color: var(--text-muted);
+      border-color: var(--border);
+    }
+    table.cal-table td.cal-cell .cal-pri { font-size: 18px; font-weight: 700; line-height: 1.15; }
+    table.cal-table td.cal-cell .cal-sec { font-size: 11px; margin-top: 3px; opacity: 0.95; }
+    table.cal-table td.cal-cell .cal-sec .cal-rec { color: #a5f3fc; font-weight: 500; margin-left: 4px; }
+    table.cal-table td.cal-cell .cal-tri { font-size: 10px; margin-top: 2px; opacity: 0.9; }
+    table.cal-table td.cal-cell .cal-flags {
+      position: absolute;
+      top: 3px;
+      right: 5px;
+      font-size: 10px;
+      display: flex;
+      gap: 2px;
+      line-height: 1;
+    }
+    table.cal-table td.cal-cell.clickable { cursor: pointer; }
+    table.cal-table td.cal-cell.clickable:hover { filter: brightness(1.12); }
+    table.cal-table td.cal-cell.cal-none .cal-pri { color: var(--text-muted); font-weight: 500; }
   </style>
 </head>
 <body>
@@ -204,6 +333,10 @@
     <a class="subsubtab active" data-view="recs"       onclick="switchView('recs')">New Recommendations</a>
     <a class="subsubtab"        data-view="competitor" onclick="switchView('competitor')">Competitor Analysis</a>
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px;padding-right:16px;">
+      <div class="view-toggle" role="group" aria-label="View mode">
+        <button type="button" class="vt-btn vt-active" data-mode="list" onclick="setViewMode('list')">☰ List</button>
+        <button type="button" class="vt-btn" data-mode="calendar" onclick="setViewMode('calendar')">▦ Calendar</button>
+      </div>
       <button class="adv-trigger-btn" id="advTriggerBtn" type="button" onclick="openAdvDrawer()">
         <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 3h10M4 7h6M6 11h2"/></svg>
         Advanced Filters
@@ -235,6 +368,7 @@
         <span class="legend-sep">·</span>
         <span class="legend-item"><span class="legend-key ros-down">▼</span> ROS behind target</span>
       </div>
+      <div class="list-pane" id="listPane" style="flex:1;min-height:0;display:flex;flex-direction:column;">
       <div class="table-wrap">
         <table class="data-table" id="recsTable">
           <thead id="recsTableHead"></thead>
@@ -288,6 +422,17 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+      </div><!-- /#listPane -->
+
+      <!-- Calendar pane (heatmap) -->
+      <div class="cal-pane hidden" id="calPane">
+        <div class="cal-wrap">
+          <table class="cal-table">
+            <thead id="calHead"></thead>
+            <tbody id="calBody"></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -914,6 +1059,9 @@ function renderRecsTable() {
       rcb.innerHTML = `Showing all <strong>${totalDestCount}</strong> destinations · <strong>${totalLeaves}</strong> rows`;
     }
   }
+
+  // Keep the calendar in sync when it is the active view.
+  if (typeof viewMode !== 'undefined' && viewMode === 'calendar') renderCalendar();
 }
 
 // ── Competitor Analysis flat table ─────────────────────────
@@ -1351,6 +1499,157 @@ function buildAdvDrawer() {
       },
     });
   });
+}
+
+// ── Calendar view ─────────────────────────────────────────
+let viewMode = 'list'; // 'list' | 'calendar'
+const calExpandedDests  = new Set(); // dest.id
+const calExpandedRoutes = new Set(); // `${dest.id}::${route.id}`
+
+// Build calendar header weeks from the first route's dates
+const CAL_WEEKS = (FLIGHT_DATA[0]?.routes[0]?.dates || []).map((d, i) => ({
+  idx: i,
+  departureDate: d.departureDate,
+  label: `Wk ${shortMMDD(d.departureDate)}`,
+  mmdd: shortMMDD(d.departureDate),
+}));
+
+function setViewMode(mode) {
+  viewMode = mode;
+  document.querySelectorAll('.vt-btn').forEach(b => {
+    b.classList.toggle('vt-active', b.dataset.mode === mode);
+  });
+  document.getElementById('listPane').classList.toggle('hidden', mode !== 'list');
+  document.getElementById('calPane').classList.toggle('hidden', mode !== 'calendar');
+  if (mode === 'calendar') renderCalendar();
+}
+function toggleCalDest(id) {
+  if (calExpandedDests.has(id)) calExpandedDests.delete(id);
+  else calExpandedDests.add(id);
+  renderCalendar();
+}
+function toggleCalRoute(key) {
+  if (calExpandedRoutes.has(key)) calExpandedRoutes.delete(key);
+  else calExpandedRoutes.add(key);
+  renderCalendar();
+}
+
+function calLfClass(lf) {
+  if (lf == null || isNaN(lf) || lf === 0) return 'cal-none';
+  const pct = lf * 100;
+  if (pct >= 80) return 'cal-hi';
+  if (pct >= 60) return 'cal-mid';
+  return 'cal-lo';
+}
+
+function renderCalendarHead() {
+  const thead = document.getElementById('calHead');
+  const weekCells = CAL_WEEKS.map(wk => {
+    return `<th class="cal-wk-hd">
+      <div class="cal-wk-lbl">${wk.label}</div>
+      <div class="cal-wk-sub">${wk.mmdd}</div>
+    </th>`;
+  }).join('');
+  thead.innerHTML = `<tr><th class="cal-corner">Destination / Route / Flight</th>${weekCells}</tr>`;
+}
+
+function renderCalendar() {
+  renderCalendarHead();
+  const tbody = document.getElementById('calBody');
+  const rows = [];
+
+  FLIGHT_DATA.forEach(dest => {
+    if (headerFiltersActive() && !passesHeaderFilters(dest)) return;
+    const destOpen = calExpandedDests.has(dest.id);
+
+    // Dest-level cells: aggregate across all routes for that week
+    const destCells = CAL_WEEKS.map((wk, weekIdx) => {
+      const datesAtWeek = dest.routes.map(r => r.dates[weekIdx]).filter(Boolean);
+      if (!datesAtWeek.length) return '<td class="cal-cell cal-none"><div class="cal-pri">—</div></td>';
+      if (headerFiltersActive() && !passesHeaderDate(datesAtWeek[0])) {
+        return '<td class="cal-cell cal-none"><div class="cal-pri">—</div></td>';
+      }
+      const agg = aggDates(datesAtWeek);
+      const cls = calLfClass(agg.lf);
+      return `<td class="cal-cell ${cls}">
+        <div class="cal-pri">${Math.round(agg.lf * 100)}%</div>
+        <div class="cal-sec">${fmt$(agg.avgCurrentFare)}</div>
+      </td>`;
+    }).join('');
+
+    rows.push(`<tr class="cal-dest">
+      <td class="cal-name" onclick="toggleCalDest('${dest.id}')" style="cursor:pointer;">
+        <button class="expand-btn ${destOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleCalDest('${dest.id}')">${chevron(destOpen)}</button>
+        ${dest.name}
+      </td>
+      ${destCells}
+    </tr>`);
+
+    if (!destOpen) return;
+
+    dest.routes.forEach(route => {
+      const routeKey = `${dest.id}::${route.id}`;
+      const routeOpen = calExpandedRoutes.has(routeKey);
+
+      const routeCells = CAL_WEEKS.map((wk, weekIdx) => {
+        const date = route.dates[weekIdx];
+        if (!date) return '<td class="cal-cell cal-none"><div class="cal-pri">—</div></td>';
+        if (headerFiltersActive() && !passesHeaderDate(date)) {
+          return '<td class="cal-cell cal-none"><div class="cal-pri">—</div></td>';
+        }
+        const agg = aggDates([date]);
+        const cls = calLfClass(agg.lf);
+        return `<td class="cal-cell ${cls}">
+          <div class="cal-pri">${Math.round(agg.lf * 100)}%</div>
+          <div class="cal-sec">${fmt$(agg.avgCurrentFare)}<span class="cal-rec">${fmt$(agg.avgRecFare)}</span></div>
+        </td>`;
+      }).join('');
+
+      rows.push(`<tr class="cal-route">
+        <td class="cal-name" onclick="toggleCalRoute('${routeKey}')" style="cursor:pointer;">
+          <button class="expand-btn ${routeOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleCalRoute('${routeKey}')">${chevron(routeOpen)}</button>
+          <span class="font-mono" style="font-weight:500;">${route.flightNum}</span>
+          <span style="color:var(--text-secondary);margin-left:6px;font-size:11px;">${route.origin}→${dest.id}</span>
+          ${flightCatBadge(route.category)}
+        </td>
+        ${routeCells}
+      </tr>`);
+
+      if (!routeOpen) return;
+
+      // Leaf row: one row showing flight-date detail across the 8 week columns
+      const leafCells = CAL_WEEKS.map((wk, weekIdx) => {
+        const date = route.dates[weekIdx];
+        if (!date) return '<td class="cal-cell cal-none"><div class="cal-pri">—</div></td>';
+        if (headerFiltersActive() && !passesHeaderDate(date)) {
+          return '<td class="cal-cell cal-none"><div class="cal-pri">—</div></td>';
+        }
+        const eff = getEffectiveFare(date);
+        const lf = date.capacity ? date.sold / date.capacity : 0;
+        const dFare = date.recFare - eff;
+        const cls = calLfClass(lf);
+        let flags = '';
+        if (date.hasCostChange) flags += '⚠️';
+        if (notes[date.id]) flags += '📝';
+        if (date.locked) flags += '🔒';
+        const deltaStr = dFare ? ((dFare > 0 ? '+' : '') + fmt$(dFare)) : '';
+        return `<td class="cal-cell ${cls} clickable" onclick="openNotesModal('${date.id}')">
+          ${flags ? `<div class="cal-flags">${flags}</div>` : ''}
+          <div class="cal-pri">${Math.round(lf * 100)}%</div>
+          <div class="cal-sec">${fmt$(eff)}<span class="cal-rec">${fmt$(date.recFare)}</span></div>
+          ${deltaStr ? `<div class="cal-tri">${deltaStr}</div>` : ''}
+        </td>`;
+      }).join('');
+
+      // One "date detail" row under each route when expanded — departure times per week
+      rows.push(`<tr class="cal-date">
+        <td class="cal-name">Flight dates</td>
+        ${leafCells}
+      </tr>`);
+    });
+  });
+
+  tbody.innerHTML = rows.join('');
 }
 
 // ── Init ───────────────────────────────────────────────────

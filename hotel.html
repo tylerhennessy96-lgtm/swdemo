@@ -62,6 +62,328 @@
     }
     .legend-bar .legend-sep { color: var(--border-mid); }
 
+    /* ── View mode toggle (List / Calendar) ─────────────────── */
+    .view-toggle {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      height: 28px;
+    }
+    .vt-btn {
+      background: var(--surface);
+      border: none;
+      padding: 0 12px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-family: 'Archivo', sans-serif;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .vt-btn + .vt-btn { border-left: 1px solid var(--border); }
+    .vt-btn.vt-active { background: var(--accent); color: #fff; }
+    .vt-btn:not(.vt-active):hover { background: #f5f6f8; color: var(--text-primary); }
+
+    /* ── Calendar view ───────────────────────────────────────── */
+    .cal-pane { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .cal-pane.hidden { display: none; }
+    .cal-wrap {
+      flex: 1;
+      overflow: auto;
+      background: #fff;
+    }
+    table.cal-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: max-content;
+      min-width: 100%;
+      table-layout: fixed;
+    }
+    table.cal-table thead th {
+      position: sticky;
+      top: 0;
+      background: var(--nav-bg);
+      color: #fff;
+      font-weight: 600;
+      text-align: center;
+      padding: 8px 10px;
+      height: 48px;
+      box-sizing: border-box;
+      border-bottom: 1px solid var(--nav-border);
+      border-right: 1px solid rgba(255,255,255,0.08);
+      z-index: 19;
+    }
+    table.cal-table thead th.cal-corner {
+      left: 0;
+      z-index: 21;
+      text-align: left;
+      padding-left: 16px;
+      font-size: 11.5px;
+      min-width: 220px;
+      width: 220px;
+    }
+    table.cal-table thead th.cal-wk-hd { min-width: 130px; width: 130px; }
+    table.cal-table thead th .cal-wk-lbl { font-size: 12px; font-weight: 600; }
+    table.cal-table thead th .cal-wk-sub { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+
+    table.cal-table td.cal-name {
+      position: sticky;
+      left: 0;
+      z-index: 10;
+      min-width: 220px;
+      width: 220px;
+      background: #fff;
+      padding: 10px 10px 10px 16px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 12.5px;
+    }
+    table.cal-table tr.cal-dest td.cal-name {
+      background: #fafbfc;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    table.cal-table tr.cal-hotel td.cal-name {
+      padding-left: 32px;
+      font-weight: 500;
+    }
+    table.cal-table tr.cal-hotel td.cal-name .cls-inline {
+      display: inline-flex; align-items: center; gap: 6px; margin-left: 6px;
+    }
+    table.cal-table tr.cal-cat td.cal-name {
+      padding-left: 56px;
+      color: var(--text-secondary);
+    }
+
+    table.cal-table td.cal-cell {
+      min-width: 130px;
+      width: 130px;
+      height: 68px;
+      text-align: center;
+      padding: 8px 6px;
+      box-sizing: border-box;
+      border-bottom: 1px solid rgba(255,255,255,0.18);
+      border-right: 1px solid rgba(255,255,255,0.18);
+      color: #fff;
+      vertical-align: middle;
+      position: relative;
+    }
+    table.cal-table td.cal-cell.cal-hi   { background: #1a7a4a; }
+    table.cal-table td.cal-cell.cal-mid  { background: #c47a1e; }
+    table.cal-table td.cal-cell.cal-lo   { background: #b03030; }
+    table.cal-table td.cal-cell.cal-none {
+      background: #f3f4f6;
+      color: var(--text-muted);
+      border-color: var(--border);
+    }
+    table.cal-table td.cal-cell .cal-pri { font-size: 18px; font-weight: 700; line-height: 1.15; }
+    table.cal-table td.cal-cell .cal-sec { font-size: 11px; margin-top: 3px; opacity: 0.95; }
+    table.cal-table td.cal-cell .cal-sec .cal-rec { color: #a5f3fc; font-weight: 500; margin-left: 4px; }
+    table.cal-table td.cal-cell .cal-tri { font-size: 10px; margin-top: 2px; opacity: 0.9; }
+    table.cal-table td.cal-cell .cal-flags {
+      position: absolute;
+      top: 3px;
+      right: 5px;
+      font-size: 10px;
+      display: flex;
+      gap: 2px;
+      line-height: 1;
+    }
+    table.cal-table td.cal-cell.clickable { cursor: pointer; }
+    table.cal-table td.cal-cell.clickable:hover { filter: brightness(1.12); }
+    table.cal-table td.cal-cell.cal-none .cal-pri { color: var(--text-muted); font-weight: 500; }
+
+    /* ── Calendar click-to-detail side panel ────────────────── */
+    .cdp {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 360px;
+      background: #fff;
+      border-left: 2px solid #0d9488;
+      box-shadow: -8px 0 24px rgba(0,0,0,0.12);
+      transform: translateX(100%);
+      transition: transform .25s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 55;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      font-size: 12.5px;
+      color: var(--text-primary);
+    }
+    .cdp.open { transform: translateX(0); }
+    .cdp-header {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 2;
+    }
+    .cdp-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 16px;
+      line-height: 1;
+    }
+    .cdp-close:hover { color: var(--text-primary); background: #f3f4f6; }
+    .cdp-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .cdp-sub   { font-size: 11.5px; color: var(--text-secondary); margin-top: 3px; }
+    .cdp-meta  { display: flex; align-items: center; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+    .cdp-section {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .cdp-section:last-of-type { border-bottom: none; }
+    .cdp-section-title {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 10px;
+    }
+    .cdp-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 12.5px;
+    }
+    .cdp-row:last-child { margin-bottom: 0; }
+    .cdp-row .cdp-label { color: var(--text-secondary); }
+    .cdp-row .cdp-val   { font-weight: 500; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+    .cdp-row .cdp-val.teal { color: #0d9488; }
+    .cdp-row .cdp-big    { font-size: 20px; font-weight: 700; line-height: 1; }
+
+    .cdp-occ-bar {
+      margin-bottom: 8px;
+    }
+    .cdp-occ-bar .cdp-occ-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 3px;
+    }
+    .cdp-occ-bar .cdp-occ-track {
+      height: 6px;
+      background: #f3f4f6;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .cdp-occ-bar .cdp-occ-fill { height: 100%; border-radius: 3px; }
+    .cdp-occ-fill.cdp-hi  { background: #10b981; }
+    .cdp-occ-fill.cdp-mid { background: #f59e0b; }
+    .cdp-occ-fill.cdp-lo  { background: #ef4444; }
+
+    .cdp-sparkline {
+      width: 100%;
+      height: 40px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .cdp-chip-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .cdp-chip-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      padding: 6px 10px;
+      background: #fafbfc;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+    .cdp-chip-row .cdp-chip-name { color: var(--text-primary); }
+
+    .cdp-alert {
+      display: flex;
+      gap: 8px;
+      padding: 8px 10px;
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      border-radius: 4px;
+      font-size: 11.5px;
+      color: #92400e;
+      margin-bottom: 6px;
+    }
+    .cdp-alert.cdp-alert-locked { background: #fce7f3; border-color: #fbcfe8; color: #9d174d; }
+
+    .cdp-actions {
+      padding: 14px 20px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #fff;
+      position: sticky;
+      bottom: 0;
+    }
+    .cdp-btn {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 6px;
+      font-family: 'Archivo', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--text-primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .cdp-btn:hover { border-color: #0d9488; color: #0d9488; }
+    .cdp-btn.primary { background: #0d9488; color: #fff; border-color: #0d9488; }
+    .cdp-btn.primary:hover { background: #0b7f73; border-color: #0b7f73; color: #fff; }
+    .cdp-btn.primary.locked { background: #c4005e; border-color: #c4005e; }
+
+    .cdp-link {
+      display: inline-flex;
+      font-size: 11.5px;
+      color: #0d9488;
+      text-decoration: none;
+      margin-top: 6px;
+      cursor: pointer;
+    }
+    .cdp-link:hover { text-decoration: underline; }
+
+    .cdp-confirmation {
+      font-size: 11.5px;
+      color: #047857;
+      background: #d1fae5;
+      border: 1px solid #6ee7b7;
+      border-radius: 4px;
+      padding: 6px 10px;
+      margin-bottom: 6px;
+      display: none;
+    }
+    .cdp-confirmation.shown { display: block; }
+
     /* Compact, outlined region badge on the second line of dest+week rows */
     tr.row-property .row-region {
       margin-top: 3px;
@@ -208,6 +530,10 @@
     <a class="subsubtab active" data-view="recs"       onclick="switchView('recs')">New Recommendations</a>
     <a class="subsubtab"        data-view="exceptions" onclick="switchView('exceptions')">Cost Change Exceptions</a>
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px;padding-right:16px;">
+      <div class="view-toggle" role="group" aria-label="View mode">
+        <button type="button" class="vt-btn vt-active" data-mode="list" onclick="setViewMode('list')">☰ List</button>
+        <button type="button" class="vt-btn" data-mode="calendar" onclick="setViewMode('calendar')">▦ Calendar</button>
+      </div>
       <button class="adv-trigger-btn" id="advTriggerBtn" type="button" onclick="openAdvDrawer()">
         <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 3h10M4 7h6M6 11h2"/></svg>
         Advanced Filters
@@ -239,6 +565,7 @@
         <span class="legend-sep">·</span>
         <span class="legend-item"><span class="legend-key">📝</span> Note attached</span>
       </div>
+      <div class="list-pane" id="listPane" style="flex:1;min-height:0;display:flex;flex-direction:column;">
       <div class="table-wrap">
         <table class="data-table" id="recsTable">
           <thead id="recsTableHead"></thead>
@@ -294,6 +621,17 @@
           </div>
         </div>
       </div>
+      </div><!-- /#listPane -->
+
+      <!-- Calendar pane (heatmap) -->
+      <div class="cal-pane hidden" id="calPane">
+        <div class="cal-wrap">
+          <table class="cal-table">
+            <thead id="calHead"></thead>
+            <tbody id="calBody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- Cost Change Exceptions view (flat table) -->
@@ -320,6 +658,14 @@
       </div>
     </div>
   </div><!-- /.main -->
+
+  <!-- ── Calendar click-to-detail side panel ── -->
+  <aside class="cdp" id="calDetailPanel" aria-hidden="true">
+    <button type="button" class="cdp-close" onclick="closeCalPanel()" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="3" y1="3" x2="11" y2="11"/><line x1="11" y1="3" x2="3" y2="11"/></svg>
+    </button>
+    <div id="cdpContent"></div>
+  </aside>
 
   <!-- ── Advanced Filters Drawer ── -->
   <div class="adv-backdrop" id="advBackdrop" onclick="closeAdvDrawer()"></div>
@@ -913,6 +1259,9 @@ function renderRecsTable() {
       rcb.innerHTML = `Showing all <strong>${totalDestCount}</strong> destinations · <strong>${totalLeaves}</strong> rows`;
     }
   }
+
+  // Keep the calendar in sync when it is the active view.
+  if (typeof viewMode !== 'undefined' && viewMode === 'calendar') renderCalendar();
 }
 
 // ── Cost Change Exceptions flat table ──────────────────────
@@ -1219,6 +1568,15 @@ document.addEventListener('click', (e) => {
   }
   // Close notes modal when clicking backdrop
   if (e.target.id === 'notesModalBackdrop') closeNotesModal();
+
+  // Close calendar detail panel when clicking outside both the panel and any
+  // calendar cell (cells handle their own open/update via stopPropagation).
+  if (calPanelOpen && !e.target.closest('#calDetailPanel') && !e.target.closest('.cal-cell')) {
+    closeCalPanel();
+  }
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && calPanelOpen) closeCalPanel();
 });
 
 // ── Advanced filter predicates ─────────────────────────────
@@ -1390,6 +1748,421 @@ function buildAdvDrawer() {
       },
     });
   });
+}
+
+// ── Calendar view ─────────────────────────────────────────
+let viewMode = 'list'; // 'list' | 'calendar'
+const calExpandedDests  = new Set(); // dest.id
+const calExpandedHotels = new Set(); // `${dest.id}::${hotel.id}`
+
+function setViewMode(mode) {
+  viewMode = mode;
+  document.querySelectorAll('.vt-btn').forEach(b => {
+    b.classList.toggle('vt-active', b.dataset.mode === mode);
+  });
+  document.getElementById('listPane').classList.toggle('hidden', mode !== 'list');
+  document.getElementById('calPane').classList.toggle('hidden', mode !== 'calendar');
+  if (mode === 'calendar') renderCalendar();
+}
+function toggleCalDest(id) {
+  if (calExpandedDests.has(id)) calExpandedDests.delete(id);
+  else calExpandedDests.add(id);
+  renderCalendar();
+}
+function toggleCalHotel(key) {
+  if (calExpandedHotels.has(key)) calExpandedHotels.delete(key);
+  else calExpandedHotels.add(key);
+  renderCalendar();
+}
+
+function calOccClass(occ) {
+  if (occ == null || isNaN(occ) || occ === 0) return 'cal-none';
+  const pct = occ * 100;
+  if (pct >= 75) return 'cal-hi';
+  if (pct >= 50) return 'cal-mid';
+  return 'cal-lo';
+}
+
+function renderCalendarHead() {
+  const thead = document.getElementById('calHead');
+  const weekCells = CHECK_IN_WEEKS.map(wk => {
+    const mmdd = (wk.weekStart || '').slice(0, 5);
+    return `<th class="cal-wk-hd">
+      <div class="cal-wk-lbl">${wk.weekLabel}</div>
+      <div class="cal-wk-sub">${mmdd}</div>
+    </th>`;
+  }).join('');
+  thead.innerHTML = `<tr><th class="cal-corner">Destination / Hotel / Room</th>${weekCells}</tr>`;
+}
+
+function renderCalendar() {
+  renderCalendarHead();
+  const tbody = document.getElementById('calBody');
+  const rows = [];
+
+  HOTEL_DATA.forEach(dest => {
+    // Apply header filter (dest-level)
+    if (headerFiltersActive()) {
+      // Use a representative week to skip non-matching dests by brand/region/dest/rm
+      if (!passesHeaderFilters(dest, CHECK_IN_WEEKS[0])) return;
+    }
+    const destOpen = calExpandedDests.has(dest.id);
+
+    const destCells = CHECK_IN_WEEKS.map((wk, weekIdx) => {
+      // Dates-range filter applies per week column
+      const wkActive = !headerFiltersActive() || passesHeaderFilters(dest, wk);
+      if (!wkActive) return '<td class="cal-cell cal-none"><div class="cal-pri">—</div></td>';
+      const allCats = dest.hotels.flatMap(h => h.categories);
+      const agg = aggCatsAtWeek(allCats, weekIdx);
+      const cls = calOccClass(agg.currentOcc);
+      return `<td class="cal-cell ${cls} clickable" onclick="event.stopPropagation();openCalPanel('dest','${dest.id}','','',${weekIdx})">
+        <div class="cal-pri">${fmtPct(agg.currentOcc)}</div>
+        <div class="cal-sec">${fmt$(agg.currentADR)}</div>
+      </td>`;
+    }).join('');
+
+    rows.push(`<tr class="cal-dest">
+      <td class="cal-name" onclick="toggleCalDest('${dest.id}')" style="cursor:pointer;">
+        <button class="expand-btn ${destOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleCalDest('${dest.id}')">${chevron(destOpen)}</button>
+        ${dest.name}
+      </td>
+      ${destCells}
+    </tr>`);
+
+    if (!destOpen) return;
+
+    dest.hotels.forEach(hotel => {
+      const hotelKey = `${dest.id}::${hotel.id}`;
+      const hotelOpen = calExpandedHotels.has(hotelKey);
+
+      const hotelCells = CHECK_IN_WEEKS.map((wk, weekIdx) => {
+        const wkActive = !headerFiltersActive() || passesHeaderFilters(dest, wk);
+        if (!wkActive) return '<td class="cal-cell cal-none"><div class="cal-pri">—</div></td>';
+        const agg = aggCatsAtWeek(hotel.categories, weekIdx);
+        const cls = calOccClass(agg.currentOcc);
+        return `<td class="cal-cell ${cls} clickable" onclick="event.stopPropagation();openCalPanel('hotel','${dest.id}','${hotel.id}','',${weekIdx})">
+          <div class="cal-pri">${fmtPct(agg.currentOcc)}</div>
+          <div class="cal-sec">${fmt$(agg.currentADR)}<span class="cal-rec">${fmt$(agg.recADR)}</span></div>
+        </td>`;
+      }).join('');
+
+      rows.push(`<tr class="cal-hotel">
+        <td class="cal-name" onclick="toggleCalHotel('${hotelKey}')" style="cursor:pointer;">
+          <button class="expand-btn ${hotelOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleCalHotel('${hotelKey}')">${chevron(hotelOpen)}</button>
+          ${hotel.name}
+          <span class="cls-inline">${classBadge(hotel.classification)}${starsMarkup(hotel.stars)}</span>
+        </td>
+        ${hotelCells}
+      </tr>`);
+
+      if (!hotelOpen) return;
+
+      hotel.categories.forEach(cat => {
+        const catCells = cat.checkInWeeks.map((week, weekIdx) => {
+          const wkMeta = CHECK_IN_WEEKS[weekIdx];
+          const wkActive = !headerFiltersActive() || passesHeaderFilters(dest, wkMeta);
+          if (!wkActive) return '<td class="cal-cell cal-none"><div class="cal-pri">—</div></td>';
+          const eff = getEffectiveADR(week);
+          const delta = week.recADR - eff;
+          const cls = calOccClass(week.currentOcc);
+          let flags = '';
+          if (week.hasCostChange) flags += '⚠️';
+          if (notes[week.id]) flags += '📝';
+          const deltaStr = delta ? ((delta > 0 ? '+' : '') + fmt$(delta)) : '';
+          return `<td class="cal-cell ${cls} clickable" onclick="event.stopPropagation();openCalPanel('cat','${dest.id}','${hotel.id}','${cat.id}',${weekIdx})">
+            ${flags ? `<div class="cal-flags">${flags}</div>` : ''}
+            <div class="cal-pri">${fmtPct(week.currentOcc)}</div>
+            <div class="cal-sec">${fmt$(eff)}<span class="cal-rec">${fmt$(week.recADR)}</span></div>
+            ${deltaStr ? `<div class="cal-tri">${deltaStr}</div>` : ''}
+          </td>`;
+        }).join('');
+
+        rows.push(`<tr class="cal-cat">
+          <td class="cal-name">${cat.name}</td>
+          ${catCells}
+        </tr>`);
+      });
+    });
+  });
+
+  tbody.innerHTML = rows.join('');
+}
+
+// ── Calendar click-to-detail panel ────────────────────────
+let calPanelOpen = false;
+let calPanelCtx  = null; // { type, destId, hotelId, catId, weekIdx }
+
+function openCalPanel(type, destId, hotelId, catId, weekIdx) {
+  calPanelOpen = true;
+  calPanelCtx = { type, destId, hotelId, catId, weekIdx };
+  renderCalPanel();
+  document.getElementById('calDetailPanel').classList.add('open');
+  document.getElementById('calDetailPanel').setAttribute('aria-hidden', 'false');
+}
+function closeCalPanel() {
+  calPanelOpen = false;
+  calPanelCtx = null;
+  document.getElementById('calDetailPanel').classList.remove('open');
+  document.getElementById('calDetailPanel').setAttribute('aria-hidden', 'true');
+}
+
+function occBar(label, occ) {
+  const pct = Math.max(0, Math.min(100, Math.round((occ || 0) * 100)));
+  let cls = 'cdp-mid';
+  if (pct >= 75) cls = 'cdp-hi';
+  else if (pct < 50) cls = 'cdp-lo';
+  return `<div class="cdp-occ-bar">
+    <div class="cdp-occ-label"><span>${label}</span><span>${pct}%</span></div>
+    <div class="cdp-occ-track"><div class="cdp-occ-fill ${cls}" style="width:${pct}%;"></div></div>
+  </div>`;
+}
+
+function sparklineData(week) {
+  // Synthesized 7-day recent bookings ending at today's rate-of-sale pace.
+  const id = (week && week.id) || 'x';
+  const seed = id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  const base = Math.max(1, Math.round((week && week.sold ? week.sold : 20) / 8));
+  const data = [];
+  for (let i = 0; i < 7; i++) {
+    const noise = Math.sin((seed + i * 3) * 0.55) * 1.8 + Math.cos((seed + i * 2) * 0.31);
+    data.push(Math.max(0, Math.round(base + noise)));
+  }
+  return data;
+}
+function drawSparkline(canvasId, data) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  const w = rect.width || 320;
+  const h = rect.height || 40;
+  canvas.width = w * 2;
+  canvas.height = h * 2;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  ctx.scale(2, 2);
+  ctx.clearRect(0, 0, w, h);
+  const pad = 4;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  ctx.strokeStyle = '#0d9488';
+  ctx.lineWidth = 1.75;
+  ctx.beginPath();
+  const pts = data.map((v, i) => {
+    const x = pad + (i / (data.length - 1)) * (w - pad * 2);
+    const y = (h - pad) - ((v - min) / range) * (h - pad * 2);
+    return [x, y];
+  });
+  pts.forEach(([x, y], i) => { if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
+  ctx.stroke();
+  // Fill under line
+  ctx.lineTo(pts[pts.length - 1][0], h - pad);
+  ctx.lineTo(pts[0][0], h - pad);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(13,148,136,0.10)';
+  ctx.fill();
+  // Dots
+  ctx.fillStyle = '#0d9488';
+  pts.forEach(([x, y]) => {
+    ctx.beginPath();
+    ctx.arc(x, y, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+function renderCalPanel() {
+  if (!calPanelCtx) return;
+  const { type, destId, hotelId, catId, weekIdx } = calPanelCtx;
+  const dest = HOTEL_DATA.find(d => d.id === destId);
+  if (!dest) return;
+  const wkMeta = CHECK_IN_WEEKS[weekIdx] || {};
+  const weekLabel = `${wkMeta.weekLabel || ''} — ${wkMeta.weekStart || ''}`;
+
+  const content = document.getElementById('cdpContent');
+
+  if (type === 'cat') {
+    const hotel = dest.hotels.find(h => h.id === hotelId);
+    const cat   = hotel ? hotel.categories.find(c => c.id === catId) : null;
+    const week  = cat ? cat.checkInWeeks[weekIdx] : null;
+    if (!hotel || !cat || !week) { content.innerHTML = ''; return; }
+    const eff = getEffectiveADR(week);
+    const delta = week.recADR - eff;
+    const curMargin = eff - week.supplierCost;
+    const recMargin = week.recADR - week.supplierCost;
+    const marginPct = eff ? (curMargin / eff) : 0;
+    const marginD = recMargin - curMargin;
+    const targetOcc = 0.78; // demo target
+    const ros = Math.max(0, Math.round((week.sold / 10) * 10) / 10);
+    const rosTarget = Math.max(1, Math.round(((week.allocation * targetOcc - week.sold) / 7) * 10) / 10);
+    const rosAhead  = ros >= rosTarget;
+
+    const alerts = [];
+    if (week.hasCostChange) alerts.push('<div class="cdp-alert">⚠️ Supplier cost changed recently on this week.</div>');
+    if (week.locked)        alerts.push('<div class="cdp-alert cdp-alert-locked">🔒 Price locked · Sarah Chen</div>');
+
+    const sold = `${week.sold} / ${week.allocation} rooms`;
+    const soldPct = week.allocation ? week.sold / week.allocation : 0;
+
+    content.innerHTML = `
+      <div class="cdp-header">
+        <div class="cdp-title">${hotel.name}</div>
+        <div class="cdp-sub">${cat.name} · ${weekLabel}</div>
+        <div class="cdp-meta">
+          ${classBadge(hotel.classification)}
+          ${starsMarkup(hotel.stars)}
+        </div>
+      </div>
+      <div class="cdp-confirmation" id="cdpConfirm">Recommendation accepted.</div>
+
+      <div class="cdp-section">
+        <div class="cdp-section-title">Performance</div>
+        ${occBar('Current occ',  week.currentOcc)}
+        ${occBar('Forecast occ', week.forecastOcc)}
+        ${occBar('Target occ',   targetOcc)}
+        <div class="cdp-row"><span class="cdp-label">Sold / Allocation</span><span class="cdp-val">${sold}</span></div>
+        <div class="cdp-row"><span class="cdp-label">Sold %</span><span class="cdp-val">${soldPctText(soldPct)}</span></div>
+      </div>
+
+      <div class="cdp-section">
+        <div class="cdp-section-title">Pricing</div>
+        <div class="cdp-row"><span class="cdp-label">Supplier cost / night</span><span class="cdp-val">${fmt$(week.supplierCost)}</span></div>
+        <div class="cdp-row"><span class="cdp-label">Current ADR</span><span class="cdp-val cdp-big">${fmt$(eff)}</span></div>
+        <div class="cdp-row"><span class="cdp-label">Recommended ADR</span><span class="cdp-val cdp-big teal">${fmt$(week.recADR)}</span></div>
+        <div class="cdp-row"><span class="cdp-label">Delta</span><span class="cdp-val">${deltaCell(delta)}</span></div>
+        <div class="cdp-row"><span class="cdp-label">Current margin</span><span class="cdp-val">${fmt$(curMargin)}</span></div>
+        <div class="cdp-row"><span class="cdp-label">Rec margin</span><span class="cdp-val teal">${fmt$(recMargin)}</span></div>
+        <div class="cdp-row"><span class="cdp-label">Margin Δ</span><span class="cdp-val">${deltaCell(marginD)}</span></div>
+        <div class="cdp-row"><span class="cdp-label">Margin %</span><span class="cdp-val">${marginPctBadge(marginPct)}</span></div>
+      </div>
+
+      <div class="cdp-section">
+        <div class="cdp-section-title">Booking Trend</div>
+        <canvas class="cdp-sparkline" id="cdpSpark"></canvas>
+        <div class="cdp-row"><span class="cdp-label">Rate of sale</span><span class="cdp-val">${ros.toFixed(1)} rooms/day</span></div>
+        <div class="cdp-row"><span class="cdp-label">Pace vs target</span><span class="cdp-val" style="color:${rosAhead ? '#047857' : 'var(--danger)'};">${rosAhead ? '▲ Ahead' : '▼ Behind'}</span></div>
+      </div>
+
+      ${alerts.length ? `<div class="cdp-section"><div class="cdp-section-title">Alerts</div>${alerts.join('')}</div>` : ''}
+
+      <div class="cdp-actions">
+        <button type="button" class="cdp-btn primary" onclick="cdpAcceptRec('${week.id}')">Accept Recommendation</button>
+        <button type="button" class="cdp-btn ${week.locked ? 'primary locked' : ''}" onclick="cdpToggleLock('${week.id}')">${week.locked ? '🔒 Unlock Price' : '🔒 Lock Price'}</button>
+        <button type="button" class="cdp-btn" onclick="openNotesModal('${week.id}')">📝 Add / Edit Note</button>
+      </div>
+    `;
+    requestAnimationFrame(() => drawSparkline('cdpSpark', sparklineData(week)));
+    return;
+  }
+
+  if (type === 'hotel') {
+    const hotel = dest.hotels.find(h => h.id === hotelId);
+    if (!hotel) { content.innerHTML = ''; return; }
+    const hAgg = aggCatsAtWeek(hotel.categories, weekIdx);
+    const hMargin = aggMargin(hotel.categories.map(c => c.checkInWeeks[weekIdx]).filter(Boolean));
+
+    const catChips = hotel.categories.map(c => {
+      const w = c.checkInWeeks[weekIdx];
+      const pct = Math.round((w.currentOcc || 0) * 100);
+      return `<div class="cdp-chip-row">
+        <span class="cdp-chip-name">${c.name}</span>
+        <span>${occPill(w.currentOcc)}</span>
+      </div>`;
+    }).join('');
+
+    content.innerHTML = `
+      <div class="cdp-header">
+        <div class="cdp-title">${hotel.name}</div>
+        <div class="cdp-sub">${dest.name} · ${weekLabel}</div>
+        <div class="cdp-meta">${classBadge(hotel.classification)} ${starsMarkup(hotel.stars)}</div>
+      </div>
+
+      <div class="cdp-section">
+        <div class="cdp-section-title">Performance (hotel avg)</div>
+        ${occBar('Avg current occ',  hAgg.currentOcc)}
+        ${occBar('Avg forecast occ', hAgg.forecastOcc)}
+        <div class="cdp-row"><span class="cdp-label">Sold / Allocation</span><span class="cdp-val">${hAgg.sold} / ${hAgg.alloc}</span></div>
+        <div class="cdp-row"><span class="cdp-label">Sold %</span><span class="cdp-val">${soldPctText(hAgg.soldPct)}</span></div>
+      </div>
+
+      <div class="cdp-section">
+        <div class="cdp-section-title">Pricing (hotel avg)</div>
+        <div class="cdp-row"><span class="cdp-label">Avg current ADR</span><span class="cdp-val cdp-big">${fmt$(hAgg.currentADR)}</span></div>
+        <div class="cdp-row"><span class="cdp-label">Avg rec ADR</span><span class="cdp-val cdp-big teal">${fmt$(hAgg.recADR)}</span></div>
+        <div class="cdp-row"><span class="cdp-label">Delta</span><span class="cdp-val">${deltaCell(hAgg.deltaADR)}</span></div>
+        ${hMargin ? `<div class="cdp-row"><span class="cdp-label">Avg margin %</span><span class="cdp-val">${marginPctBadge(hMargin.marginPct)}</span></div>` : ''}
+      </div>
+
+      <div class="cdp-section">
+        <div class="cdp-section-title">Room Categories</div>
+        <div class="cdp-chip-list">${catChips}</div>
+        <a class="cdp-link" href="#" onclick="event.preventDefault();cdpExpandHotel('${dest.id}','${hotel.id}')">View all room types in list →</a>
+      </div>
+    `;
+    return;
+  }
+
+  // type === 'dest'
+  const allCats = dest.hotels.flatMap(h => h.categories);
+  const dAgg = aggCatsAtWeek(allCats, weekIdx);
+  const hotelChips = dest.hotels.map(h => {
+    const a = aggCatsAtWeek(h.categories, weekIdx);
+    return `<div class="cdp-chip-row">
+      <span class="cdp-chip-name">${h.name}</span>
+      <span>${occPill(a.currentOcc)}</span>
+    </div>`;
+  }).join('');
+  content.innerHTML = `
+    <div class="cdp-header">
+      <div class="cdp-title">${dest.name}</div>
+      <div class="cdp-sub">${weekLabel}</div>
+      <div class="cdp-meta">${regionBadge(dest.region)}</div>
+    </div>
+
+    <div class="cdp-section">
+      <div class="cdp-section-title">Performance (destination avg)</div>
+      ${occBar('Avg current occ',  dAgg.currentOcc)}
+      ${occBar('Avg forecast occ', dAgg.forecastOcc)}
+      <div class="cdp-row"><span class="cdp-label">Sold / Allocation</span><span class="cdp-val">${dAgg.sold} / ${dAgg.alloc}</span></div>
+    </div>
+
+    <div class="cdp-section">
+      <div class="cdp-section-title">Pricing (destination avg)</div>
+      <div class="cdp-row"><span class="cdp-label">Avg current ADR</span><span class="cdp-val cdp-big">${fmt$(dAgg.currentADR)}</span></div>
+      <div class="cdp-row"><span class="cdp-label">Avg rec ADR</span><span class="cdp-val cdp-big teal">${fmt$(dAgg.recADR)}</span></div>
+      <div class="cdp-row"><span class="cdp-label">Delta</span><span class="cdp-val">${deltaCell(dAgg.deltaADR)}</span></div>
+    </div>
+
+    <div class="cdp-section">
+      <div class="cdp-section-title">Hotels</div>
+      <div class="cdp-chip-list">${hotelChips}</div>
+      <a class="cdp-link" href="#" onclick="event.preventDefault();cdpExpandDest('${dest.id}')">View all hotels in list →</a>
+    </div>
+  `;
+}
+
+function cdpAcceptRec(weekId) {
+  acceptRec(weekId);
+  const c = document.getElementById('cdpConfirm');
+  if (c) {
+    c.classList.add('shown');
+    setTimeout(() => c.classList.remove('shown'), 1800);
+  }
+  renderCalPanel();
+}
+function cdpToggleLock(weekId) {
+  toggleLock(weekId);
+  renderCalPanel();
+}
+function cdpExpandHotel(destId, hotelId) {
+  calExpandedDests.add(destId);
+  calExpandedHotels.add(`${destId}::${hotelId}`);
+  renderCalendar();
+  closeCalPanel();
+}
+function cdpExpandDest(destId) {
+  calExpandedDests.add(destId);
+  renderCalendar();
+  closeCalPanel();
 }
 
 // ── Init ───────────────────────────────────────────────────
