@@ -272,14 +272,13 @@
 
 <script>
 // ── State ──────────────────────────────────────────────────
-// Tree: Destination → Check-in Week → Hotel → Room Category (leaf)
-const expandedDests  = new Set();  // dest.id
+// Tree: (Destination + Week) → Hotel → Room Category (leaf)
 const expandedWeeks  = new Set();  // `${dest.id}::${weekIdx}`
 const expandedHotels = new Set();  // `${dest.id}::${weekIdx}::${hotel.id}`
 const adrOverrides   = {};         // { weekId: newADR }
 const notes          = {};         // { weekId: { text, expires, createdBy, createdAt } }
 let   activeNoteKey  = null;
-// All levels start collapsed by default.
+// All top-level rows start collapsed by default.
 
 // ── Formatting helpers ─────────────────────────────────────
 function fmt$(n) {
@@ -408,19 +407,19 @@ function renderRecsHead() {
   const thead = document.getElementById('recsTableHead');
   thead.innerHTML = `
     <tr>
-      <th style="min-width:300px;">Destination / Week / Hotel / Room Category</th>
-      <th style="width:130px;">Class / Stars</th>
+      <th style="min-width:320px;">Destination / Week</th>
+      <th style="width:100px;">Check-in Wk</th>
       <th class="text-right" style="width:80px;">Alloc</th>
       <th class="text-right" style="width:80px;">Sold</th>
       <th class="text-right" style="width:70px;">Sold %</th>
       <th class="text-right" style="width:80px;">Forecast<span class="th-sub">Occ %</span></th>
       <th class="text-right" style="width:80px;">Current<span class="th-sub">Occ %</span></th>
-      <th class="text-right" style="width:80px;">Supp Cost<span class="th-sub">/ night</span></th>
+      <th class="text-right" style="width:90px;">Supp Cost<span class="th-sub">/ night</span></th>
       <th class="text-right" style="width:90px;">Current<span class="th-sub">ADR $</span></th>
       <th class="text-right" style="width:90px;">Rec<span class="th-sub">ADR $</span></th>
       <th class="text-right" style="width:80px;">Delta<span class="th-sub">$</span></th>
-      <th style="width:70px;">Flags</th>
-      <th style="width:80px;">Actions</th>
+      <th style="width:80px;">Flags</th>
+      <th style="width:110px;">Actions</th>
     </tr>
   `;
 }
@@ -430,68 +429,37 @@ function renderRecsTable() {
   const rows = [];
 
   HOTEL_DATA.forEach(dest => {
-    const destOpen = expandedDests.has(dest.id);
-    const dLive = aggregateDestinationLive(dest);
-
-    rows.push(`
-      <tr class="row-property" onclick="toggleDest('${dest.id}')" style="cursor:pointer;">
-        <td>
-          <button class="expand-btn ${destOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleDest('${dest.id}')">${chevron(destOpen)}</button>
-          <span style="font-weight:600;">${dest.name}</span>
-          ${regionBadge(dest.region)}
-          <span style="color:var(--text-muted);margin-left:8px;font-size:11px;">${dest.totalHotels} hotels</span>
-        </td>
-        <td class="text-muted">—</td>
-        <td class="text-right num">${dest.allocation.toLocaleString()}</td>
-        <td class="text-right num">${dest.sold.toLocaleString()}</td>
-        <td class="text-right">${soldPctText(dest.soldPct)}</td>
-        <td class="text-right">${occPill(dest.forecastOcc)}</td>
-        <td class="text-right num">${fmtPct(dest.currentOcc)}</td>
-        <td class="text-muted">—</td>
-        <td class="text-right">${fmt$(dLive.avgCurrentADR)}</td>
-        <td class="text-right highlight-teal">${fmt$(dLive.avgRecADR)}</td>
-        <td class="text-right">${deltaCell(dLive.deltaADR)}</td>
-        <td></td>
-        <td>
-          <span class="pkg-action-icons">
-            <button title="Booking curve" onclick="event.stopPropagation();openDestCurve('${dest.id}')">
-              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="2,11 5,7 8,9 12,3"/><line x1="2" y1="12" x2="12" y2="12"/></svg>
-            </button>
-          </span>
-        </td>
-      </tr>
-    `);
-
-    if (!destOpen) return;
-
-    // ── Level 2: Check-in Week (one row per week, aggregated across all hotels)
+    // ── Level 1: one row per (destination + check-in week) ──
     CHECK_IN_WEEKS.forEach((wkMeta, weekIdx) => {
       const weekKey = `${dest.id}::${weekIdx}`;
       const weekOpen = expandedWeeks.has(weekKey);
       const allCats = dest.hotels.flatMap(h => h.categories);
-      const wAgg = aggCatsAtWeek(allCats, weekIdx);
+      const dwAgg = aggCatsAtWeek(allCats, weekIdx);
+      // "MM/DD" extracted from weekStart (which is "MM/DD/YY")
+      const shortDate = (wkMeta.weekStart || '').slice(0, 5);
 
       rows.push(`
-        <tr class="row-bedtype clickable" onclick="toggleWeek('${weekKey}')" style="cursor:pointer;">
+        <tr class="row-property" onclick="toggleWeek('${weekKey}')" style="cursor:pointer;">
           <td>
             <button class="expand-btn ${weekOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleWeek('${weekKey}')">${chevron(weekOpen)}</button>
-            <span style="font-weight:500;">${wkMeta.weekLabel}</span>
-            <span style="color:var(--text-muted);margin-left:6px;font-size:10.5px;">${wkMeta.weekStart}</span>
+            <span style="font-weight:600;">${dest.name}</span>
+            <span style="font-weight:400;color:var(--text-muted);margin-left:6px;">- Wk ${shortDate}</span>
+            ${regionBadge(dest.region)}
           </td>
+          <td><span style="font-weight:500;">Wk ${shortDate}</span></td>
+          <td class="text-right num">${dwAgg.alloc.toLocaleString()}</td>
+          <td class="text-right num">${dwAgg.sold.toLocaleString()}</td>
+          <td class="text-right">${soldPctText(dwAgg.soldPct)}</td>
+          <td class="text-right">${occPill(dwAgg.forecastOcc)}</td>
+          <td class="text-right num">${fmtPct(dwAgg.currentOcc)}</td>
           <td class="text-muted">—</td>
-          <td class="text-right num">${wAgg.alloc.toLocaleString()}</td>
-          <td class="text-right num">${wAgg.sold.toLocaleString()}</td>
-          <td class="text-right">${soldPctText(wAgg.soldPct)}</td>
-          <td class="text-right">${occPill(wAgg.forecastOcc)}</td>
-          <td class="text-right num">${fmtPct(wAgg.currentOcc)}</td>
-          <td class="text-muted">—</td>
-          <td class="text-right">${fmt$(wAgg.currentADR)}</td>
-          <td class="text-right highlight-teal">${fmt$(wAgg.recADR)}</td>
-          <td class="text-right">${deltaCell(wAgg.deltaADR)}</td>
-          <td>${wAgg.hasCostChange ? '<span class="cost-change-flag" title="Cost change in this week">⚠️</span>' : ''}</td>
+          <td class="text-right">${fmt$(dwAgg.currentADR)}</td>
+          <td class="text-right highlight-teal">${fmt$(dwAgg.recADR)}</td>
+          <td class="text-right">${deltaCell(dwAgg.deltaADR)}</td>
+          <td>${dwAgg.hasCostChange ? '<span class="cost-change-flag" title="Cost change in this week">⚠️</span>' : ''}</td>
           <td>
             <span class="pkg-action-icons">
-              <button title="Booking curve" onclick="event.stopPropagation();openWeekCurve('${dest.id}', ${weekIdx})">
+              <button title="Booking curve" onclick="event.stopPropagation();openDestWeekCurve('${dest.id}', ${weekIdx})">
                 <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="2,11 5,7 8,9 12,3"/><line x1="2" y1="12" x2="12" y2="12"/></svg>
               </button>
             </span>
@@ -501,20 +469,22 @@ function renderRecsTable() {
 
       if (!weekOpen) return;
 
-      // ── Level 3: Hotel (within this dest+week)
+      // ── Level 2: Hotel rows (within this dest+week) ──
       dest.hotels.forEach(hotel => {
         const hotelKey = `${dest.id}::${weekIdx}::${hotel.id}`;
         const hotelOpen = expandedHotels.has(hotelKey);
         const hAgg = aggCatsAtWeek(hotel.categories, weekIdx);
 
         rows.push(`
-          <tr class="row-unit clickable" onclick="toggleHotel('${hotelKey}')" style="cursor:pointer;">
+          <tr class="row-bedtype clickable" onclick="toggleHotel('${hotelKey}')" style="cursor:pointer;">
             <td>
               <button class="expand-btn ${hotelOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleHotel('${hotelKey}')">${chevron(hotelOpen)}</button>
               <span style="font-weight:500;">${hotel.name}</span>
+              ${classBadge(hotel.classification)}
+              ${starsMarkup(hotel.stars)}
               <span class="font-mono" style="color:var(--text-muted);margin-left:6px;font-size:10.5px;">${hotel.id}</span>
             </td>
-            <td>${classBadge(hotel.classification)} ${starsMarkup(hotel.stars)}</td>
+            <td class="text-muted">—</td>
             <td class="text-right num">${hAgg.alloc.toLocaleString()}</td>
             <td class="text-right num">${hAgg.sold.toLocaleString()}</td>
             <td class="text-right">${soldPctText(hAgg.soldPct)}</td>
@@ -525,13 +495,19 @@ function renderRecsTable() {
             <td class="text-right highlight-teal">${fmt$(hAgg.recADR)}</td>
             <td class="text-right">${deltaCell(hAgg.deltaADR)}</td>
             <td>${hAgg.hasCostChange ? '<span class="cost-change-flag" title="Cost change in a category">⚠️</span>' : ''}</td>
-            <td></td>
+            <td>
+              <span class="pkg-action-icons">
+                <button title="Booking curve" onclick="event.stopPropagation();openHotelWeekCurve('${dest.id}', ${weekIdx}, '${hotel.id}')">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="2,11 5,7 8,9 12,3"/><line x1="2" y1="12" x2="12" y2="12"/></svg>
+                </button>
+              </span>
+            </td>
           </tr>
         `);
 
         if (!hotelOpen) return;
 
-        // ── Level 4 (leaf): Room Category for this dest+week+hotel
+        // ── Level 3 (leaf): Room Category for this dest+week+hotel ──
         hotel.categories.forEach(cat => {
           const week    = cat.checkInWeeks[weekIdx];
           const eff     = getEffectiveADR(week);
@@ -540,7 +516,7 @@ function renderRecsTable() {
           const hasNote = !!notes[week.id];
 
           rows.push(`
-            <tr class="row-week">
+            <tr class="row-unit">
               <td>
                 <span>${cat.name}</span>
                 <span class="font-mono" style="color:var(--text-muted);margin-left:6px;font-size:10.5px;">${cat.id}</span>
@@ -656,58 +632,8 @@ function closeExposure() {
 }
 function toggleExposure() { closeExposure(); }
 
-function openDestCurve(destId) {
-  const dest = HOTEL_DATA.find(d => d.id === destId);
-  if (!dest) return;
-
-  // Per-week aggregates across all hotels/categories for this dest
-  const weeks = CHECK_IN_WEEKS.map((wkMeta, i) => {
-    const allCats = dest.hotels.flatMap(h => h.categories);
-    const w = aggCatsAtWeek(allCats, i);
-    return { label: wkMeta.weekLabel, ...w };
-  });
-
-  const totalAlloc = dest.allocation;
-  const totalSold  = dest.sold;
-  const overallOcc = Math.round(dest.forecastOcc * 100);
-
-  document.getElementById('exposurePropName').innerHTML =
-    `<span style="color:#fff;font-weight:500;">${dest.name}</span>
-     <span style="color:#9ca3af;margin-left:8px;">Alloc ${totalAlloc.toLocaleString()}</span>
-     <span style="color:#9ca3af;margin-left:8px;">Sold ${totalSold.toLocaleString()}</span>
-     <span style="color:#9ca3af;margin-left:8px;">Occ ${overallOcc}%</span>`;
-
-  document.getElementById('chartLabel1Sub').textContent = 'Room nights — all weeks';
-  document.getElementById('chartLabel2Title').textContent = 'Occupancy Trend';
-  document.getElementById('chartLabel2Sub').textContent = 'Current vs forecast by week';
-  document.getElementById('chart2Legend').innerHTML = `
-    <span class="legend-item"><span class="legend-line" style="background:#e8007d"></span>Current %</span>
-    <span class="legend-item"><span class="legend-line" style="background:#60a5fa"></span>Forecast %</span>
-  `;
-
-  const labels = weeks.map(w => w.label);
-  // Booking curve series: cumulative sold vs target vs forecast across weeks
-  let cumSold = 0, cumTarget = 0, cumForecast = 0;
-  const sold = [], target = [], forecast = [];
-  weeks.forEach(w => {
-    cumSold += w.sold;
-    cumTarget += Math.round(w.alloc * 0.78);
-    cumForecast += Math.round(w.alloc * w.forecastOcc);
-    sold.push(cumSold);
-    target.push(cumTarget);
-    forecast.push(cumForecast);
-  });
-
-  const currentOccSeries  = weeks.map(w => Math.round(w.currentOcc * 100));
-  const forecastOccSeries = weeks.map(w => Math.round(w.forecastOcc * 100));
-
-  drawBookingLine(labels, sold, target, forecast);
-  drawSecondaryBars(labels, currentOccSeries, forecastOccSeries, 'Occ %', '%');
-
-  showExposure();
-}
-
-function openWeekCurve(destId, weekIdx) {
+// Top-level (Destination + Week) booking curve
+function openDestWeekCurve(destId, weekIdx) {
   const dest = HOTEL_DATA.find(d => d.id === destId);
   if (!dest) return;
   const wkMeta = CHECK_IN_WEEKS[weekIdx];
@@ -716,44 +642,80 @@ function openWeekCurve(destId, weekIdx) {
   const occPct = Math.round(wAgg.forecastOcc * 100);
 
   document.getElementById('exposurePropName').innerHTML =
-    `<span style="color:#fff;font-weight:500;">${dest.name}</span>
-     <span style="color:#9ca3af;margin-left:8px;">${wkMeta.weekLabel}</span>
+    `<span style="color:#fff;font-weight:500;">${dest.name} - ${wkMeta.weekLabel}</span>
      <span style="color:#9ca3af;margin-left:8px;">Alloc ${wAgg.alloc.toLocaleString()}</span>
      <span style="color:#9ca3af;margin-left:8px;">Sold ${wAgg.sold.toLocaleString()}</span>
      <span style="color:#9ca3af;margin-left:8px;">Occ ${occPct}%</span>`;
 
   document.getElementById('chartLabel1Sub').textContent = `Room nights — ${wkMeta.weekLabel}`;
-  document.getElementById('chartLabel2Title').textContent = 'ADR Trend';
-  document.getElementById('chartLabel2Sub').textContent = 'Current vs rec by hotel';
+  document.getElementById('chartLabel2Title').textContent = 'ADR by Hotel';
+  document.getElementById('chartLabel2Sub').textContent = 'Current vs rec';
   document.getElementById('chart2Legend').innerHTML = `
     <span class="legend-item"><span class="legend-line" style="background:#e8007d"></span>Current ADR</span>
     <span class="legend-item"><span class="legend-line" style="background:#60a5fa"></span>Rec ADR</span>
   `;
 
-  // Synthetic 12-step booking curve ramping to this week's sold/target/forecast
   const steps = 12;
   const labels = Array.from({ length: steps }, (_, i) => `T-${steps - i}w`);
-  const targetFinal = Math.round(wAgg.alloc * 0.78);
+  const targetFinal   = Math.round(wAgg.alloc * 0.78);
   const forecastFinal = Math.round(wAgg.alloc * wAgg.forecastOcc);
-  const soldFinal = wAgg.sold;
+  const soldFinal     = wAgg.sold;
   const ease = i => (i + 1) / steps;
   const sold     = labels.map((_, i) => Math.round(soldFinal * ease(i) * (0.82 + 0.18 * (i + 1) / steps)));
   const target   = labels.map((_, i) => Math.round(targetFinal * ease(i)));
   const forecast = labels.map((_, i) => Math.round(forecastFinal * ease(i)));
 
-  // Per-hotel ADR for the secondary bar chart
-  const hotelLabels = dest.hotels.map(h => h.name);
-  const hotelCurrent = dest.hotels.map(h => {
-    const hAgg = aggCatsAtWeek(h.categories, weekIdx);
-    return hAgg.currentADR;
-  });
-  const hotelRec = dest.hotels.map(h => {
-    const hAgg = aggCatsAtWeek(h.categories, weekIdx);
-    return hAgg.recADR;
-  });
+  const hotelLabels  = dest.hotels.map(h => h.name);
+  const hotelCurrent = dest.hotels.map(h => aggCatsAtWeek(h.categories, weekIdx).currentADR);
+  const hotelRec     = dest.hotels.map(h => aggCatsAtWeek(h.categories, weekIdx).recADR);
 
   drawBookingLine(labels, sold, target, forecast);
   drawSecondaryBars(hotelLabels, hotelCurrent, hotelRec, 'ADR $', '$');
+
+  showExposure();
+}
+
+// Hotel-row (single hotel × week) booking curve
+function openHotelWeekCurve(destId, weekIdx, hotelId) {
+  const dest = HOTEL_DATA.find(d => d.id === destId);
+  if (!dest) return;
+  const hotel = dest.hotels.find(h => h.id === hotelId);
+  if (!hotel) return;
+  const wkMeta = CHECK_IN_WEEKS[weekIdx];
+  const hAgg = aggCatsAtWeek(hotel.categories, weekIdx);
+
+  document.getElementById('exposurePropName').innerHTML =
+    `<span style="color:#fff;font-weight:500;">${hotel.name}</span>
+     <span style="color:#9ca3af;margin-left:8px;">${dest.name}</span>
+     <span style="color:#9ca3af;margin-left:8px;">${wkMeta.weekLabel}</span>
+     <span style="color:#9ca3af;margin-left:8px;">Alloc ${hAgg.alloc.toLocaleString()}</span>
+     <span style="color:#9ca3af;margin-left:8px;">Sold ${hAgg.sold.toLocaleString()}</span>
+     <span style="color:#9ca3af;margin-left:8px;">Occ ${Math.round(hAgg.forecastOcc * 100)}%</span>`;
+
+  document.getElementById('chartLabel1Sub').textContent = `Room nights — ${hotel.name}`;
+  document.getElementById('chartLabel2Title').textContent = 'ADR by Room Category';
+  document.getElementById('chartLabel2Sub').textContent = 'Current vs rec';
+  document.getElementById('chart2Legend').innerHTML = `
+    <span class="legend-item"><span class="legend-line" style="background:#e8007d"></span>Current ADR</span>
+    <span class="legend-item"><span class="legend-line" style="background:#60a5fa"></span>Rec ADR</span>
+  `;
+
+  const steps = 12;
+  const labels = Array.from({ length: steps }, (_, i) => `T-${steps - i}w`);
+  const targetFinal   = Math.round(hAgg.alloc * 0.78);
+  const forecastFinal = Math.round(hAgg.alloc * hAgg.forecastOcc);
+  const soldFinal     = hAgg.sold;
+  const ease = i => (i + 1) / steps;
+  const sold     = labels.map((_, i) => Math.round(soldFinal * ease(i) * (0.82 + 0.18 * (i + 1) / steps)));
+  const target   = labels.map((_, i) => Math.round(targetFinal * ease(i)));
+  const forecast = labels.map((_, i) => Math.round(forecastFinal * ease(i)));
+
+  const catLabels  = hotel.categories.map(c => c.name);
+  const catCurrent = hotel.categories.map(c => getEffectiveADR(c.checkInWeeks[weekIdx]));
+  const catRec     = hotel.categories.map(c => c.checkInWeeks[weekIdx].recADR);
+
+  drawBookingLine(labels, sold, target, forecast);
+  drawSecondaryBars(catLabels, catCurrent, catRec, 'ADR $', '$');
 
   showExposure();
 }
@@ -804,7 +766,6 @@ function drawSecondaryBars(labels, seriesA, seriesB, yLabel, prefix) {
 }
 
 // ── Expand / collapse ──────────────────────────────────────
-function toggleDest(id)    { expandedDests.has(id)   ? expandedDests.delete(id)   : expandedDests.add(id);   renderRecsTable(); }
 function toggleWeek(key)   { expandedWeeks.has(key)  ? expandedWeeks.delete(key)  : expandedWeeks.add(key);  renderRecsTable(); }
 function toggleHotel(key)  { expandedHotels.has(key) ? expandedHotels.delete(key) : expandedHotels.add(key); renderRecsTable(); }
 

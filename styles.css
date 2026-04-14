@@ -1902,6 +1902,14 @@ tr.row-flat:hover td { background: var(--row-hover); }
 .status-badge.status-expired   { background: #f3f4f6; color: var(--text-muted); border: 1px solid var(--border); }
 
 /* View container (hidden views) */
+.view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
 .view.hidden { display: none !important; }
 
 /* Adr input (same as margin-input but used on hotel weekly rows) */

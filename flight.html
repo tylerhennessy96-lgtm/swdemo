@@ -296,27 +296,16 @@
 
 <script>
 // ── State ──────────────────────────────────────────────────
-// Tree: Destination → Check-in Week (idx) → Flight Route → Flight Date (leaf)
-const expandedDests  = new Set();  // dest.id
-const expandedWeeks  = new Set();  // `${dest.id}::${weekIdx}`
-const expandedRoutes = new Set();  // `${dest.id}::${weekIdx}::${route.id}`
-const fareOverrides  = {};         // { dateId: newFare }
-const notes          = {};         // { dateId: { text, expires, createdBy, createdAt } }
-let   activeNoteKey  = null;
-let   activeDateId   = null;
-let   bookingChart   = null;
-let   fareChart      = null;
-
-// Build the 8 weeks from the flight data's own dates (first route, first dest).
-// FLIGHT_DATA all share the same 8 generated departure dates.
-const FLIGHT_WEEKS = (FLIGHT_DATA[0]?.routes[0]?.dates || []).map((d, i) => ({
-  idx: i,
-  departureDate: d.departureDate,
-  // Reuse CHECK_IN_WEEKS label if available — identical 8-week cadence.
-  weekLabel: (typeof CHECK_IN_WEEKS !== 'undefined' && CHECK_IN_WEEKS[i])
-    ? CHECK_IN_WEEKS[i].weekLabel
-    : `Wk ${d.departureDate}`,
-}));
+// Tree: (Destination + Week) → Flight Route → Flight Date (leaf)
+const expandedDestWeeks = new Set(); // `${dest.id}::${weekIdx}`
+const expandedRoutes    = new Set(); // `${dest.id}::${weekIdx}::${route.id}`
+const fareOverrides     = {};        // { dateId: newFare }
+const notes             = {};        // { dateId: { text, expires, createdBy, createdAt } }
+let   activeNoteKey     = null;
+let   activeDateId      = null;
+let   bookingChart      = null;
+let   fareChart         = null;
+// All top-level rows start collapsed by default.
 
 // Build a map for hotel occupancy lookup by dest.id (used for awareness on dest row)
 const HOTEL_BY_DEST = {};
@@ -402,21 +391,15 @@ function shortDate(s) {
   const mons = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return `${dows[d.getDay()]} ${d.getDate()} ${mons[d.getMonth()]}`;
 }
+function shortMMDD(s) {
+  // Input "Apr 27, 2026" → "04/27"
+  if (!s) return '';
+  const d = new Date(s);
+  if (isNaN(d)) return '';
+  return String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
+}
 
 // ── Aggregations ───────────────────────────────────────────
-// Pivot: at a given weekIdx, fold all routes/dates on that week for a dest.
-function aggDestAllDates(dest) {
-  const dates = dest.routes.flatMap(r => r.dates);
-  return aggDates(dates);
-}
-function aggWeekAllRoutes(dest, weekIdx) {
-  const dates = dest.routes.map(r => r.dates[weekIdx]).filter(Boolean);
-  return aggDates(dates);
-}
-function aggRouteWeek(route, weekIdx) {
-  const d = route.dates[weekIdx];
-  return d ? aggDates([d]) : null;
-}
 function aggDates(dates) {
   if (!dates.length) return null;
   const capacity = dates.reduce((s, x) => s + x.capacity, 0);
@@ -440,21 +423,6 @@ function aggDates(dates) {
   };
 }
 
-// Combined destination margin: flight margin ($ per seat * seats sold)
-// + a simple hotel margin proxy ((ADR - supplier cost) * sold * 7 nights).
-function combinedDestMargin(dest) {
-  let margin = 0;
-  dest.routes.forEach(r => r.dates.forEach(d => {
-    margin += d.currentMargin * d.sold;
-  }));
-  const h = HOTEL_BY_DEST[dest.id];
-  if (h) {
-    h.hotels.forEach(hh => hh.categories.forEach(c => c.checkInWeeks.forEach(w => {
-      margin += Math.max(0, w.currentADR - w.supplierCost) * w.sold * 7;
-    })));
-  }
-  return margin;
-}
 function bedsSeatsRatio(dest) {
   const h = HOTEL_BY_DEST[dest.id];
   if (!h) return null;
@@ -465,9 +433,16 @@ function bedsSeatsRatio(dest) {
   if (!seats) return null;
   return beds / seats;
 }
-function hotelOccForDest(dest) {
+function hotelOccForWeek(dest, weekIdx) {
   const h = HOTEL_BY_DEST[dest.id];
-  return h ? h.forecastOcc : null;
+  if (!h) return null;
+  const vals = [];
+  h.hotels.forEach(hh => hh.categories.forEach(c => {
+    const w = c.checkInWeeks[weekIdx];
+    if (w && w.forecastOcc != null) vals.push(w.forecastOcc);
+  }));
+  if (!vals.length) return null;
+  return vals.reduce((s, v) => s + v, 0) / vals.length;
 }
 
 // ── Table head ─────────────────────────────────────────────
@@ -475,25 +450,19 @@ function renderRecsHead() {
   const thead = document.getElementById('recsTableHead');
   thead.innerHTML = `
     <tr>
-      <th style="min-width:300px;">Destination / Week / Route / Flight</th>
-      <th style="width:120px;">Route / Category</th>
-      <th class="text-right" style="width:70px;">Cap</th>
-      <th class="text-right" style="width:70px;">Sold</th>
-      <th class="text-right" style="width:70px;">Unsold</th>
+      <th style="min-width:320px;">Destination / Week</th>
+      <th style="width:100px;">Dep. Week</th>
+      <th class="text-right" style="width:80px;">Capacity</th>
+      <th class="text-right" style="width:80px;">Sold</th>
       <th class="text-right" style="width:70px;">LF %</th>
-      <th class="text-right" style="width:70px;">Target<span class="th-sub">LF %</span></th>
-      <th class="text-right" style="width:80px;">Forecast<span class="th-sub">LF %</span></th>
-      <th class="text-right" style="width:80px;">Rate of<span class="th-sub">Sale</span></th>
       <th class="text-right" style="width:90px;">Current<span class="th-sub">Fare $</span></th>
       <th class="text-right" style="width:90px;">Rec<span class="th-sub">Fare $</span></th>
-      <th class="text-right" style="width:70px;">Delta<span class="th-sub">$</span></th>
-      <th class="text-right" style="width:85px;">Current<span class="th-sub">Margin $</span></th>
-      <th class="text-right" style="width:85px;">Rec<span class="th-sub">Margin $</span></th>
-      <th class="text-right" style="width:75px;">Comp 1</th>
-      <th class="text-right" style="width:75px;">Comp 2</th>
-      <th class="text-right" style="width:80px;">Comp<span class="th-sub">Delta $</span></th>
-      <th style="width:70px;">Flags</th>
-      <th style="width:90px;">Actions</th>
+      <th class="text-right" style="width:80px;">Delta<span class="th-sub">$</span></th>
+      <th class="text-right" style="width:90px;">Forecast<span class="th-sub">LF %</span></th>
+      <th class="text-right" style="width:90px;">Beds:Seats</th>
+      <th class="text-right" style="width:80px;">Hotel<span class="th-sub">Occ %</span></th>
+      <th style="width:80px;">Flags</th>
+      <th style="width:110px;">Actions</th>
     </tr>
   `;
 }
@@ -504,123 +473,88 @@ function renderRecsTable() {
   const rows = [];
 
   FLIGHT_DATA.forEach(dest => {
-    const destOpen = expandedDests.has(dest.id);
-    const dAgg = aggDestAllDates(dest);
-    const margin = combinedDestMargin(dest);
+    // Each route shares the same 8 weekly departure dates, indexed 0-7.
+    const weekCount = dest.routes[0]?.dates?.length || 0;
     const ratio  = bedsSeatsRatio(dest);
-    const hOcc   = hotelOccForDest(dest);
 
-    const destExtras = `
-      <span class="dest-extras">
-        <span><span class="dx-label">Combined margin</span> <span class="dx-val">${fmt$(margin)}</span></span>
-        <span><span class="dx-label">B:S</span> ${ratioBadge(ratio)}</span>
-        <span><span class="dx-label">Hotel occ</span> ${hOcc != null ? lfPill(hOcc) : '<span class="text-muted">—</span>'}</span>
-      </span>
-    `;
+    for (let weekIdx = 0; weekIdx < weekCount; weekIdx++) {
+      const dwKey = `${dest.id}::${weekIdx}`;
+      const dwOpen = expandedDestWeeks.has(dwKey);
+      const datesAtWeek = dest.routes.map(r => r.dates[weekIdx]).filter(Boolean);
+      const dwAgg = aggDates(datesAtWeek);
+      if (!dwAgg) continue;
+      const refDateStr = datesAtWeek[0]?.departureDate || '';
+      const shortDt    = shortMMDD(refDateStr);
+      const hOcc       = hotelOccForWeek(dest, weekIdx);
 
-    rows.push(`
-      <tr class="row-property" onclick="toggleDest('${dest.id}')" style="cursor:pointer;">
-        <td>
-          <button class="expand-btn ${destOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleDest('${dest.id}')">${chevron(destOpen)}</button>
-          <span style="font-weight:600;">${dest.name}</span>
-          ${regionBadge(dest.region)}
-          <span style="color:var(--text-muted);margin-left:8px;font-size:11px;">${dest.totalRoutes} routes · ${dest.totalFlights} flights</span>
-        </td>
-        <td class="text-muted">—</td>
-        <td class="text-right num">${dAgg.capacity.toLocaleString()}</td>
-        <td class="text-right num">${dAgg.sold.toLocaleString()}</td>
-        <td class="text-right num">${dAgg.unsold.toLocaleString()}</td>
-        <td class="text-right">${lfText(dAgg.lf)}</td>
-        <td class="text-muted">—</td>
-        <td class="text-right">${lfPill(dAgg.forecastLF)}</td>
-        <td class="text-muted">—</td>
-        <td class="text-right">${fmt$(dAgg.avgCurrentFare)}</td>
-        <td class="text-right highlight-teal">${fmt$(dAgg.avgRecFare)}</td>
-        <td class="text-right">${deltaCell(dAgg.deltaFare)}</td>
-        <td class="text-right" colspan="6">${destExtras}</td>
-        <td></td>
-      </tr>
-    `);
-
-    if (!destOpen) return;
-
-    // ── Level 2: Check-in Week (across routes)
-    FLIGHT_WEEKS.forEach((wkMeta, weekIdx) => {
-      const weekKey = `${dest.id}::${weekIdx}`;
-      const weekOpen = expandedWeeks.has(weekKey);
-      const wAgg = aggWeekAllRoutes(dest, weekIdx);
-      if (!wAgg) return;
-
+      // ── Level 1: Destination + Week row ──
       rows.push(`
-        <tr class="row-bedtype clickable" onclick="toggleWeek('${weekKey}')" style="cursor:pointer;">
+        <tr class="row-property" onclick="toggleDestWeek('${dwKey}')" style="cursor:pointer;">
           <td>
-            <button class="expand-btn ${weekOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleWeek('${weekKey}')">${chevron(weekOpen)}</button>
-            <span style="font-weight:500;">${wkMeta.weekLabel}</span>
-            <span style="color:var(--text-muted);margin-left:6px;font-size:10.5px;">${wkMeta.departureDate}</span>
+            <button class="expand-btn ${dwOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleDestWeek('${dwKey}')">${chevron(dwOpen)}</button>
+            <span style="font-weight:600;">${dest.name}</span>
+            <span style="font-weight:400;color:var(--text-muted);margin-left:6px;">- Wk ${shortDt}</span>
+            ${regionBadge(dest.region)}
           </td>
-          <td class="text-muted">—</td>
-          <td class="text-right num">${wAgg.capacity.toLocaleString()}</td>
-          <td class="text-right num">${wAgg.sold.toLocaleString()}</td>
-          <td class="text-right num">${wAgg.unsold.toLocaleString()}</td>
-          <td class="text-right">${lfText(wAgg.lf)}</td>
-          <td class="text-right num">${fmtPct(wAgg.targetLF)}</td>
-          <td class="text-right">${lfPill(wAgg.forecastLF)}</td>
-          <td class="text-muted">—</td>
-          <td class="text-right">${fmt$(wAgg.avgCurrentFare)}</td>
-          <td class="text-right highlight-teal">${fmt$(wAgg.avgRecFare)}</td>
-          <td class="text-right">${deltaCell(wAgg.deltaFare)}</td>
-          <td class="text-muted">—</td>
-          <td class="text-muted">—</td>
-          <td class="text-muted">—</td>
-          <td class="text-muted">—</td>
-          <td class="text-muted">—</td>
-          <td>${wAgg.hasAlert ? '<span class="cost-change-flag" title="Alerts in this week">⚠️</span>' : ''}</td>
-          <td></td>
+          <td><span style="font-weight:500;">Wk ${shortDt}</span></td>
+          <td class="text-right num">${dwAgg.capacity.toLocaleString()}</td>
+          <td class="text-right num">${dwAgg.sold.toLocaleString()}</td>
+          <td class="text-right">${lfText(dwAgg.lf)}</td>
+          <td class="text-right">${fmt$(dwAgg.avgCurrentFare)}</td>
+          <td class="text-right highlight-teal">${fmt$(dwAgg.avgRecFare)}</td>
+          <td class="text-right">${deltaCell(dwAgg.deltaFare)}</td>
+          <td class="text-right">${lfPill(dwAgg.forecastLF)}</td>
+          <td class="text-right">${ratioBadge(ratio)}</td>
+          <td class="text-right">${hOcc != null ? lfPill(hOcc) : '<span class="text-muted">—</span>'}</td>
+          <td>${dwAgg.hasAlert ? '<span class="cost-change-flag" title="Alerts in this week">⚠️</span>' : ''}</td>
+          <td>
+            <span class="pkg-action-icons">
+              <button title="Booking curve" onclick="event.stopPropagation();openDestWeekCurve('${dest.id}', ${weekIdx})">
+                <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="2,11 5,7 8,9 12,3"/><line x1="2" y1="12" x2="12" y2="12"/></svg>
+              </button>
+            </span>
+          </td>
         </tr>
       `);
 
-      if (!weekOpen) return;
+      if (!dwOpen) continue;
 
-      // ── Level 3: Flight Route (this week only)
+      // ── Level 2: Flight Route rows (within this dest+week) ──
       dest.routes.forEach(route => {
+        const date = route.dates[weekIdx];
+        if (!date) return;
         const routeKey = `${dest.id}::${weekIdx}::${route.id}`;
         const routeOpen = expandedRoutes.has(routeKey);
-        const rAgg = aggRouteWeek(route, weekIdx);
-        if (!rAgg) return;
+        const rAgg = aggDates([date]);
+        const rosAheadRoute = date.rateOfSale >= date.rateOfSaleTarget;
+        const routeAlert = !rosAheadRoute || date.forecastLF < date.targetLF - 0.05;
 
         rows.push(`
-          <tr class="row-unit clickable" onclick="toggleRoute('${routeKey}')" style="cursor:pointer;">
+          <tr class="row-bedtype clickable" onclick="toggleRoute('${routeKey}')" style="cursor:pointer;">
             <td>
               <button class="expand-btn ${routeOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleRoute('${routeKey}')">${chevron(routeOpen)}</button>
               <span class="font-mono" style="font-weight:500;">${route.flightNum}</span>
               <span style="color:var(--text-secondary);margin-left:6px;font-size:11px;">${route.origin} → ${dest.id}</span>
+              ${flightCatBadge(route.category)}
             </td>
-            <td>${flightCatBadge(route.category)}</td>
+            <td class="text-muted">—</td>
             <td class="text-right num">${rAgg.capacity.toLocaleString()}</td>
             <td class="text-right num">${rAgg.sold.toLocaleString()}</td>
-            <td class="text-right num">${rAgg.unsold.toLocaleString()}</td>
             <td class="text-right">${lfText(rAgg.lf)}</td>
-            <td class="text-right num">${fmtPct(rAgg.targetLF)}</td>
-            <td class="text-right">${lfPill(rAgg.forecastLF)}</td>
-            <td class="text-muted">—</td>
             <td class="text-right">${fmt$(rAgg.avgCurrentFare)}</td>
             <td class="text-right highlight-teal">${fmt$(rAgg.avgRecFare)}</td>
             <td class="text-right">${deltaCell(rAgg.deltaFare)}</td>
+            <td class="text-right">${lfPill(rAgg.forecastLF)}</td>
             <td class="text-muted">—</td>
             <td class="text-muted">—</td>
-            <td class="text-muted">—</td>
-            <td class="text-muted">—</td>
-            <td class="text-muted">—</td>
-            <td></td>
+            <td>${routeAlert ? '<span class="cost-change-flag" title="Alerts on this route">⚠️</span>' : ''}</td>
             <td></td>
           </tr>
         `);
 
         if (!routeOpen) return;
 
-        // ── Level 4 (leaf): single flight date
-        const date = route.dates[weekIdx];
-        if (!date) return;
+        // ── Level 3 (leaf): the single flight date ──
         const eff = getEffectiveFare(date);
         const dFare = date.recFare - eff;
         const lf = date.capacity ? date.sold / date.capacity : 0;
@@ -628,22 +562,16 @@ function renderRecsTable() {
         const hasNote = !!notes[date.id];
 
         rows.push(`
-          <tr class="row-week">
+          <tr class="row-unit">
             <td>
               <span>${shortDate(date.departureDate)}</span>
-              <span class="font-mono" style="color:var(--text-muted);margin-left:6px;font-size:10.5px;">${date.departureTime}</span>
+              <div style="font-size:10.5px;color:var(--text-muted);margin-top:1px;">${date.departureTime}</div>
               ${date.locked ? ' <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--accent);vertical-align:middle;"><rect x="3" y="6" width="8" height="6" rx="1"/><path d="M5 6V4a2 2 0 0 1 4 0v2"/></svg>' : ''}
             </td>
-            <td class="font-mono" style="font-size:11px;color:var(--text-muted);">${route.origin}→${dest.id}</td>
+            <td class="text-muted">—</td>
             <td class="text-right num">${date.capacity}</td>
             <td class="text-right num">${date.sold}</td>
-            <td class="text-right num">${date.capacity - date.sold}</td>
             <td class="text-right">${lfText(lf)}</td>
-            <td class="text-right num">${fmtPct(date.targetLF)}</td>
-            <td class="text-right">${lfPill(date.forecastLF)}</td>
-            <td class="text-right ros-cell ${rosAhead ? 'ros-ahead' : 'ros-behind'}">
-              ${date.rateOfSale.toFixed(1)}/day ${rosAhead ? '▲' : '▼'}
-            </td>
             <td class="text-right">
               <input class="adr-input" type="number" value="${eff}" onchange="updateFare('${date.id}', this.value)" onclick="event.stopPropagation()" />
             </td>
@@ -651,11 +579,9 @@ function renderRecsTable() {
               <span class="rec-margin-cell" onclick="event.stopPropagation();acceptRec('${date.id}')" title="Click to accept">${fmt$(date.recFare)}</span>
             </td>
             <td class="text-right">${deltaCell(dFare)}</td>
-            <td class="text-right num">${fmt$(date.currentMargin)}</td>
-            <td class="text-right num" style="color:var(--accent);">${fmt$(date.recMargin)}</td>
-            <td class="text-right num">${fmt$(date.comp1Fare)}</td>
-            <td class="text-right num">${fmt$(date.comp2Fare)}</td>
-            <td class="text-right">${compDeltaCell(eff, date.comp1Fare, date.comp2Fare)}</td>
+            <td class="text-right">${lfPill(date.forecastLF)}</td>
+            <td class="text-muted">—</td>
+            <td class="text-muted">—</td>
             <td>
               ${date.hasCostChange ? '<span class="cost-change-flag" title="Cost change">⚠️</span>' : ''}
               <button class="notes-icon ${hasNote ? 'has-note' : ''}" title="${hasNote ? 'Edit note' : 'Add note'}" onclick="event.stopPropagation();openNotesModal('${date.id}')">
@@ -680,7 +606,7 @@ function renderRecsTable() {
           </tr>
         `);
       });
-    });
+    }
   });
 
   tbody.innerHTML = rows.join('');
@@ -739,9 +665,8 @@ function renderMetricsBar() {
 }
 
 // ── Expand / collapse ──────────────────────────────────────
-function toggleDest(id)   { expandedDests.has(id)   ? expandedDests.delete(id)   : expandedDests.add(id);   renderRecsTable(); }
-function toggleWeek(key)  { expandedWeeks.has(key)  ? expandedWeeks.delete(key)  : expandedWeeks.add(key);  renderRecsTable(); }
-function toggleRoute(key) { expandedRoutes.has(key) ? expandedRoutes.delete(key) : expandedRoutes.add(key); renderRecsTable(); }
+function toggleDestWeek(key) { expandedDestWeeks.has(key) ? expandedDestWeeks.delete(key) : expandedDestWeeks.add(key); renderRecsTable(); }
+function toggleRoute(key)    { expandedRoutes.has(key)    ? expandedRoutes.delete(key)    : expandedRoutes.add(key);    renderRecsTable(); }
 
 // ── Inline edit / accept / lock ───────────────────────────
 function updateFare(dateId, value) {
@@ -783,6 +708,38 @@ function openExposure(dateId) {
   showExposure();
 
   drawCharts(date);
+}
+
+function openDestWeekCurve(destId, weekIdx) {
+  const dest = FLIGHT_DATA.find(d => d.id === destId);
+  if (!dest) return;
+  const datesAtWeek = dest.routes.map(r => r.dates[weekIdx]).filter(Boolean);
+  if (!datesAtWeek.length) return;
+  const agg = aggDates(datesAtWeek);
+  const refDate = datesAtWeek[0].departureDate;
+  const shortDt = shortMMDD(refDate);
+
+  // Synthesize a date-like object so drawCharts() can reuse its booking + fare logic.
+  const syn = {
+    id: `${destId}-w${weekIdx}`,
+    capacity:    agg.capacity,
+    sold:        agg.sold,
+    targetLF:    agg.targetLF,
+    forecastLF:  agg.forecastLF,
+    currentFare: agg.avgCurrentFare,
+    comp1Fare:   Math.round(datesAtWeek.reduce((s, d) => s + d.comp1Fare, 0) / datesAtWeek.length),
+    comp2Fare:   Math.round(datesAtWeek.reduce((s, d) => s + d.comp2Fare, 0) / datesAtWeek.length),
+  };
+
+  document.getElementById('exposurePropName').innerHTML =
+    `<span style="color:#fff;font-weight:500;">${dest.name}</span>
+     <span style="color:#9ca3af;margin-left:6px;">- Wk ${shortDt}</span>
+     <span style="color:#9ca3af;margin-left:8px;">Cap ${agg.capacity.toLocaleString()}</span>
+     <span style="color:#9ca3af;margin-left:8px;">Sold ${agg.sold.toLocaleString()}</span>
+     <span style="color:#9ca3af;margin-left:8px;">LF ${Math.round(agg.lf * 100)}%</span>`;
+
+  showExposure();
+  drawCharts(syn);
 }
 function showExposure() {
   const wrap = document.getElementById('exposureWrap');

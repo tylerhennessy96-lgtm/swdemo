@@ -15,7 +15,8 @@
       "Bash(npm install:*)",
       "Bash(mkdir -p /tmp/jstest)",
       "Bash(npm init:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git checkout:*)"
     ]
   }
 }
