@@ -30,6 +30,7 @@
   </style>
 </head>
 <body>
+<div class="analytics-backdrop" id="analyticsBackdrop" onclick="closeExposure()"></div>
 <div class="app">
 
   <!-- ── Top Nav ── -->
@@ -48,7 +49,6 @@
       <a href="pricing.html" class="nav-tab active">Pricing</a>
       <a href="demand.html"  class="nav-tab">Demand Forecast</a>
       <a href="#"            class="nav-tab">Rules &amp; Parameters</a>
-      <a href="#"            class="nav-tab">Audit Log</a>
     </div>
 
     <div class="nav-divider"></div>
@@ -116,7 +116,6 @@
     <a href="pricing.html" class="subtab">Vacation Packages</a>
     <a href="hotel.html"   class="subtab">Hotel Only</a>
     <a href="flight.html"  class="subtab active">Flight Only</a>
-    <a href="#groups"      class="subtab">Groups</a>
     <div class="subtab-spacer"></div>
     <button class="btn btn-primary" onclick="runEvaluation()" style="margin-right:8px;">
       <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="3,2 12,7 3,12" fill="currentColor" stroke="none"/></svg>
@@ -165,7 +164,6 @@
   <!-- ── Sub-subtab Bar ── -->
   <div class="subsubtab-bar" id="subsubtabBar">
     <a class="subsubtab active" data-view="recs"       onclick="switchView('recs')">New Recommendations</a>
-    <a class="subsubtab"        data-view="published"  onclick="switchView('published')">Published Changes</a>
     <a class="subsubtab"        data-view="competitor" onclick="switchView('competitor')">Competitor Analysis</a>
   </div>
 
@@ -207,7 +205,7 @@
                       <span class="legend-item"><span class="legend-line" style="background:#60a5fa"></span>Forecast</span>
                     </div>
                   </div>
-                  <div style="position:relative;width:100%;height:200px;">
+                  <div style="position:relative;width:100%;height:220px;">
                     <canvas id="bookingCurveChart"></canvas>
                   </div>
                 </div>
@@ -220,7 +218,7 @@
                       <span class="legend-item"><span class="legend-line" style="background:#a78bfa"></span>Comp 2</span>
                     </div>
                   </div>
-                  <div style="position:relative;width:100%;height:200px;">
+                  <div style="position:relative;width:100%;height:220px;">
                     <canvas id="fareHistoryChart"></canvas>
                   </div>
                 </div>
@@ -228,30 +226,6 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Published Changes view (flat table) -->
-    <div class="view hidden" id="viewPublished">
-      <div class="table-wrap">
-        <table class="data-table" id="publishedTable">
-          <thead>
-            <tr>
-              <th>Destination</th>
-              <th>Flight #</th>
-              <th>Route</th>
-              <th>Departure Date</th>
-              <th style="text-align:right;">Old Fare</th>
-              <th style="text-align:right;">New Fare</th>
-              <th style="text-align:right;">Change $</th>
-              <th style="text-align:right;">Change %</th>
-              <th>Published By</th>
-              <th>Published Date</th>
-              <th style="width:110px;">Status</th>
-            </tr>
-          </thead>
-          <tbody id="publishedTableBody"></tbody>
-        </table>
       </div>
     </div>
 
@@ -301,11 +275,11 @@
         <div style="display:flex;gap:12px;">
           <div style="flex:1;">
             <label style="display:block;font-size:11.5px;font-weight:500;color:var(--text-secondary);margin-bottom:4px;">Expiry date</label>
-            <input type="date" id="notesExpiry" style="width:100%;padding:8px 12px;border:1px solid var(--border-mid);border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;outline:none;" />
+            <input type="date" id="notesExpiry" style="width:100%;padding:8px 12px;border:1px solid var(--border-mid);border-radius:var(--radius);font-family:'Archivo',sans-serif;font-size:13px;outline:none;" />
           </div>
           <div style="flex:1;">
             <label style="display:block;font-size:11.5px;font-weight:500;color:var(--text-secondary);margin-bottom:4px;">Created by</label>
-            <input type="text" id="notesCreatedBy" readonly value="Sarah Chen" style="width:100%;padding:8px 12px;border:1px solid var(--border-mid);border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;background:#f9fafb;color:var(--text-secondary);outline:none;" />
+            <input type="text" id="notesCreatedBy" readonly value="Sarah Chen" style="width:100%;padding:8px 12px;border:1px solid var(--border-mid);border-radius:var(--radius);font-family:'Archivo',sans-serif;font-size:13px;background:#f9fafb;color:var(--text-secondary);outline:none;" />
           </div>
         </div>
         <div style="font-size:11px;color:var(--text-muted);margin-top:10px;" id="notesCreatedAt">Created: —</div>
@@ -553,9 +527,9 @@ function renderRecsTable() {
           <span style="color:var(--text-muted);margin-left:8px;font-size:11px;">${dest.totalRoutes} routes · ${dest.totalFlights} flights</span>
         </td>
         <td class="text-muted">—</td>
-        <td class="text-right font-mono">${dAgg.capacity.toLocaleString()}</td>
-        <td class="text-right font-mono">${dAgg.sold.toLocaleString()}</td>
-        <td class="text-right font-mono">${dAgg.unsold.toLocaleString()}</td>
+        <td class="text-right num">${dAgg.capacity.toLocaleString()}</td>
+        <td class="text-right num">${dAgg.sold.toLocaleString()}</td>
+        <td class="text-right num">${dAgg.unsold.toLocaleString()}</td>
         <td class="text-right">${lfText(dAgg.lf)}</td>
         <td class="text-muted">—</td>
         <td class="text-right">${lfPill(dAgg.forecastLF)}</td>
@@ -585,11 +559,11 @@ function renderRecsTable() {
             <span style="color:var(--text-muted);margin-left:6px;font-size:10.5px;">${wkMeta.departureDate}</span>
           </td>
           <td class="text-muted">—</td>
-          <td class="text-right font-mono">${wAgg.capacity.toLocaleString()}</td>
-          <td class="text-right font-mono">${wAgg.sold.toLocaleString()}</td>
-          <td class="text-right font-mono">${wAgg.unsold.toLocaleString()}</td>
+          <td class="text-right num">${wAgg.capacity.toLocaleString()}</td>
+          <td class="text-right num">${wAgg.sold.toLocaleString()}</td>
+          <td class="text-right num">${wAgg.unsold.toLocaleString()}</td>
           <td class="text-right">${lfText(wAgg.lf)}</td>
-          <td class="text-right font-mono">${fmtPct(wAgg.targetLF)}</td>
+          <td class="text-right num">${fmtPct(wAgg.targetLF)}</td>
           <td class="text-right">${lfPill(wAgg.forecastLF)}</td>
           <td class="text-muted">—</td>
           <td class="text-right">${fmt$(wAgg.avgCurrentFare)}</td>
@@ -622,11 +596,11 @@ function renderRecsTable() {
               <span style="color:var(--text-secondary);margin-left:6px;font-size:11px;">${route.origin} → ${dest.id}</span>
             </td>
             <td>${flightCatBadge(route.category)}</td>
-            <td class="text-right font-mono">${rAgg.capacity.toLocaleString()}</td>
-            <td class="text-right font-mono">${rAgg.sold.toLocaleString()}</td>
-            <td class="text-right font-mono">${rAgg.unsold.toLocaleString()}</td>
+            <td class="text-right num">${rAgg.capacity.toLocaleString()}</td>
+            <td class="text-right num">${rAgg.sold.toLocaleString()}</td>
+            <td class="text-right num">${rAgg.unsold.toLocaleString()}</td>
             <td class="text-right">${lfText(rAgg.lf)}</td>
-            <td class="text-right font-mono">${fmtPct(rAgg.targetLF)}</td>
+            <td class="text-right num">${fmtPct(rAgg.targetLF)}</td>
             <td class="text-right">${lfPill(rAgg.forecastLF)}</td>
             <td class="text-muted">—</td>
             <td class="text-right">${fmt$(rAgg.avgCurrentFare)}</td>
@@ -661,11 +635,11 @@ function renderRecsTable() {
               ${date.locked ? ' <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--accent);vertical-align:middle;"><rect x="3" y="6" width="8" height="6" rx="1"/><path d="M5 6V4a2 2 0 0 1 4 0v2"/></svg>' : ''}
             </td>
             <td class="font-mono" style="font-size:11px;color:var(--text-muted);">${route.origin}→${dest.id}</td>
-            <td class="text-right font-mono">${date.capacity}</td>
-            <td class="text-right font-mono">${date.sold}</td>
-            <td class="text-right font-mono">${date.capacity - date.sold}</td>
+            <td class="text-right num">${date.capacity}</td>
+            <td class="text-right num">${date.sold}</td>
+            <td class="text-right num">${date.capacity - date.sold}</td>
             <td class="text-right">${lfText(lf)}</td>
-            <td class="text-right font-mono">${fmtPct(date.targetLF)}</td>
+            <td class="text-right num">${fmtPct(date.targetLF)}</td>
             <td class="text-right">${lfPill(date.forecastLF)}</td>
             <td class="text-right ros-cell ${rosAhead ? 'ros-ahead' : 'ros-behind'}">
               ${date.rateOfSale.toFixed(1)}/day ${rosAhead ? '▲' : '▼'}
@@ -677,10 +651,10 @@ function renderRecsTable() {
               <span class="rec-margin-cell" onclick="event.stopPropagation();acceptRec('${date.id}')" title="Click to accept">${fmt$(date.recFare)}</span>
             </td>
             <td class="text-right">${deltaCell(dFare)}</td>
-            <td class="text-right font-mono">${fmt$(date.currentMargin)}</td>
-            <td class="text-right font-mono" style="color:var(--accent);">${fmt$(date.recMargin)}</td>
-            <td class="text-right font-mono">${fmt$(date.comp1Fare)}</td>
-            <td class="text-right font-mono">${fmt$(date.comp2Fare)}</td>
+            <td class="text-right num">${fmt$(date.currentMargin)}</td>
+            <td class="text-right num" style="color:var(--accent);">${fmt$(date.recMargin)}</td>
+            <td class="text-right num">${fmt$(date.comp1Fare)}</td>
+            <td class="text-right num">${fmt$(date.comp2Fare)}</td>
             <td class="text-right">${compDeltaCell(eff, date.comp1Fare, date.comp2Fare)}</td>
             <td>
               ${date.hasCostChange ? '<span class="cost-change-flag" title="Cost change">⚠️</span>' : ''}
@@ -712,26 +686,6 @@ function renderRecsTable() {
   tbody.innerHTML = rows.join('');
 }
 
-// ── Published Changes flat table ───────────────────────────
-function renderPublishedTable() {
-  const tbody = document.getElementById('publishedTableBody');
-  tbody.innerHTML = FLIGHT_PUBLISHED_DATA.map(p => `
-    <tr class="row-flat">
-      <td>${p.destination}</td>
-      <td class="font-mono">${p.flightNum}</td>
-      <td class="font-mono" style="font-size:11.5px;">${p.route}</td>
-      <td class="font-mono" style="font-size:11.5px;">${p.departureDate}</td>
-      <td class="text-right font-mono">${fmt$(p.oldFare)}</td>
-      <td class="text-right font-mono">${fmt$(p.newFare)}</td>
-      <td class="text-right ${p.changeAmt >= 0 ? 'delta-pos' : 'delta-neg'}">${p.changeAmt >= 0 ? '+' : ''}${fmt$(p.changeAmt)}</td>
-      <td class="text-right ${p.changeAmt >= 0 ? 'delta-pos' : 'delta-neg'}">${p.changePct >= 0 ? '+' : ''}${p.changePct}%</td>
-      <td>${p.publishedBy}</td>
-      <td class="font-mono" style="font-size:11.5px;">${p.publishedDate}</td>
-      <td>${statusBadge(p.status)}</td>
-    </tr>
-  `).join('');
-}
-
 // ── Competitor Analysis flat table ─────────────────────────
 function renderCompetitorTable() {
   const tbody = document.getElementById('competitorTableBody');
@@ -744,12 +698,12 @@ function renderCompetitorTable() {
         <td>${c.destination}</td>
         <td class="font-mono" style="font-size:11.5px;">${c.flightDate}</td>
         <td class="font-mono">${c.ourFlight}</td>
-        <td class="text-right font-mono">${fmt$(c.ourFare)}</td>
+        <td class="text-right num">${fmt$(c.ourFare)}</td>
         <td>${c.comp1Name}</td>
-        <td class="text-right font-mono">${fmt$(c.comp1Fare)}</td>
+        <td class="text-right num">${fmt$(c.comp1Fare)}</td>
         <td>${c.comp2Name}</td>
-        <td class="text-right font-mono">${fmt$(c.comp2Fare)}</td>
-        <td class="text-right font-mono">${fmt$(c.cheapestComp)}</td>
+        <td class="text-right num">${fmt$(c.comp2Fare)}</td>
+        <td class="text-right num">${fmt$(c.cheapestComp)}</td>
         <td class="text-right ${deltaCls}">${sign}${fmt$(c.ourDelta)}</td>
         <td class="text-right ${deltaCls}">${sign}${c.ourDeltaPct}%</td>
         <td class="font-mono" style="font-size:11.5px;">${c.lastUpdated}</td>
@@ -766,7 +720,7 @@ function computeMetrics() {
   const avgFareChange = allDates.reduce((s, x) => s + (x.recFare - getEffectiveFare(x)), 0) / Math.max(1, allDates.length);
   const rosAlerts = allDates.filter(x => x.rateOfSale < x.rateOfSaleTarget).length;
   const compUndercuts = COMPETITOR_FLIGHT_DATA.filter(c => c.ourDelta > 0).length;
-  const pendingApproval = FLIGHT_PUBLISHED_DATA.filter(p => p.status === 'Scheduled').length;
+  const pendingApproval = typeof FLIGHT_PUBLISHED_DATA !== 'undefined' ? FLIGHT_PUBLISHED_DATA.filter(p => p.status === 'Scheduled').length : 0;
   return { flightsBehind, avgForecastLF, avgFareChange, rosAlerts, compUndercuts, pendingApproval };
 }
 function renderMetricsBar() {
@@ -826,17 +780,23 @@ function openExposure(dateId) {
      <span style="color:#9ca3af;margin-left:8px;">Cap ${date.capacity}</span>
      <span style="color:#9ca3af;margin-left:8px;">LF ${lfPctNow}%</span>`;
 
-  const wrap = document.getElementById('exposureWrap');
-  wrap.style.display = 'block';
-  wrap.classList.remove('panel-closed');
+  showExposure();
 
   drawCharts(date);
 }
-function toggleExposure() {
+function showExposure() {
   const wrap = document.getElementById('exposureWrap');
-  if (wrap.style.display === 'none') return;
-  wrap.classList.toggle('panel-closed');
+  wrap.style.display = 'block';
+  wrap.classList.remove('panel-closed');
+  document.getElementById('analyticsBackdrop').classList.add('open');
 }
+function closeExposure() {
+  const wrap = document.getElementById('exposureWrap');
+  wrap.style.display = 'none';
+  wrap.classList.remove('panel-closed');
+  document.getElementById('analyticsBackdrop').classList.remove('open');
+}
+function toggleExposure() { closeExposure(); }
 function drawCharts(date) {
   const weeks = 12;
   const labels = Array.from({ length: weeks }, (_, i) => `Wk ${i + 1}`);
@@ -952,7 +912,7 @@ function switchView(view) {
   document.querySelector(`.subsubtab[data-view="${view}"]`).classList.add('active');
 
   document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-  const map = { recs: 'viewRecs', published: 'viewPublished', competitor: 'viewCompetitor' };
+  const map = { recs: 'viewRecs', competitor: 'viewCompetitor' };
   document.getElementById(map[view]).classList.remove('hidden');
 }
 
@@ -997,11 +957,49 @@ document.addEventListener('click', (e) => {
   if (e.target.id === 'notesModalBackdrop') closeNotesModal();
 });
 
+// ── Filter population (Brand / Region / Destination / RM) ─
+function populateFilters() {
+  function setupDropdown(wrapId, values, onSelect) {
+    const wrap = document.getElementById(wrapId);
+    if (!wrap) return;
+    const opts = wrap.querySelector('.ms-options');
+    if (!opts) return;
+    opts.innerHTML = values.map(v => `<div class="ms-option" data-value="${v}">${v}</div>`).join('');
+    opts.querySelectorAll('.ms-option').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const val = el.dataset.value;
+        const labelEl = wrap.querySelector('button span');
+        if (labelEl) labelEl.textContent = val;
+        wrap.classList.remove('open');
+        if (onSelect) onSelect(val);
+      });
+    });
+  }
+  function destValuesFor(region) {
+    const filtered = region === 'All Regions'
+      ? DESTINATIONS
+      : DESTINATIONS.filter(d => d.region === region);
+    return ['All Destinations', ...filtered.map(d => d.name)];
+  }
+  setupDropdown('fBrand',   ['All Brands', ...BRANDS]);
+  setupDropdown('fRegion',  ['All Regions', 'Caribbean', 'Mexico', 'Central America', 'Europe', 'Sun & Sand'], (val) => {
+    const destWrap = document.getElementById('fDestination');
+    if (destWrap) {
+      const labelEl = destWrap.querySelector('button span');
+      if (labelEl) labelEl.textContent = 'All Destinations';
+    }
+    setupDropdown('fDestination', destValuesFor(val));
+  });
+  setupDropdown('fDestination', destValuesFor('All Regions'));
+  setupDropdown('fRM', REVENUE_MANAGERS);
+}
+
 // ── Init ───────────────────────────────────────────────────
+populateFilters();
 renderMetricsBar();
 renderRecsHead();
 renderRecsTable();
-renderPublishedTable();
 renderCompetitorTable();
 </script>
 

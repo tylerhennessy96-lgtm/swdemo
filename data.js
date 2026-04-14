@@ -1,27 +1,53 @@
 // ── Sunwing Revenue Management — Seed Data ──────────────────
 // All prices in CAD ($). All data fictional and for demo use only.
 
-const REGIONS    = ['All', 'Caribbean', 'Mexico', 'Europe', 'Sun/Sand'];
-const GATEWAYS   = ['YYZ', 'YVR', 'YWG', 'YUL', 'YYC'];
+const BRANDS     = ['Sunwing', 'WestJet Vacations'];
+const REGIONS    = ['All', 'Caribbean', 'Mexico', 'Central America', 'Europe', 'Sun & Sand'];
+const GATEWAYS   = ['YYZ', 'YVR', 'YWG', 'YUL', 'YYC', 'YOW', 'YHZ'];
 const TRIP_DURATIONS = [7, 10, 14];
 
-const REVENUE_MANAGERS = ['All RMs', 'Sarah Chen', 'Marcus Webb', 'Priya Patel', 'Jordan Kim'];
+const REVENUE_MANAGERS = ['All RMs', 'Sarah Chen', 'Marcus Webb', 'Priya Patel', 'Jordan Kim', 'David Okafor', 'Lisa Tran'];
 const SALES_MANAGERS   = ['All Sales', 'Tom Reyes', 'Diana Novak', 'Amir Hassan', 'Chloe Martin'];
 
 // ── Destinations ───────────────────────────────────────────
 const DESTINATIONS = [
-  { id: 'CUN', name: 'Cancun',          region: 'Mexico',    country: 'Mexico',              departureGateway: 'YYZ', revenueManager: 'Sarah Chen',   salesManager: 'Tom Reyes'    },
-  { id: 'PUJ', name: 'Punta Cana',      region: 'Caribbean', country: 'Dominican Republic',  departureGateway: 'YYZ', revenueManager: 'Sarah Chen',   salesManager: 'Tom Reyes'    },
-  { id: 'VRA', name: 'Varadero',        region: 'Caribbean', country: 'Cuba',                departureGateway: 'YUL', revenueManager: 'Marcus Webb',  salesManager: 'Diana Novak'  },
-  { id: 'MBJ', name: 'Montego Bay',     region: 'Caribbean', country: 'Jamaica',             departureGateway: 'YYZ', revenueManager: 'Marcus Webb',  salesManager: 'Diana Novak'  },
-  { id: 'POP', name: 'Puerto Plata',    region: 'Caribbean', country: 'Dominican Republic',  departureGateway: 'YWG', revenueManager: 'Priya Patel',  salesManager: 'Amir Hassan'  },
-  { id: 'SJD', name: 'Los Cabos',       region: 'Mexico',    country: 'Mexico',              departureGateway: 'YVR', revenueManager: 'Priya Patel',  salesManager: 'Amir Hassan'  },
-  { id: 'PVR', name: 'Puerto Vallarta', region: 'Mexico',    country: 'Mexico',              departureGateway: 'YVR', revenueManager: 'Jordan Kim',   salesManager: 'Chloe Martin' },
-  { id: 'TUL', name: 'Tulum',           region: 'Mexico',    country: 'Mexico',              departureGateway: 'YYZ', revenueManager: 'Sarah Chen',   salesManager: 'Chloe Martin' },
-  { id: 'NAS', name: 'Nassau',          region: 'Caribbean', country: 'Bahamas',             departureGateway: 'YYZ', revenueManager: 'Marcus Webb',  salesManager: 'Tom Reyes'    },
-  { id: 'AUA', name: 'Aruba',           region: 'Caribbean', country: 'Aruba',               departureGateway: 'YYZ', revenueManager: 'Jordan Kim',   salesManager: 'Diana Novak'  },
-  { id: 'HUX', name: 'Huatulco',        region: 'Mexico',    country: 'Mexico',              departureGateway: 'YYC', revenueManager: 'Priya Patel',  salesManager: 'Amir Hassan'  },
-  { id: 'CZM', name: 'Cozumel',         region: 'Mexico',    country: 'Mexico',              departureGateway: 'YUL', revenueManager: 'Jordan Kim',   salesManager: 'Chloe Martin' },
+  // ── Caribbean ──
+  { id: 'PUJ', name: 'Punta Cana',      region: 'Caribbean',       country: 'Dominican Republic',  departureGateway: 'YYZ', revenueManager: 'Sarah Chen',   salesManager: 'Tom Reyes'    },
+  { id: 'MBJ', name: 'Montego Bay',     region: 'Caribbean',       country: 'Jamaica',             departureGateway: 'YYZ', revenueManager: 'Marcus Webb',  salesManager: 'Diana Novak'  },
+  { id: 'VRA', name: 'Varadero',        region: 'Caribbean',       country: 'Cuba',                departureGateway: 'YUL', revenueManager: 'Marcus Webb',  salesManager: 'Diana Novak'  },
+  { id: 'NAS', name: 'Nassau',          region: 'Caribbean',       country: 'Bahamas',             departureGateway: 'YYZ', revenueManager: 'David Okafor', salesManager: 'Tom Reyes'    },
+  { id: 'AUA', name: 'Aruba',           region: 'Caribbean',       country: 'Aruba',               departureGateway: 'YYZ', revenueManager: 'Jordan Kim',   salesManager: 'Diana Novak'  },
+  { id: 'BGI', name: 'Barbados',        region: 'Caribbean',       country: 'Barbados',            departureGateway: 'YYZ', revenueManager: 'Lisa Tran',    salesManager: 'Diana Novak'  },
+  { id: 'UVF', name: 'St. Lucia',       region: 'Caribbean',       country: 'Saint Lucia',         departureGateway: 'YYZ', revenueManager: 'Lisa Tran',    salesManager: 'Diana Novak'  },
+  { id: 'PLS', name: 'Turks & Caicos',  region: 'Caribbean',       country: 'Turks and Caicos',    departureGateway: 'YYZ', revenueManager: 'David Okafor', salesManager: 'Tom Reyes'    },
+  { id: 'POP', name: 'Puerto Plata',    region: 'Caribbean',       country: 'Dominican Republic',  departureGateway: 'YWG', revenueManager: 'Priya Patel',  salesManager: 'Amir Hassan'  },
+
+  // ── Mexico ──
+  { id: 'CUN', name: 'Cancun',          region: 'Mexico',          country: 'Mexico',              departureGateway: 'YYZ', revenueManager: 'Sarah Chen',   salesManager: 'Tom Reyes'    },
+  { id: 'SJD', name: 'Los Cabos',       region: 'Mexico',          country: 'Mexico',              departureGateway: 'YVR', revenueManager: 'Priya Patel',  salesManager: 'Amir Hassan'  },
+  { id: 'PVR', name: 'Puerto Vallarta', region: 'Mexico',          country: 'Mexico',              departureGateway: 'YVR', revenueManager: 'Jordan Kim',   salesManager: 'Chloe Martin' },
+  { id: 'MID', name: 'Riviera Maya',    region: 'Mexico',          country: 'Mexico',              departureGateway: 'YYZ', revenueManager: 'David Okafor', salesManager: 'Tom Reyes'    },
+  { id: 'HUX', name: 'Huatulco',        region: 'Mexico',          country: 'Mexico',              departureGateway: 'YYC', revenueManager: 'Priya Patel',  salesManager: 'Amir Hassan'  },
+  { id: 'MZT', name: 'Mazatlan',        region: 'Mexico',          country: 'Mexico',              departureGateway: 'YYC', revenueManager: 'Jordan Kim',   salesManager: 'Amir Hassan'  },
+  { id: 'CZM', name: 'Cozumel',         region: 'Mexico',          country: 'Mexico',              departureGateway: 'YUL', revenueManager: 'Jordan Kim',   salesManager: 'Chloe Martin' },
+  { id: 'ZIH', name: 'Ixtapa',          region: 'Mexico',          country: 'Mexico',              departureGateway: 'YYZ', revenueManager: 'Lisa Tran',    salesManager: 'Chloe Martin' },
+
+  // ── Central America ──
+  { id: 'RTB', name: 'Roatan',          region: 'Central America', country: 'Honduras',            departureGateway: 'YYZ', revenueManager: 'David Okafor', salesManager: 'Amir Hassan'  },
+  { id: 'LIR', name: 'Liberia',         region: 'Central America', country: 'Costa Rica',          departureGateway: 'YYZ', revenueManager: 'Lisa Tran',    salesManager: 'Amir Hassan'  },
+  { id: 'PTY', name: 'Panama City',     region: 'Central America', country: 'Panama',              departureGateway: 'YYZ', revenueManager: 'David Okafor', salesManager: 'Tom Reyes'    },
+
+  // ── Europe ──
+  { id: 'LIS', name: 'Lisbon',          region: 'Europe',          country: 'Portugal',            departureGateway: 'YYZ', revenueManager: 'Sarah Chen',   salesManager: 'Tom Reyes'    },
+  { id: 'BCN', name: 'Barcelona',       region: 'Europe',          country: 'Spain',               departureGateway: 'YYZ', revenueManager: 'Marcus Webb',  salesManager: 'Diana Novak'  },
+  { id: 'FCO', name: 'Rome',            region: 'Europe',          country: 'Italy',               departureGateway: 'YYZ', revenueManager: 'Marcus Webb',  salesManager: 'Diana Novak'  },
+  { id: 'ATH', name: 'Athens',          region: 'Europe',          country: 'Greece',              departureGateway: 'YYZ', revenueManager: 'Priya Patel',  salesManager: 'Amir Hassan'  },
+  { id: 'AMS', name: 'Amsterdam',       region: 'Europe',          country: 'Netherlands',         departureGateway: 'YYZ', revenueManager: 'Jordan Kim',   salesManager: 'Chloe Martin' },
+
+  // ── Sun & Sand (long-haul) ──
+  { id: 'MLE', name: 'Maldives',        region: 'Sun & Sand',      country: 'Maldives',            departureGateway: 'YYZ', revenueManager: 'David Okafor', salesManager: 'Tom Reyes'    },
+  { id: 'DXB', name: 'Dubai',           region: 'Sun & Sand',      country: 'United Arab Emirates',departureGateway: 'YYZ', revenueManager: 'Lisa Tran',    salesManager: 'Diana Novak'  },
+  { id: 'HKT', name: 'Phuket',          region: 'Sun & Sand',      country: 'Thailand',            departureGateway: 'YVR', revenueManager: 'David Okafor', salesManager: 'Chloe Martin' },
 ];
 
 // ── Hotel / flight pools for seeding ───────────────────────
@@ -290,6 +316,26 @@ const _FLIGHT_ROUTES = {
     { flightNum: 'WS2801', origin: 'YYZ', category: 'Own Flight' },
     { flightNum: 'WG5701', origin: 'YHZ', category: 'Risk Block' },
   ],
+  MID: [
+    { flightNum: 'WS2501', origin: 'YYZ', category: 'Own Flight' },
+    { flightNum: 'WG5401', origin: 'YYC', category: 'Risk Block' },
+  ],
+  SJD: [
+    { flightNum: 'WS3001', origin: 'YYZ', category: 'Own Flight' },
+    { flightNum: 'WS3003', origin: 'YVR', category: 'Own Flight' },
+  ],
+  BGI: [
+    { flightNum: 'WS3201', origin: 'YYZ', category: 'Own Flight' },
+    { flightNum: 'WG5801', origin: 'YOW', category: 'Risk Block' },
+  ],
+  NAS: [
+    { flightNum: 'WS3401', origin: 'YYZ', category: 'Own Flight' },
+    { flightNum: 'WG5901', origin: 'YWG', category: '3rd Party'  },
+  ],
+  PVR: [
+    { flightNum: 'WS2701', origin: 'YYZ', category: 'Own Flight' },
+    { flightNum: 'WS2703', origin: 'YVR', category: 'Own Flight' },
+  ],
 };
 
 // 8 rolling weekly departure dates starting from next Monday
@@ -497,6 +543,27 @@ const _HOTEL_SPECS = {
   MBJ: [
     { id: 'MBJ-H01', name: 'Sandals Montego Bay', classification: 'Exclusive', stars: 5 },
     { id: 'MBJ-H02', name: 'Riu Montego Bay',     classification: 'Commodity', stars: 4 },
+  ],
+  MID: [
+    { id: 'MID-H01', name: 'Now Jade Resort',     classification: 'Exclusive', stars: 5 },
+    { id: 'MID-H02', name: 'Iberostar Paraiso',   classification: 'Exclusive', stars: 4 },
+    { id: 'MID-H03', name: 'Gran Bahia Principe', classification: 'Commodity', stars: 4 },
+  ],
+  SJD: [
+    { id: 'SJD-H01', name: 'Breathless Cabo', classification: 'Exclusive', stars: 5 },
+    { id: 'SJD-H02', name: 'Riu Santa Fe',    classification: 'Commodity', stars: 4 },
+  ],
+  BGI: [
+    { id: 'BGI-H01', name: 'Sandals Barbados',   classification: 'Exclusive', stars: 5 },
+    { id: 'BGI-H02', name: 'Accra Beach Hotel',  classification: 'Commodity', stars: 3 },
+  ],
+  NAS: [
+    { id: 'NAS-H01', name: 'Atlantis Paradise Island', classification: 'Exclusive', stars: 5 },
+    { id: 'NAS-H02', name: 'Melia Nassau',             classification: 'Commodity', stars: 4 },
+  ],
+  PVR: [
+    { id: 'PVR-H01', name: 'Dreams Villamagna', classification: 'Exclusive', stars: 5 },
+    { id: 'PVR-H02', name: 'Krystal Grand',     classification: 'Commodity', stars: 4 },
   ],
 };
 

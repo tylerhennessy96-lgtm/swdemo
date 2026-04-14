@@ -9,6 +9,7 @@
   <script src="data.js"></script>
 </head>
 <body>
+<div class="analytics-backdrop" id="analyticsBackdrop" onclick="closeExposure()"></div>
 <div class="app">
 
   <!-- ── Top Nav ── -->
@@ -27,7 +28,6 @@
       <a href="pricing.html" class="nav-tab active">Pricing</a>
       <a href="demand.html"  class="nav-tab">Demand Forecast</a>
       <a href="#"            class="nav-tab">Rules &amp; Parameters</a>
-      <a href="#"            class="nav-tab">Audit Log</a>
     </div>
 
     <div class="nav-divider"></div>
@@ -113,7 +113,6 @@
     <a href="pricing.html" class="subtab active">Vacation Packages</a>
     <a href="hotel.html"   class="subtab">Hotel Only</a>
     <a href="flight.html"  class="subtab">Flight Only</a>
-    <a href="#groups"      class="subtab">Groups</a>
     <div class="subtab-spacer"></div>
     <button class="btn btn-primary" onclick="runEvaluation()" style="margin-right:8px;">
       <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="3,2 12,7 3,12" fill="currentColor" stroke="none"/></svg>
@@ -179,7 +178,7 @@
                     <span class="legend-item"><span class="legend-line" style="background:#9ca3af;border-top:1px dashed #9ca3af;height:0;"></span>Target</span>
                   </div>
                 </div>
-                <div style="position:relative;width:100%;height:200px;">
+                <div style="position:relative;width:100%;height:220px;">
                   <canvas id="bookingCurveChart"></canvas>
                 </div>
               </div>
@@ -192,7 +191,7 @@
                     <span class="legend-item"><span class="legend-line" style="background:#a78bfa"></span>Competitor 2</span>
                   </div>
                 </div>
-                <div style="position:relative;width:100%;height:200px;">
+                <div style="position:relative;width:100%;height:220px;">
                   <canvas id="compPriceChart"></canvas>
                 </div>
               </div>
@@ -477,7 +476,7 @@ function renderTable() {
               <div>${pkg.departureDate}</div>
               <div class="font-mono" style="font-size:10.5px;color:var(--text-muted);">${pkg.flightNum}</div>
             </td>
-            <td class="text-right font-mono">${fmt$(pkg.totalCost)}</td>
+            <td class="text-right num">${fmt$(pkg.totalCost)}</td>
             <td class="text-right">
               <input class="margin-input" type="number" value="${effMargin}" data-pkg="${pkg.id}" onchange="updateMargin('${pkg.id}', this.value)" onclick="event.stopPropagation()" />
             </td>
@@ -485,11 +484,11 @@ function renderTable() {
               <span class="rec-margin-cell" onclick="event.stopPropagation();acceptRec('${pkg.id}')" title="Click to accept">${fmt$(pkg.recMargin)}</span>
             </td>
             <td class="text-right">${deltaCell(effDelta)}</td>
-            <td class="text-right font-mono">${fmt$(effPrice)}</td>
-            <td class="text-right font-mono highlight-teal">${fmt$(pkg.recPrice)}</td>
+            <td class="text-right num">${fmt$(effPrice)}</td>
+            <td class="text-right num highlight-teal">${fmt$(pkg.recPrice)}</td>
             <td class="text-right">${lfPill(pkg.lf)}</td>
-            <td class="text-right font-mono text-muted">${fmt$(pkg.competitor1Price)}</td>
-            <td class="text-right font-mono text-muted">${fmt$(pkg.competitor2Price)}</td>
+            <td class="text-right num text-muted">${fmt$(pkg.competitor1Price)}</td>
+            <td class="text-right num text-muted">${fmt$(pkg.competitor2Price)}</td>
             <td>${paceBadge(pkg.bookingPace)}</td>
             <td>
               <span class="pkg-action-icons">
@@ -646,13 +645,13 @@ function baseChartOptions(yLabel, yFormat) {
     scales: {
       x: {
         grid: { color: CHART_DARK_GRID, drawBorder: false },
-        ticks: { color: CHART_DARK_TICK, font: { size: 10, family: 'Inter' } },
+        ticks: { color: CHART_DARK_TICK, font: { size: 10, family: 'Archivo' } },
       },
       y: {
         grid: { color: CHART_DARK_GRID, drawBorder: false },
         ticks: {
           color: CHART_DARK_TICK,
-          font: { size: 10, family: 'Inter' },
+          font: { size: 10, family: 'Archivo' },
           callback: (v) => yFormat ? yFormat(v) : v,
         },
         title: yLabel ? { display: true, text: yLabel, color: CHART_DARK_TICK, font: { size: 10 } } : undefined,
@@ -751,7 +750,9 @@ function openPackagePanel(pkgId) {
 
   const wrap = document.getElementById('exposureWrap');
   wrap.style.display = 'block';
+  wrap.classList.remove('panel-closed');
   document.getElementById('exposurePanel').classList.remove('panel-closed');
+  document.getElementById('analyticsBackdrop').classList.add('open');
 
   document.getElementById('exposurePropName').textContent =
     `${hit.destination.name} · ${hit.package.hotel} · ${hit.package.id}`;
@@ -765,15 +766,25 @@ function openPackagePanel(pkgId) {
 
 function toggleExposure() {
   const wrap = document.getElementById('exposureWrap');
-  if (wrap.style.display === 'none' || !wrap.style.display) {
-    if (activePanelPkgId) {
-      openPackagePanel(activePanelPkgId);
-    } else {
-      wrap.style.display = 'block';
-    }
+  const shown = wrap.style.display && wrap.style.display !== 'none';
+  if (shown) {
+    closeExposure();
   } else {
-    wrap.style.display = 'none';
+    if (activePanelPkgId) openPackagePanel(activePanelPkgId);
+    else showExposure();
   }
+}
+function showExposure() {
+  const wrap = document.getElementById('exposureWrap');
+  wrap.style.display = 'block';
+  wrap.classList.remove('panel-closed');
+  document.getElementById('analyticsBackdrop').classList.add('open');
+}
+function closeExposure() {
+  const wrap = document.getElementById('exposureWrap');
+  wrap.style.display = 'none';
+  wrap.classList.remove('panel-closed');
+  document.getElementById('analyticsBackdrop').classList.remove('open');
 }
 
 // ── Rules drawer ───────────────────────────────────────────
@@ -855,7 +866,46 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// ── Filter population (Brand / Region / Destination / RM) ─
+function populateFilters() {
+  function setupDropdown(wrapId, values, onSelect) {
+    const wrap = document.getElementById(wrapId);
+    if (!wrap) return;
+    const opts = wrap.querySelector('.ms-options');
+    if (!opts) return;
+    opts.innerHTML = values.map(v => `<div class="ms-option" data-value="${v}">${v}</div>`).join('');
+    opts.querySelectorAll('.ms-option').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const val = el.dataset.value;
+        const labelEl = wrap.querySelector('button span');
+        if (labelEl) labelEl.textContent = val;
+        wrap.classList.remove('open');
+        if (onSelect) onSelect(val);
+      });
+    });
+  }
+  function destValuesFor(region) {
+    const filtered = region === 'All Regions'
+      ? DESTINATIONS
+      : DESTINATIONS.filter(d => d.region === region);
+    return ['All Destinations', ...filtered.map(d => d.name)];
+  }
+  setupDropdown('fBrand',   ['All Brands', ...BRANDS]);
+  setupDropdown('fRegion',  ['All Regions', 'Caribbean', 'Mexico', 'Central America', 'Europe', 'Sun & Sand'], (val) => {
+    const destWrap = document.getElementById('fDestination');
+    if (destWrap) {
+      const labelEl = destWrap.querySelector('button span');
+      if (labelEl) labelEl.textContent = 'All Destinations';
+    }
+    setupDropdown('fDestination', destValuesFor(val));
+  });
+  setupDropdown('fDestination', destValuesFor('All Regions'));
+  setupDropdown('fRM', REVENUE_MANAGERS);
+}
+
 // ── Init ───────────────────────────────────────────────────
+populateFilters();
 renderStatsBar();
 renderTable();
 </script>

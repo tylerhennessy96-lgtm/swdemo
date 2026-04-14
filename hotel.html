@@ -9,6 +9,7 @@
   <script src="data.js"></script>
 </head>
 <body>
+<div class="analytics-backdrop" id="analyticsBackdrop" onclick="closeExposure()"></div>
 <div class="app">
 
   <!-- ── Top Nav ── -->
@@ -27,7 +28,6 @@
       <a href="pricing.html" class="nav-tab active">Pricing</a>
       <a href="demand.html"  class="nav-tab">Demand Forecast</a>
       <a href="#"            class="nav-tab">Rules &amp; Parameters</a>
-      <a href="#"            class="nav-tab">Audit Log</a>
     </div>
 
     <div class="nav-divider"></div>
@@ -95,7 +95,6 @@
     <a href="pricing.html" class="subtab">Vacation Packages</a>
     <a href="hotel.html"   class="subtab active">Hotel Only</a>
     <a href="flight.html"  class="subtab">Flight Only</a>
-    <a href="#groups"      class="subtab">Groups</a>
     <div class="subtab-spacer"></div>
     <button class="btn btn-primary" onclick="runEvaluation()" style="margin-right:8px;">
       <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="3,2 12,7 3,12" fill="currentColor" stroke="none"/></svg>
@@ -184,7 +183,7 @@
                       <span class="legend-item"><span class="legend-line" style="background:#60a5fa"></span>Forecast</span>
                     </div>
                   </div>
-                  <div style="position:relative;width:100%;height:200px;">
+                  <div style="position:relative;width:100%;height:220px;">
                     <canvas id="hotelBookingCurveChart"></canvas>
                   </div>
                 </div>
@@ -197,7 +196,7 @@
                       <span class="legend-item"><span class="legend-line" style="background:#60a5fa"></span>Forecast</span>
                     </div>
                   </div>
-                  <div style="position:relative;width:100%;height:200px;">
+                  <div style="position:relative;width:100%;height:220px;">
                     <canvas id="hotelSecondaryChart"></canvas>
                   </div>
                 </div>
@@ -252,11 +251,11 @@
         <div style="display:flex;gap:12px;">
           <div style="flex:1;">
             <label style="display:block;font-size:11.5px;font-weight:500;color:var(--text-secondary);margin-bottom:4px;">Expiry date</label>
-            <input type="date" id="notesExpiry" style="width:100%;padding:8px 12px;border:1px solid var(--border-mid);border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;outline:none;" />
+            <input type="date" id="notesExpiry" style="width:100%;padding:8px 12px;border:1px solid var(--border-mid);border-radius:var(--radius);font-family:'Archivo',sans-serif;font-size:13px;outline:none;" />
           </div>
           <div style="flex:1;">
             <label style="display:block;font-size:11.5px;font-weight:500;color:var(--text-secondary);margin-bottom:4px;">Created by</label>
-            <input type="text" id="notesCreatedBy" readonly value="Sarah Chen" style="width:100%;padding:8px 12px;border:1px solid var(--border-mid);border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;background:#f9fafb;color:var(--text-secondary);outline:none;" />
+            <input type="text" id="notesCreatedBy" readonly value="Sarah Chen" style="width:100%;padding:8px 12px;border:1px solid var(--border-mid);border-radius:var(--radius);font-family:'Archivo',sans-serif;font-size:13px;background:#f9fafb;color:var(--text-secondary);outline:none;" />
           </div>
         </div>
         <div style="font-size:11px;color:var(--text-muted);margin-top:10px;" id="notesCreatedAt">Created: —</div>
@@ -443,11 +442,11 @@ function renderRecsTable() {
           <span style="color:var(--text-muted);margin-left:8px;font-size:11px;">${dest.totalHotels} hotels</span>
         </td>
         <td class="text-muted">—</td>
-        <td class="text-right font-mono">${dest.allocation.toLocaleString()}</td>
-        <td class="text-right font-mono">${dest.sold.toLocaleString()}</td>
+        <td class="text-right num">${dest.allocation.toLocaleString()}</td>
+        <td class="text-right num">${dest.sold.toLocaleString()}</td>
         <td class="text-right">${soldPctText(dest.soldPct)}</td>
         <td class="text-right">${occPill(dest.forecastOcc)}</td>
-        <td class="text-right font-mono">${fmtPct(dest.currentOcc)}</td>
+        <td class="text-right num">${fmtPct(dest.currentOcc)}</td>
         <td class="text-muted">—</td>
         <td class="text-right">${fmt$(dLive.avgCurrentADR)}</td>
         <td class="text-right highlight-teal">${fmt$(dLive.avgRecADR)}</td>
@@ -480,11 +479,11 @@ function renderRecsTable() {
             <span style="color:var(--text-muted);margin-left:6px;font-size:10.5px;">${wkMeta.weekStart}</span>
           </td>
           <td class="text-muted">—</td>
-          <td class="text-right font-mono">${wAgg.alloc.toLocaleString()}</td>
-          <td class="text-right font-mono">${wAgg.sold.toLocaleString()}</td>
+          <td class="text-right num">${wAgg.alloc.toLocaleString()}</td>
+          <td class="text-right num">${wAgg.sold.toLocaleString()}</td>
           <td class="text-right">${soldPctText(wAgg.soldPct)}</td>
           <td class="text-right">${occPill(wAgg.forecastOcc)}</td>
-          <td class="text-right font-mono">${fmtPct(wAgg.currentOcc)}</td>
+          <td class="text-right num">${fmtPct(wAgg.currentOcc)}</td>
           <td class="text-muted">—</td>
           <td class="text-right">${fmt$(wAgg.currentADR)}</td>
           <td class="text-right highlight-teal">${fmt$(wAgg.recADR)}</td>
@@ -516,11 +515,11 @@ function renderRecsTable() {
               <span class="font-mono" style="color:var(--text-muted);margin-left:6px;font-size:10.5px;">${hotel.id}</span>
             </td>
             <td>${classBadge(hotel.classification)} ${starsMarkup(hotel.stars)}</td>
-            <td class="text-right font-mono">${hAgg.alloc.toLocaleString()}</td>
-            <td class="text-right font-mono">${hAgg.sold.toLocaleString()}</td>
+            <td class="text-right num">${hAgg.alloc.toLocaleString()}</td>
+            <td class="text-right num">${hAgg.sold.toLocaleString()}</td>
             <td class="text-right">${soldPctText(hAgg.soldPct)}</td>
             <td class="text-right">${occPill(hAgg.forecastOcc)}</td>
-            <td class="text-right font-mono">${fmtPct(hAgg.currentOcc)}</td>
+            <td class="text-right num">${fmtPct(hAgg.currentOcc)}</td>
             <td class="text-muted">—</td>
             <td class="text-right">${fmt$(hAgg.currentADR)}</td>
             <td class="text-right highlight-teal">${fmt$(hAgg.recADR)}</td>
@@ -548,12 +547,12 @@ function renderRecsTable() {
                 ${week.locked ? ' <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--accent);vertical-align:middle;"><rect x="3" y="6" width="8" height="6" rx="1"/><path d="M5 6V4a2 2 0 0 1 4 0v2"/></svg>' : ''}
               </td>
               <td class="text-muted">—</td>
-              <td class="text-right font-mono">${week.allocation}</td>
-              <td class="text-right font-mono">${week.sold}</td>
+              <td class="text-right num">${week.allocation}</td>
+              <td class="text-right num">${week.sold}</td>
               <td class="text-right">${soldPctText(wSoldPct)}</td>
               <td class="text-right">${occPill(week.forecastOcc)}</td>
-              <td class="text-right font-mono">${fmtPct(week.currentOcc)}</td>
-              <td class="text-right font-mono">${fmt$(week.supplierCost)}</td>
+              <td class="text-right num">${fmtPct(week.currentOcc)}</td>
+              <td class="text-right num">${fmt$(week.supplierCost)}</td>
               <td class="text-right">
                 <input class="adr-input" type="number" value="${eff}" onchange="updateADR('${week.id}', this.value)" onclick="event.stopPropagation()" />
               </td>
@@ -598,8 +597,8 @@ function renderExceptionsTable() {
       <td>${c.hotel}</td>
       <td>${c.roomCategory}</td>
       <td class="font-mono" style="font-size:11.5px;">${c.checkInWeek}</td>
-      <td class="text-right font-mono">${fmt$(c.oldCost)}</td>
-      <td class="text-right font-mono">${fmt$(c.newCost)}</td>
+      <td class="text-right num">${fmt$(c.oldCost)}</td>
+      <td class="text-right num">${fmt$(c.newCost)}</td>
       <td class="text-right ${c.changeAmt >= 0 ? 'delta-neg' : 'delta-pos'}">${c.changeAmt >= 0 ? '+' : ''}${fmt$(c.changeAmt)}</td>
       <td class="text-right ${c.changeAmt >= 0 ? 'delta-neg' : 'delta-pos'}">${c.changePct >= 0 ? '+' : ''}${c.changePct}%</td>
       <td class="font-mono" style="font-size:11.5px;">${c.dateReceived}</td>
@@ -643,11 +642,19 @@ function renderMetricsBar() {
 let hotelBookingChart = null;
 let hotelSecondaryChart = null;
 
-function toggleExposure() {
+function showExposure() {
   const wrap = document.getElementById('exposureWrap');
-  if (wrap.style.display === 'none') return;
-  wrap.classList.toggle('panel-closed');
+  wrap.style.display = 'block';
+  wrap.classList.remove('panel-closed');
+  document.getElementById('analyticsBackdrop').classList.add('open');
 }
+function closeExposure() {
+  const wrap = document.getElementById('exposureWrap');
+  wrap.style.display = 'none';
+  wrap.classList.remove('panel-closed');
+  document.getElementById('analyticsBackdrop').classList.remove('open');
+}
+function toggleExposure() { closeExposure(); }
 
 function openDestCurve(destId) {
   const dest = HOTEL_DATA.find(d => d.id === destId);
@@ -697,9 +704,7 @@ function openDestCurve(destId) {
   drawBookingLine(labels, sold, target, forecast);
   drawSecondaryBars(labels, currentOccSeries, forecastOccSeries, 'Occ %', '%');
 
-  const wrap = document.getElementById('exposureWrap');
-  wrap.style.display = 'block';
-  wrap.classList.remove('panel-closed');
+  showExposure();
 }
 
 function openWeekCurve(destId, weekIdx) {
@@ -750,9 +755,7 @@ function openWeekCurve(destId, weekIdx) {
   drawBookingLine(labels, sold, target, forecast);
   drawSecondaryBars(hotelLabels, hotelCurrent, hotelRec, 'ADR $', '$');
 
-  const wrap = document.getElementById('exposureWrap');
-  wrap.style.display = 'block';
-  wrap.classList.remove('panel-closed');
+  showExposure();
 }
 
 function drawBookingLine(labels, sold, target, forecast) {
@@ -924,6 +927,45 @@ document.addEventListener('click', (e) => {
 });
 
 // ── Init ───────────────────────────────────────────────────
+// ── Filter population (Brand / Region / Destination / RM) ─
+function populateFilters() {
+  function setupDropdown(wrapId, values, onSelect) {
+    const wrap = document.getElementById(wrapId);
+    if (!wrap) return;
+    const opts = wrap.querySelector('.ms-options');
+    if (!opts) return;
+    opts.innerHTML = values.map(v => `<div class="ms-option" data-value="${v}">${v}</div>`).join('');
+    opts.querySelectorAll('.ms-option').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const val = el.dataset.value;
+        const labelEl = wrap.querySelector('button span');
+        if (labelEl) labelEl.textContent = val;
+        wrap.classList.remove('open');
+        if (onSelect) onSelect(val);
+      });
+    });
+  }
+  function destValuesFor(region) {
+    const filtered = region === 'All Regions'
+      ? DESTINATIONS
+      : DESTINATIONS.filter(d => d.region === region);
+    return ['All Destinations', ...filtered.map(d => d.name)];
+  }
+  setupDropdown('fBrand',   ['All Brands', ...BRANDS]);
+  setupDropdown('fRegion',  ['All Regions', 'Caribbean', 'Mexico', 'Central America', 'Europe', 'Sun & Sand'], (val) => {
+    const destWrap = document.getElementById('fDestination');
+    if (destWrap) {
+      const labelEl = destWrap.querySelector('button span');
+      if (labelEl) labelEl.textContent = 'All Destinations';
+    }
+    setupDropdown('fDestination', destValuesFor(val));
+  });
+  setupDropdown('fDestination', destValuesFor('All Regions'));
+  setupDropdown('fRM', REVENUE_MANAGERS);
+}
+
+populateFilters();
 renderMetricsBar();
 renderRecsHead();
 renderRecsTable();
