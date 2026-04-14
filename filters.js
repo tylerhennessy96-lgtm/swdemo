@@ -68,7 +68,11 @@
 
   function msApplyLabel(wrapId) {
     const wrap = document.getElementById(wrapId);
-    if (wrap) setLabelText(wrap, msLabel(wrapId));
+    if (!wrap) return;
+    setLabelText(wrap, msLabel(wrapId));
+    const s = msState[wrapId];
+    if (s && s.selected.size > 0) wrap.classList.add('has-selection');
+    else wrap.classList.remove('has-selection');
   }
 
   function msRenderOptions(wrapId) {
@@ -263,14 +267,17 @@
     const wrap = document.getElementById(wrapId);
     if (!s || !wrap) return;
     const labelEl = wrap.querySelector('.date-range-text');
-    if (!labelEl) return;
-    if (!s.startWeek) {
-      labelEl.textContent = s.defaultLabel;
-    } else if (!s.endWeek) {
-      labelEl.textContent = fmtWeek(s.startWeek);
-    } else {
-      labelEl.textContent = `${fmtWeek(s.startWeek)} – ${fmtWeek(s.endWeek)}`;
+    if (labelEl) {
+      if (!s.startWeek) {
+        labelEl.textContent = s.defaultLabel;
+      } else if (!s.endWeek) {
+        labelEl.textContent = fmtWeek(s.startWeek);
+      } else {
+        labelEl.textContent = `${fmtWeek(s.startWeek)} – ${fmtWeek(s.endWeek)}`;
+      }
     }
+    if (s.startWeek) wrap.classList.add('has-selection');
+    else wrap.classList.remove('has-selection');
   }
 
   F.initWeekPicker = function (wrapId, opts) {

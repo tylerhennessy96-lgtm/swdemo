@@ -200,32 +200,13 @@ html, body {
 /* ── Multi-Select Filter ──────────────────────────────────── */
 .ms-wrap { position: relative; display: inline-block; }
 
-.ms-trigger {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--pill-bg);
-  border: 1px solid var(--nav-border);
-  border-radius: 20px;
-  color: #cbd5e1;
-  font-family: 'Archivo', sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  padding: 4px 12px;
-  min-width: 130px;
-  cursor: pointer;
-  transition: border-color .15s;
-  white-space: nowrap;
-}
-
-.ms-trigger:hover { border-color: #3d4150; }
-.ms-trigger svg { flex-shrink: 0; color: #6b7280; }
-
-/* ── Dates pill (date range picker styled like ms-trigger) ── */
+.ms-trigger,
 .date-pill {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  height: 28px;
+  box-sizing: border-box;
   background: var(--pill-bg);
   border: 1px solid var(--nav-border);
   border-radius: 20px;
@@ -233,16 +214,34 @@ html, body {
   font-family: 'Archivo', sans-serif;
   font-size: 12px;
   font-weight: 500;
-  padding: 4px 12px;
-  min-width: 170px;
+  padding: 0 12px;
+  min-width: 130px;
   cursor: pointer;
   transition: border-color .15s;
   white-space: nowrap;
   position: relative;
 }
+.date-pill { gap: 8px; min-width: 170px; }
+
+.ms-trigger:hover,
 .date-pill:hover { border-color: #3d4150; }
+.ms-trigger svg { flex-shrink: 0; color: #6b7280; }
+
+/* Active filter dot — small teal pip when the wrap has a selection */
+.ms-wrap.has-selection .ms-trigger::after,
+.ms-wrap.has-selection .date-pill::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 2px var(--pill-bg);
+}
 .date-pill svg.cal { flex-shrink: 0; color: #6b7280; }
-.date-pill .date-range-text { color: #cbd5e1; }
+.date-pill .date-range-text { color: #fff; }
 .date-pill .date-range-text .date-sep { color: #6b7280; margin: 0 4px; }
 .date-pill input[type="date"] {
   position: absolute;
@@ -351,13 +350,13 @@ html, body {
   border: none;
   border-bottom: 1px solid #2a2d35;
   padding: 8px 12px;
-  color: #e5e7eb;
+  color: #fff;
   font-family: 'Archivo', sans-serif;
   font-size: 12px;
   outline: none;
 }
 
-.ms-search input::placeholder { color: #6b7280; }
+.ms-search input::placeholder { color: rgba(255,255,255,0.55); }
 
 .ms-actions {
   display: flex;
@@ -367,16 +366,17 @@ html, body {
 }
 .ms-actions a {
   font-size: 11px;
-  color: var(--accent);
+  color: #fff;
   text-decoration: none;
   cursor: pointer;
+  transition: color .15s;
 }
-.ms-actions a:hover { color: var(--accent-dim); }
+.ms-actions a:hover { color: var(--accent); }
 
 .ms-empty {
   padding: 14px 12px;
   text-align: center;
-  color: #6b7280;
+  color: rgba(255,255,255,0.55);
   font-size: 11.5px;
 }
 
@@ -387,13 +387,13 @@ html, body {
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  color: #cbd5e1;
+  color: #fff;
   font-size: 12px;
   cursor: pointer;
   user-select: none;
 }
 
-.ms-option:hover { background: rgba(255,255,255,.05); }
+.ms-option:hover { background: rgba(255,255,255,.07); }
 
 .ms-option input[type=checkbox] { accent-color: var(--accent); cursor: pointer; }
 
@@ -631,7 +631,7 @@ table.data-table td:first-child { min-width: 160px; }
 table.data-table thead th {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  padding: 9px 12px;
+  padding: 9px 16px;
   text-align: left;
   font-weight: 600;
   font-size: 11.5px;
@@ -659,11 +659,16 @@ table.data-table tbody tr {
 table.data-table tbody tr:hover { background: var(--row-hover); }
 
 table.data-table tbody td {
-  padding: 8px 12px;
+  padding: 8px 16px;
   vertical-align: middle;
   white-space: nowrap;
   color: var(--text-primary);
 }
+
+/* Consistent row hover across all hierarchy levels */
+tr.row-property:hover td   { background: #f7f8fa !important; cursor: pointer; }
+tr.row-unit:hover td       { background: #f9fafb; }
+tr.row-cat-week:hover td   { background: #f9fafb; }
 
 /* Row hierarchy levels */
 tr.row-property td:first-child { font-weight: 600; font-size: 13px; }
@@ -1163,12 +1168,21 @@ table.modal-table .info-icon {
 .row-count-bar {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  padding: 6px 20px;
+  padding: 8px 20px;
   font-size: 11.5px;
   color: var(--text-secondary);
   flex-shrink: 0;
+  font-family: 'Archivo', sans-serif;
+  letter-spacing: .01em;
 }
 .row-count-bar strong { color: var(--text-primary); font-weight: 600; }
+
+/* Highlight key alert metric cards with a subtle teal left edge */
+.metric-card.metric-emphasis {
+  border-left-width: 3px;
+  border-left-color: var(--accent);
+  padding-left: 10px;
+}
 
 .adv-drawer-header {
   display: flex;

@@ -8,6 +8,77 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <script src="data.js"></script>
   <script src="filters.js"></script>
+  <style>
+    /* Inline star rating with partial fill */
+    .star-rating {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      vertical-align: middle;
+      margin-left: 4px;
+      white-space: nowrap;
+    }
+    .star-icon {
+      position: relative;
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      line-height: 0;
+    }
+    .star-icon svg { display: block; width: 12px; height: 12px; }
+    .star-icon .star-fg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 12px;
+      overflow: hidden;
+    }
+    .star-num { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+
+    /* Legend / key bar above the table */
+    .legend-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 20px;
+      font-size: 11px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .legend-bar .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .legend-bar .legend-key {
+      display: inline-flex;
+      align-items: center;
+    }
+    .legend-bar .legend-sep { color: var(--border-mid); }
+
+    /* Compact, outlined region badge on the second line of dest+week rows */
+    tr.row-property .row-region {
+      margin-top: 3px;
+      margin-left: 22px;
+      line-height: 1;
+    }
+    tr.row-property .row-region .region-badge {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 6px;
+      background: transparent;
+      border-width: 1px;
+      border-style: solid;
+      letter-spacing: .02em;
+      opacity: 0.8;
+    }
+  </style>
 </head>
 <body>
 <div class="analytics-backdrop" id="analyticsBackdrop" onclick="closeExposure()"></div>
@@ -100,7 +171,7 @@
 
   <!-- ── Metrics Bar (6 KPI cards) ── -->
   <div class="metrics-bar" id="metricsBar">
-    <div class="metric-card">
+    <div class="metric-card metric-emphasis">
       <div class="metric-card-label">Hotels behind plan</div>
       <div class="metric-card-value metric-warn" id="mHotelsBehind">—</div>
       <div class="metric-card-sub">Need hotel pricing action</div>
@@ -120,12 +191,12 @@
       <div class="metric-card-value metric-pos" id="mHighDemand">—</div>
       <div class="metric-card-sub">Beds need protection</div>
     </div>
-    <div class="metric-card">
+    <div class="metric-card metric-emphasis">
       <div class="metric-card-label">Supplier cost changes</div>
       <div class="metric-card-value metric-warn" id="mCostChanges">—</div>
       <div class="metric-card-sub">Contract or allotment updates</div>
     </div>
-    <div class="metric-card">
+    <div class="metric-card metric-emphasis">
       <div class="metric-card-label">Pending approval</div>
       <div class="metric-card-value" id="mPendingApproval">—</div>
       <div class="metric-card-sub">Waiting to publish</div>
@@ -150,6 +221,24 @@
     <!-- New Recommendations view (tree table) -->
     <div class="view" id="viewRecs">
       <div class="row-count-bar" id="rowCountBar"></div>
+      <div class="legend-bar" aria-label="Table legend">
+        <span class="legend-item"><span class="class-badge exclusive legend-key">EXC</span> Exclusive contract</span>
+        <span class="legend-sep">·</span>
+        <span class="legend-item"><span class="class-badge commodity legend-key">COM</span> Commodity / open market</span>
+        <span class="legend-sep">·</span>
+        <span class="legend-item">
+          <span class="legend-key">
+            <span class="star-icon"><span style="color:#d1d5db;"><svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 0.5 L7.55 4.05 L11.4 4.5 L8.5 7.15 L9.3 11 L6 9.05 L2.7 11 L3.5 7.15 L0.6 4.5 L4.45 4.05 Z"/></svg></span><span class="star-fg" style="width:80%;color:#0d9488;"><svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 0.5 L7.55 4.05 L11.4 4.5 L8.5 7.15 L9.3 11 L6 9.05 L2.7 11 L3.5 7.15 L0.6 4.5 L4.45 4.05 Z"/></svg></span></span>
+          </span>
+          Hotel star rating
+        </span>
+        <span class="legend-sep">·</span>
+        <span class="legend-item"><span class="legend-key">⚠️</span> Cost change / alert</span>
+        <span class="legend-sep">·</span>
+        <span class="legend-item"><span class="legend-key">🔒</span> Price locked</span>
+        <span class="legend-sep">·</span>
+        <span class="legend-item"><span class="legend-key">📝</span> Note attached</span>
+      </div>
       <div class="table-wrap">
         <table class="data-table" id="recsTable">
           <thead id="recsTableHead"></thead>
@@ -453,12 +542,22 @@ function regionBadge(region) {
 }
 function classBadge(classification) {
   const cls = classification.toLowerCase();
-  return `<span class="class-badge ${cls}">${classification}</span>`;
+  const abbr = classification === 'Exclusive' ? 'EXC' : (classification === 'Commodity' ? 'COM' : classification);
+  return `<span class="class-badge ${cls}" title="${classification}">${abbr}</span>`;
 }
+// Star path is the same; partial fill is achieved by clipping a teal copy
+// to a percentage width over a grey base.
+const _STAR_SVG = '<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 0.5 L7.55 4.05 L11.4 4.5 L8.5 7.15 L9.3 11 L6 9.05 L2.7 11 L3.5 7.15 L0.6 4.5 L4.45 4.05 Z"/></svg>';
 function starsMarkup(n) {
-  const filled = '★'.repeat(n);
-  const empty = '★'.repeat(5 - n);
-  return `<span class="stars">${filled}<span class="stars-empty">${empty}</span></span>`;
+  const rating = Math.max(0, Math.min(5, Number(n) || 0));
+  const pct = (rating / 5) * 100;
+  return `<span class="star-rating" title="Rating ${rating.toFixed(1)} / 5">
+    <span class="star-icon">
+      <span style="color:#d1d5db;">${_STAR_SVG}</span>
+      <span class="star-fg" style="width:${pct}%;color:#0d9488;">${_STAR_SVG}</span>
+    </span>
+    <span class="star-num">${rating.toFixed(1)}</span>
+  </span>`;
 }
 function occPill(occ) {
   const pct = Math.round(occ * 100);
@@ -536,25 +635,28 @@ function marginPctBadge(pct) {
   return `<span class="occ-pill ${cls}">${v}%</span>`;
 }
 
-// Aggregate margin from a list of week records (uses effective ADR)
+// Aggregate margin from a list of week records (uses effective ADR).
+// marginPct is the per-row average so each room category counts equally.
 function aggMargin(weeks) {
   if (!weeks.length) return null;
-  let curSum = 0, recSum = 0, adrSum = 0;
+  let curSum = 0, recSum = 0, pctSum = 0, pctN = 0;
   weeks.forEach(w => {
     const eff = getEffectiveADR(w);
     curSum += eff - w.supplierCost;
     recSum += w.recADR - w.supplierCost;
-    adrSum += eff;
+    if (eff) {
+      pctSum += (eff - w.supplierCost) / eff;
+      pctN++;
+    }
   });
   const n = weeks.length;
   const avgCur = curSum / n;
   const avgRec = recSum / n;
-  const avgADR = adrSum / n;
   return {
     currentMargin: Math.round(avgCur),
     recMargin:     Math.round(avgRec),
     marginDelta:   Math.round(avgRec - avgCur),
-    marginPct:     avgADR ? avgCur / avgADR : 0,
+    marginPct:     pctN ? pctSum / pctN : 0,
   };
 }
 
@@ -661,10 +763,10 @@ function renderRecsTable() {
             <button class="expand-btn ${weekOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleWeek('${weekKey}')">${chevron(weekOpen)}</button>
             <span style="font-weight:600;">${dest.name}</span>
             <span style="font-weight:400;color:var(--text-muted);margin-left:6px;">- Wk ${shortDate}</span>
-            ${regionBadge(dest.region)}
+            <div class="row-region">${regionBadge(dest.region)}</div>
           </td>
           <td><span style="font-weight:500;">Wk ${shortDate}</span></td>
-          <td class="text-right num">${dwAgg.sold.toLocaleString()} / ${dwAgg.alloc.toLocaleString()}</td>
+          <td class="text-right num">${dwAgg.sold.toLocaleString()}<span style="color:var(--text-muted);margin:0 5px;">/</span>${dwAgg.alloc.toLocaleString()}</td>
           <td class="text-right">${soldPctText(dwAgg.soldPct)}</td>
           <td class="text-right">${occPill(dwAgg.forecastOcc)}</td>
           <td class="text-right num">${fmtPct(dwAgg.currentOcc)}</td>
@@ -672,9 +774,9 @@ function renderRecsTable() {
           <td class="text-right">${fmt$(dwAgg.currentADR)}</td>
           <td class="text-right highlight-teal">${fmt$(dwAgg.recADR)}</td>
           <td class="text-right">${deltaCell(dwAgg.deltaADR)}</td>
-          <td class="text-muted">—</td>
-          <td class="text-muted">—</td>
-          <td class="text-muted">—</td>
+          <td class="text-right num">${dwMargin ? fmt$(dwMargin.currentMargin) : '<span class="text-muted">—</span>'}</td>
+          <td class="text-right num">${dwMargin ? fmt$(dwMargin.recMargin) : '<span class="text-muted">—</span>'}</td>
+          <td class="text-right">${dwMargin ? deltaCell(dwMargin.marginDelta) : '<span class="text-muted">—</span>'}</td>
           <td class="text-right">${dwMargin ? marginPctBadge(dwMargin.marginPct) : '<span class="text-muted">—</span>'}</td>
           <td>${dwAgg.hasCostChange ? '<span class="cost-change-flag" title="Cost change in this week">⚠️</span>' : ''}</td>
           <td>
@@ -709,7 +811,7 @@ function renderRecsTable() {
               ${starsMarkup(hotel.stars)}
             </td>
             <td class="text-muted">—</td>
-            <td class="text-right num">${hAgg.sold.toLocaleString()} / ${hAgg.alloc.toLocaleString()}</td>
+            <td class="text-right num">${hAgg.sold.toLocaleString()}<span style="color:var(--text-muted);margin:0 5px;">/</span>${hAgg.alloc.toLocaleString()}</td>
             <td class="text-right">${soldPctText(hAgg.soldPct)}</td>
             <td class="text-right">${occPill(hAgg.forecastOcc)}</td>
             <td class="text-right num">${fmtPct(hAgg.currentOcc)}</td>
@@ -717,9 +819,9 @@ function renderRecsTable() {
             <td class="text-right">${fmt$(hAgg.currentADR)}</td>
             <td class="text-right highlight-teal">${fmt$(hAgg.recADR)}</td>
             <td class="text-right">${deltaCell(hAgg.deltaADR)}</td>
-            <td class="text-muted">—</td>
-            <td class="text-muted">—</td>
-            <td class="text-muted">—</td>
+            <td class="text-right num">${hMargin ? fmt$(hMargin.currentMargin) : '<span class="text-muted">—</span>'}</td>
+            <td class="text-right num">${hMargin ? fmt$(hMargin.recMargin) : '<span class="text-muted">—</span>'}</td>
+            <td class="text-right">${hMargin ? deltaCell(hMargin.marginDelta) : '<span class="text-muted">—</span>'}</td>
             <td class="text-right">${hMargin ? marginPctBadge(hMargin.marginPct) : '<span class="text-muted">—</span>'}</td>
             <td>${hAgg.hasCostChange ? '<span class="cost-change-flag" title="Cost change in a category">⚠️</span>' : ''}</td>
             <td>
@@ -753,7 +855,7 @@ function renderRecsTable() {
                 ${week.locked ? ' <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--accent);vertical-align:middle;"><rect x="3" y="6" width="8" height="6" rx="1"/><path d="M5 6V4a2 2 0 0 1 4 0v2"/></svg>' : ''}
               </td>
               <td class="text-muted">—</td>
-              <td class="text-right num">${week.sold} / ${week.allocation}</td>
+              <td class="text-right num">${week.sold}<span style="color:var(--text-muted);margin:0 5px;">/</span>${week.allocation}</td>
               <td class="text-right">${soldPctText(wSoldPct)}</td>
               <td class="text-right">${occPill(week.forecastOcc)}</td>
               <td class="text-right num">${fmtPct(week.currentOcc)}</td>
