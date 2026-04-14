@@ -11,7 +11,7 @@ The design is a clean enterprise dashboard aesthetic (dark nav, white body, pink
 - **Pure HTML + CSS + Vanilla JS** — no framework, no build step, no npm
 - Files open directly in a browser
 - Charts use **Chart.js 4** via CDN (`https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js`)
-- Fonts: **DM Sans** + **DM Mono** via Google Fonts
+- Fonts: **Inter** + **JetBrains Mono** via Google Fonts
 - All shared styles in `styles.css`
 - All seed data in `data.js` (loaded via `<script src="data.js">` on every page)
 - All prices shown in **CAD ($)**
@@ -72,8 +72,8 @@ Key revenue-management concepts used throughout:
 ```
 
 ### Typography
-- Body font: `DM Sans` (weights 300, 400, 500, 600)
-- Monospace (package IDs, flight numbers, codes): `DM Mono` (weights 400, 500)
+- Body font: `Inter` (weights 300, 400, 500, 600, 700)
+- Monospace (package IDs, flight numbers, codes): `JetBrains Mono` (weights 400, 500)
 - Base font size: 13px
 - Table cell font size: 12.5px
 - Column headers: 11.5px, font-weight 600, color `--text-secondary`
