@@ -298,7 +298,9 @@
   // ── Convenience: standard filter bar setup ──────────────────
   // Wires the Brand / Region / Destination / Dates / RM dropdowns.
   // Region cascades into Destination.
-  F.populateStandard = function () {
+  // opts.onAnyChange(activeFilters) is fired whenever any filter value changes.
+  F.populateStandard = function (opts) {
+    opts = opts || {};
     if (typeof BRANDS === 'undefined' || typeof DESTINATIONS === 'undefined' || typeof REVENUE_MANAGERS === 'undefined') {
       return;
     }
@@ -309,19 +311,112 @@
         : DESTINATIONS.filter(d => regionSel.includes(d.region));
       return list.map(d => d.name);
     };
+    const fire = () => { if (opts.onAnyChange) opts.onAnyChange(F.getActiveFilters()); };
 
-    F.initMultiSelect('fBrand', BRANDS.slice(), { defaultLabel: 'All Brands' });
+    F.initMultiSelect('fBrand', BRANDS.slice(), {
+      defaultLabel: 'All Brands',
+      onChange: fire,
+    });
     F.initMultiSelect('fRegion', REGION_LIST, {
       defaultLabel: 'All Regions',
-      onChange: (sel) => F.setMultiSelectValues('fDestination', destNames(sel)),
+      onChange: (sel) => {
+        F.setMultiSelectValues('fDestination', destNames(sel));
+        fire();
+      },
     });
-    F.initMultiSelect('fDestination', destNames([]), { defaultLabel: 'All Destinations' });
+    F.initMultiSelect('fDestination', destNames([]), {
+      defaultLabel: 'All Destinations',
+      onChange: fire,
+    });
 
     // RM list excludes the leading 'All RMs' marker
     const rms = REVENUE_MANAGERS.filter(r => r !== 'All RMs');
-    F.initMultiSelect('fRM', rms, { defaultLabel: 'All RMs' });
+    F.initMultiSelect('fRM', rms, {
+      defaultLabel: 'All RMs',
+      onChange: fire,
+    });
 
-    F.initWeekPicker('fDates', { defaultLabel: 'Select weeks' });
+    F.initWeekPicker('fDates', {
+      defaultLabel: 'Select weeks',
+      onChange: fire,
+    });
+  };
+
+  // Snapshot of the current header-filter selections.
+  F.getActiveFilters = function () {
+    return {
+      brand:       F.getSelected('fBrand'),
+      region:      F.getSelected('fRegion'),
+      destination: F.getSelected('fDestination'),
+      rm:          F.getSelected('fRM'),
+      dates:       F.getWeekRange('fDates'),
+    };
+  };
+
+  // Active filter count — useful for badges
+  F.activeFilterCount = function () {
+    const a = F.getActiveFilters();
+    let n = 0;
+    if (a.brand.length)       n++;
+    if (a.region.length)      n++;
+    if (a.destination.length) n++;
+    if (a.rm.length)          n++;
+    if (a.dates && a.dates.start) n++;
+    return n;
+  };
+
+  // ── Dual-handle range slider ────────────────────────────────
+  // Markup expected:
+  //   <div class="dr-wrap">
+  //     <div class="dr-track"></div>
+  //     <div class="dr-fill"></div>
+  //     <input type="range" class="dr-min" min=".." max=".." value="..">
+  //     <input type="range" class="dr-max" min=".." max=".." value="..">
+  //   </div>
+  //   <div class="adv-range-vals"><span class="dr-min-val">..</span> — <span class="dr-max-val">..</span></div>
+  F.initDualRange = function (wrap, opts) {
+    opts = opts || {};
+    const min = wrap.querySelector('.dr-min');
+    const max = wrap.querySelector('.dr-max');
+    const fill = wrap.querySelector('.dr-fill');
+    // Labels live in a sibling .adv-range-vals or in a sibling element passed via opts.labels
+    const labels = opts.labels || (wrap.parentNode ? wrap.parentNode.querySelector('.adv-range-vals') : null);
+    const minLabel = labels ? labels.querySelector('.dr-min-val') : null;
+    const maxLabel = labels ? labels.querySelector('.dr-max-val') : null;
+    const fmt = opts.format || (v => String(v));
+
+    function update(emit) {
+      let lo = +min.value, hi = +max.value;
+      const lim = +max.min;
+      const ceil = +max.max;
+      // Enforce min ≤ max by pushing whichever handle the user moved
+      if (lo > hi) {
+        // Determine which input changed last using event target — fallback: clamp lo
+        // Simpler: clamp the min to hi - 1 (or hi)
+        lo = hi;
+        min.value = lo;
+      }
+      const total = ceil - lim || 1;
+      const lpct = ((lo - lim) / total) * 100;
+      const hpct = ((hi - lim) / total) * 100;
+      if (fill) {
+        fill.style.left  = lpct + '%';
+        fill.style.width = (hpct - lpct) + '%';
+      }
+      if (minLabel) minLabel.textContent = fmt(lo);
+      if (maxLabel) maxLabel.textContent = fmt(hi);
+      if (emit && opts.onChange) opts.onChange({ min: lo, max: hi });
+    }
+    min.addEventListener('input', () => update(true));
+    max.addEventListener('input', () => update(true));
+    update(false);
+
+    return {
+      get: () => ({ min: +min.value, max: +max.value }),
+      set: (lo, hi) => { min.value = lo; max.value = hi; update(false); },
+      reset: () => { min.value = min.min; max.value = max.max; update(true); },
+      isDefault: () => +min.value === +min.min && +max.value === +max.max,
+    };
   };
 
   global.Filters = F;

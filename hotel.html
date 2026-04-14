@@ -133,15 +133,23 @@
   </div>
 
   <!-- ── Sub-subtab Bar ── -->
-  <div class="subsubtab-bar" id="subsubtabBar">
+  <div class="subsubtab-bar" id="subsubtabBar" style="display:flex;align-items:center;">
     <a class="subsubtab active" data-view="recs"       onclick="switchView('recs')">New Recommendations</a>
     <a class="subsubtab"        data-view="exceptions" onclick="switchView('exceptions')">Cost Change Exceptions</a>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:10px;padding-right:16px;">
+      <button class="adv-trigger-btn" id="advTriggerBtn" type="button" onclick="openAdvDrawer()">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 3h10M4 7h6M6 11h2"/></svg>
+        Advanced Filters
+        <span class="adv-trigger-badge" id="advTriggerBadge">0</span>
+      </button>
+    </div>
   </div>
 
   <!-- ── Main ── -->
   <div class="main">
     <!-- New Recommendations view (tree table) -->
     <div class="view" id="viewRecs">
+      <div class="row-count-bar" id="rowCountBar"></div>
       <div class="table-wrap">
         <table class="data-table" id="recsTable">
           <thead id="recsTableHead"></thead>
@@ -224,6 +232,108 @@
     </div>
   </div><!-- /.main -->
 
+  <!-- ── Advanced Filters Drawer ── -->
+  <div class="adv-backdrop" id="advBackdrop" onclick="closeAdvDrawer()"></div>
+  <aside class="adv-drawer" id="advDrawer" aria-hidden="true">
+    <div class="adv-drawer-header">
+      <div style="display:flex;align-items:center;">
+        <span class="adv-drawer-title">Advanced Filters — Hotels</span>
+        <a href="#" class="adv-clear-link" onclick="event.preventDefault();clearAdvFilters()">Clear All</a>
+      </div>
+      <button class="adv-close" onclick="closeAdvDrawer()" type="button" aria-label="Close">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+      </button>
+    </div>
+
+    <div class="adv-section">
+      <div class="adv-section-title">Alerts</div>
+      <label class="adv-cb"><input type="checkbox" data-af="alertCostChange"> Hotels with cost change alerts ⚠️</label>
+      <label class="adv-cb"><input type="checkbox" data-af="alertLocked"> Hotels with locked prices 🔒</label>
+      <label class="adv-cb"><input type="checkbox" data-af="alertNotes"> Hotels with active notes 📝</label>
+      <label class="adv-cb"><input type="checkbox" data-af="alertBehind"> Hotels behind plan only</label>
+    </div>
+
+    <div class="adv-section">
+      <div class="adv-section-title">Classification</div>
+      <label class="adv-radio"><input type="radio" name="afClass" value="all" checked> All</label>
+      <label class="adv-radio"><input type="radio" name="afClass" value="exclusive"> Exclusive only</label>
+      <label class="adv-radio"><input type="radio" name="afClass" value="commodity"> Commodity only</label>
+    </div>
+
+    <div class="adv-section">
+      <div class="adv-section-title">Occupancy</div>
+      <div class="adv-range-row">
+        <div class="adv-range-label">Forecast Occ % <span class="adv-range-vals"><span class="dr-min-val">0</span>% — <span class="dr-max-val">100</span>%</span></div>
+        <div class="dr-wrap" data-af="forecastOcc">
+          <div class="dr-track"></div><div class="dr-fill"></div>
+          <input type="range" class="dr-min" min="0" max="100" value="0">
+          <input type="range" class="dr-max" min="0" max="100" value="100">
+        </div>
+      </div>
+      <div class="adv-range-row">
+        <div class="adv-range-label">Current Occ % <span class="adv-range-vals"><span class="dr-min-val">0</span>% — <span class="dr-max-val">100</span>%</span></div>
+        <div class="dr-wrap" data-af="currentOcc">
+          <div class="dr-track"></div><div class="dr-fill"></div>
+          <input type="range" class="dr-min" min="0" max="100" value="0">
+          <input type="range" class="dr-max" min="0" max="100" value="100">
+        </div>
+      </div>
+    </div>
+
+    <div class="adv-section">
+      <div class="adv-section-title">ADR &amp; Margin</div>
+      <div class="adv-range-row">
+        <div class="adv-range-label">Current ADR $ <span class="adv-range-vals">$<span class="dr-min-val">0</span> — $<span class="dr-max-val">500</span></span></div>
+        <div class="dr-wrap" data-af="adr">
+          <div class="dr-track"></div><div class="dr-fill"></div>
+          <input type="range" class="dr-min" min="0" max="500" value="0" step="5">
+          <input type="range" class="dr-max" min="0" max="500" value="500" step="5">
+        </div>
+      </div>
+      <div class="adv-range-row">
+        <div class="adv-range-label">Margin % <span class="adv-range-vals"><span class="dr-min-val">0</span>% — <span class="dr-max-val">60</span>%</span></div>
+        <div class="dr-wrap" data-af="marginPct">
+          <div class="dr-track"></div><div class="dr-fill"></div>
+          <input type="range" class="dr-min" min="0" max="60" value="0">
+          <input type="range" class="dr-max" min="0" max="60" value="60">
+        </div>
+      </div>
+      <label class="adv-cb" style="margin-top:8px;"><input type="checkbox" data-af="recDiffers"> Show only rows where Rec ADR differs from Current ADR</label>
+    </div>
+
+    <div class="adv-section">
+      <div class="adv-section-title">Sold &amp; Allocation</div>
+      <div class="adv-range-row">
+        <div class="adv-range-label">Sold % <span class="adv-range-vals"><span class="dr-min-val">0</span>% — <span class="dr-max-val">100</span>%</span></div>
+        <div class="dr-wrap" data-af="soldPct">
+          <div class="dr-track"></div><div class="dr-fill"></div>
+          <input type="range" class="dr-min" min="0" max="100" value="0">
+          <input type="range" class="dr-max" min="0" max="100" value="100">
+        </div>
+      </div>
+      <label class="adv-cb"><input type="checkbox" data-af="undersold"> Show only undersold weeks (Sold % &lt; 50%)</label>
+      <label class="adv-cb"><input type="checkbox" data-af="oversold"> Show only oversold weeks (Sold % &gt; 90%)</label>
+    </div>
+
+    <div class="adv-section">
+      <div class="adv-section-title">Star Rating</div>
+      <div class="adv-cb-grid">
+        <label class="adv-cb"><input type="checkbox" data-af-star="3"> ★★★</label>
+        <label class="adv-cb"><input type="checkbox" data-af-star="4"> ★★★★</label>
+        <label class="adv-cb"><input type="checkbox" data-af-star="5"> ★★★★★</label>
+      </div>
+    </div>
+
+    <div class="adv-section">
+      <div class="adv-section-title">Destination</div>
+      <div class="adv-cb-list" id="advDestList"></div>
+    </div>
+
+    <div class="adv-footer">
+      <button class="btn-apply" type="button" onclick="closeAdvDrawer()">Apply Filters</button>
+    </div>
+  </aside>
+
   <!-- ── Notes Modal ── -->
   <div class="modal-backdrop" id="notesModalBackdrop">
     <div class="modal">
@@ -271,6 +381,55 @@ const adrOverrides   = {};         // { weekId: newADR }
 const notes          = {};         // { weekId: { text, expires, createdBy, createdAt } }
 let   activeNoteKey  = null;
 // All top-level rows start collapsed by default.
+
+// ── Header filter state (Brand / Region / Destination / Dates / RM) ──
+let headerFilters = { brand: [], region: [], destination: [], rm: [], dates: null };
+
+function passesHeaderFilters(dest, wkMeta) {
+  const hf = headerFilters;
+  if (hf.brand.length       && !hf.brand.includes(dest.brand)) return false;
+  if (hf.region.length      && !hf.region.includes(dest.region)) return false;
+  if (hf.destination.length && !hf.destination.includes(dest.name)) return false;
+  if (hf.rm.length          && !hf.rm.includes(dest.revenueManager)) return false;
+  if (hf.dates && hf.dates.start) {
+    // Parse weekStart "MM/DD/YY" → Date
+    const parts = (wkMeta.weekStart || '').split('/').map(Number);
+    if (parts.length === 3) {
+      const wkDate = new Date(2000 + parts[2], parts[0] - 1, parts[1]);
+      wkDate.setHours(0, 0, 0, 0);
+      const lo = hf.dates.start.getTime();
+      const hi = (hf.dates.end || hf.dates.start).getTime();
+      const t = wkDate.getTime();
+      if (t < lo || t > hi) return false;
+    }
+  }
+  return true;
+}
+function headerFiltersActive() {
+  const hf = headerFilters;
+  return hf.brand.length > 0 || hf.region.length > 0 || hf.destination.length > 0
+      || hf.rm.length > 0 || (hf.dates && hf.dates.start);
+}
+
+// ── Advanced filter state ──────────────────────────────────
+const advFilters = {
+  alertCostChange: false,
+  alertLocked:     false,
+  alertNotes:      false,
+  alertBehind:     false,
+  classification:  'all',    // 'all' | 'exclusive' | 'commodity'
+  forecastOcc:     { min: 0,   max: 100 },
+  currentOcc:      { min: 0,   max: 100 },
+  adr:             { min: 0,   max: 500 },
+  marginPct:       { min: 0,   max: 60  },
+  soldPct:         { min: 0,   max: 100 },
+  recDiffers:      false,
+  undersold:       false,
+  oversold:        false,
+  stars:           new Set(),       // numbers
+  destinations:    new Set(),       // dest.id strings
+};
+const advRangeCtl = {};  // wrapId → controller from Filters.initDualRange
 
 // ── Formatting helpers ─────────────────────────────────────
 function fmt$(n) {
@@ -454,15 +613,44 @@ function renderRecsHead() {
 function renderRecsTable() {
   const tbody = document.getElementById('recsTableBody');
   const rows = [];
+  let visibleLeaves = 0, totalLeaves = 0;
+  const visibleDestSet = new Set();
+  const totalDestCount = HOTEL_DATA.length;
 
   HOTEL_DATA.forEach(dest => {
     // ── Level 1: one row per (destination + check-in week) ──
     CHECK_IN_WEEKS.forEach((wkMeta, weekIdx) => {
+      // Header filter applies to whole dest+week rows
+      if (!passesHeaderFilters(dest, wkMeta)) return;
+
       const weekKey = `${dest.id}::${weekIdx}`;
       const weekOpen = expandedWeeks.has(weekKey);
-      const allCats = dest.hotels.flatMap(h => h.categories);
-      const dwAgg = aggCatsAtWeek(allCats, weekIdx);
-      const dwWeeks = allCats.map(c => c.checkInWeeks[weekIdx]).filter(Boolean);
+
+      // Determine which hotels & categories at this dest+week pass the advanced filters.
+      const visibleHotels = dest.hotels
+        .filter(h => passesHotelLevel(h, dest))
+        .map(h => {
+          const visibleCats = h.categories.filter(c => passesLeaf(c.checkInWeeks[weekIdx]));
+          return { hotel: h, cats: visibleCats };
+        })
+        .filter(x => x.cats.length > 0);
+
+      // Tally totals for the row count bar
+      dest.hotels.forEach(h => h.categories.forEach(() => { totalLeaves++; }));
+      visibleHotels.forEach(x => x.cats.forEach(() => { visibleLeaves++; }));
+
+      // Hide the dest+week row entirely when filters are active and nothing matches
+      if (!visibleHotels.length && advFiltersActive()) return;
+
+      visibleDestSet.add(dest.id);
+
+      // Aggregates use the visible (filtered) cats so summary numbers reflect the filter.
+      // When no filters active this matches the full set anyway.
+      const allCatsForAgg = visibleHotels.length
+        ? visibleHotels.flatMap(x => x.cats)
+        : dest.hotels.flatMap(h => h.categories);
+      const dwAgg = aggCatsAtWeek(allCatsForAgg, weekIdx);
+      const dwWeeks = allCatsForAgg.map(c => c.checkInWeeks[weekIdx]).filter(Boolean);
       const dwMargin = aggMargin(dwWeeks);
       // "MM/DD" extracted from weekStart (which is "MM/DD/YY")
       const shortDate = (wkMeta.weekStart || '').slice(0, 5);
@@ -501,12 +689,15 @@ function renderRecsTable() {
 
       if (!weekOpen) return;
 
-      // ── Level 2: Hotel rows (within this dest+week) ──
-      dest.hotels.forEach(hotel => {
+      // ── Level 2: Hotel rows (within this dest+week) — only filtered hotels ──
+      const hotelIterList = visibleHotels.length
+        ? visibleHotels
+        : dest.hotels.map(h => ({ hotel: h, cats: h.categories }));
+      hotelIterList.forEach(({ hotel, cats: visibleCatsForHotel }) => {
         const hotelKey = `${dest.id}::${weekIdx}::${hotel.id}`;
         const hotelOpen = expandedHotels.has(hotelKey);
-        const hAgg = aggCatsAtWeek(hotel.categories, weekIdx);
-        const hWeeks = hotel.categories.map(c => c.checkInWeeks[weekIdx]).filter(Boolean);
+        const hAgg = aggCatsAtWeek(visibleCatsForHotel, weekIdx);
+        const hWeeks = visibleCatsForHotel.map(c => c.checkInWeeks[weekIdx]).filter(Boolean);
         const hMargin = aggMargin(hWeeks);
 
         rows.push(`
@@ -544,7 +735,7 @@ function renderRecsTable() {
         if (!hotelOpen) return;
 
         // ── Level 3 (leaf): Room Category for this dest+week+hotel ──
-        hotel.categories.forEach(cat => {
+        visibleCatsForHotel.forEach(cat => {
           const week    = cat.checkInWeeks[weekIdx];
           const eff     = getEffectiveADR(week);
           const wDelta  = week.recADR - eff;
@@ -603,7 +794,23 @@ function renderRecsTable() {
     });
   });
 
+  // Empty state when no destinations match the current filters
+  if (visibleDestSet.size === 0 && (advFiltersActive() || headerFiltersActive())) {
+    rows.push('<tr><td colspan="16" style="text-align:center;color:var(--text-muted);padding:32px;">No results match current filters</td></tr>');
+  }
+
   tbody.innerHTML = rows.join('');
+
+  // Row count bar above the table
+  const rcb = document.getElementById('rowCountBar');
+  if (rcb) {
+    const filterActive = advFiltersActive() || headerFiltersActive();
+    if (filterActive) {
+      rcb.innerHTML = `Showing <strong>${visibleDestSet.size}</strong> of <strong>${totalDestCount}</strong> destinations · <strong>${visibleLeaves}</strong> of <strong>${totalLeaves}</strong> rows`;
+    } else {
+      rcb.innerHTML = `Showing all <strong>${totalDestCount}</strong> destinations · <strong>${totalLeaves}</strong> rows`;
+    }
+  }
 }
 
 // ── Cost Change Exceptions flat table ──────────────────────
@@ -912,8 +1119,186 @@ document.addEventListener('click', (e) => {
   if (e.target.id === 'notesModalBackdrop') closeNotesModal();
 });
 
+// ── Advanced filter predicates ─────────────────────────────
+function advFiltersActive() {
+  const af = advFilters;
+  if (af.alertCostChange || af.alertLocked || af.alertNotes || af.alertBehind) return true;
+  if (af.classification !== 'all') return true;
+  if (af.recDiffers || af.undersold || af.oversold) return true;
+  if (af.stars.size > 0) return true;
+  if (af.destinations.size > 0) return true;
+  if (af.forecastOcc.min !== 0 || af.forecastOcc.max !== 100) return true;
+  if (af.currentOcc.min  !== 0 || af.currentOcc.max  !== 100) return true;
+  if (af.adr.min !== 0 || af.adr.max !== 500) return true;
+  if (af.marginPct.min !== 0 || af.marginPct.max !== 60) return true;
+  if (af.soldPct.min !== 0 || af.soldPct.max !== 100) return true;
+  return false;
+}
+function countActiveFilters() {
+  const af = advFilters;
+  let n = 0;
+  if (af.alertCostChange) n++;
+  if (af.alertLocked) n++;
+  if (af.alertNotes) n++;
+  if (af.alertBehind) n++;
+  if (af.classification !== 'all') n++;
+  if (af.recDiffers) n++;
+  if (af.undersold) n++;
+  if (af.oversold) n++;
+  if (af.stars.size > 0) n++;
+  if (af.destinations.size > 0) n++;
+  if (af.forecastOcc.min !== 0 || af.forecastOcc.max !== 100) n++;
+  if (af.currentOcc.min !== 0 || af.currentOcc.max !== 100) n++;
+  if (af.adr.min !== 0 || af.adr.max !== 500) n++;
+  if (af.marginPct.min !== 0 || af.marginPct.max !== 60) n++;
+  if (af.soldPct.min !== 0 || af.soldPct.max !== 100) n++;
+  return n;
+}
+function passesHotelLevel(hotel, dest) {
+  const af = advFilters;
+  if (af.classification === 'exclusive' && hotel.classification !== 'Exclusive') return false;
+  if (af.classification === 'commodity' && hotel.classification !== 'Commodity') return false;
+  if (af.stars.size > 0 && !af.stars.has(hotel.stars)) return false;
+  if (af.destinations.size > 0 && !af.destinations.has(dest.id)) return false;
+  if (af.alertCostChange && !hotel.categories.some(c => c.checkInWeeks.some(w => w.hasCostChange))) return false;
+  if (af.alertLocked     && !hotel.categories.some(c => c.checkInWeeks.some(w => w.locked))) return false;
+  if (af.alertNotes      && !hotel.categories.some(c => c.checkInWeeks.some(w => !!notes[w.id]))) return false;
+  if (af.alertBehind     && !(hotel.currentOcc < hotel.forecastOcc - 0.08)) return false;
+  return true;
+}
+function passesLeaf(week) {
+  if (!week) return false;
+  const af = advFilters;
+  const eff = getEffectiveADR(week);
+  const occF = week.forecastOcc * 100;
+  const occC = week.currentOcc * 100;
+  const soldPct = week.allocation ? (week.sold / week.allocation) * 100 : 0;
+  const margin = eff - week.supplierCost;
+  const marginPct = eff ? (margin / eff) * 100 : 0;
+  if (occF < af.forecastOcc.min || occF > af.forecastOcc.max) return false;
+  if (occC < af.currentOcc.min  || occC > af.currentOcc.max)  return false;
+  if (eff  < af.adr.min        || eff  > af.adr.max)         return false;
+  if (marginPct < af.marginPct.min || marginPct > af.marginPct.max) return false;
+  if (soldPct   < af.soldPct.min   || soldPct   > af.soldPct.max)   return false;
+  if (af.recDiffers && week.recADR === eff) return false;
+  if (af.undersold && soldPct >= 50) return false;
+  if (af.oversold  && soldPct <= 90) return false;
+  return true;
+}
+
+// ── Drawer open/close/clear ───────────────────────────────
+function openAdvDrawer() {
+  document.getElementById('advDrawer').classList.add('open');
+  document.getElementById('advBackdrop').classList.add('open');
+  document.getElementById('advDrawer').setAttribute('aria-hidden', 'false');
+}
+function closeAdvDrawer() {
+  document.getElementById('advDrawer').classList.remove('open');
+  document.getElementById('advBackdrop').classList.remove('open');
+  document.getElementById('advDrawer').setAttribute('aria-hidden', 'true');
+}
+function clearAdvFilters() {
+  // Reset state
+  advFilters.alertCostChange = false;
+  advFilters.alertLocked     = false;
+  advFilters.alertNotes      = false;
+  advFilters.alertBehind     = false;
+  advFilters.classification  = 'all';
+  advFilters.recDiffers      = false;
+  advFilters.undersold       = false;
+  advFilters.oversold        = false;
+  advFilters.stars.clear();
+  advFilters.destinations.clear();
+  Object.keys(advRangeCtl).forEach(k => advRangeCtl[k].reset());
+
+  // Reset DOM controls
+  document.querySelectorAll('#advDrawer input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+  const allRadio = document.querySelector('#advDrawer input[name="afClass"][value="all"]');
+  if (allRadio) allRadio.checked = true;
+
+  syncAdvBadge();
+  renderRecsTable();
+}
+function syncAdvBadge() {
+  const btn = document.getElementById('advTriggerBtn');
+  const badge = document.getElementById('advTriggerBadge');
+  const n = countActiveFilters();
+  badge.textContent = n;
+  if (n > 0) btn.classList.add('has-active');
+  else       btn.classList.remove('has-active');
+}
+
+function buildAdvDrawer() {
+  // Wire alert / boolean / radio checkboxes
+  document.querySelectorAll('#advDrawer input[type="checkbox"][data-af]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      advFilters[cb.dataset.af] = cb.checked;
+      syncAdvBadge();
+      renderRecsTable();
+    });
+  });
+  document.querySelectorAll('#advDrawer input[name="afClass"]').forEach(r => {
+    r.addEventListener('change', () => {
+      if (r.checked) {
+        advFilters.classification = r.value;
+        syncAdvBadge();
+        renderRecsTable();
+      }
+    });
+  });
+  // Star checkboxes
+  document.querySelectorAll('#advDrawer input[type="checkbox"][data-af-star]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const v = +cb.dataset.afStar;
+      if (cb.checked) advFilters.stars.add(v); else advFilters.stars.delete(v);
+      syncAdvBadge();
+      renderRecsTable();
+    });
+  });
+  // Destinations list
+  const destList = document.getElementById('advDestList');
+  destList.innerHTML = HOTEL_DATA.map(d =>
+    `<label class="adv-cb"><input type="checkbox" data-af-dest="${d.id}"> ${d.name}</label>`
+  ).join('');
+  destList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const v = cb.dataset.afDest;
+      if (cb.checked) advFilters.destinations.add(v); else advFilters.destinations.delete(v);
+      syncAdvBadge();
+      renderRecsTable();
+    });
+  });
+  // Range sliders
+  const ranges = [
+    { key: 'forecastOcc', fmt: v => v },
+    { key: 'currentOcc',  fmt: v => v },
+    { key: 'adr',         fmt: v => v },
+    { key: 'marginPct',   fmt: v => v },
+    { key: 'soldPct',     fmt: v => v },
+  ];
+  ranges.forEach(r => {
+    const wrap = document.querySelector(`#advDrawer .dr-wrap[data-af="${r.key}"]`);
+    if (!wrap) return;
+    advRangeCtl[r.key] = Filters.initDualRange(wrap, {
+      format: r.fmt,
+      onChange: (vals) => {
+        advFilters[r.key] = { min: vals.min, max: vals.max };
+        syncAdvBadge();
+        renderRecsTable();
+      },
+    });
+  });
+}
+
 // ── Init ───────────────────────────────────────────────────
-Filters.populateStandard();
+Filters.populateStandard({
+  onAnyChange: (active) => {
+    headerFilters = active;
+    renderRecsTable();
+  },
+});
+buildAdvDrawer();
+syncAdvBadge();
 renderMetricsBar();
 renderRecsHead();
 renderRecsTable();

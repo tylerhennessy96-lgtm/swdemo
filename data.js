@@ -50,6 +50,11 @@ const DESTINATIONS = [
   { id: 'HKT', name: 'Phuket',          region: 'Sun & Sand',      country: 'Thailand',            departureGateway: 'YVR', revenueManager: 'David Okafor', salesManager: 'Chloe Martin' },
 ];
 
+// Assign a brand to each destination (alternating for variety; deterministic)
+DESTINATIONS.forEach((d, i) => {
+  d.brand = (i % 2 === 0) ? 'Sunwing' : 'WestJet Vacations';
+});
+
 // ── Shared helpers ─────────────────────────────────────────
 function _fmtDate(d) {
   const mo = String(d.getMonth() + 1).padStart(2, '0');
@@ -251,6 +256,8 @@ const FLIGHT_DATA = DESTINATIONS
       name: d.name,
       region: d.region,
       country: d.country,
+      brand: d.brand,
+      revenueManager: d.revenueManager,
       totalRoutes: routes.length,
       totalFlights: allDates.length,
       totalCapacity,
@@ -490,6 +497,7 @@ const HOTEL_DATA = DESTINATIONS
       name: d.name,
       region: d.region,
       country: d.country,
+      brand: d.brand,
       departureGateway: d.departureGateway,
       revenueManager: d.revenueManager,
       totalHotels: hotels.length,

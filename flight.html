@@ -154,9 +154,16 @@
   </div>
 
   <!-- ── Sub-subtab Bar ── -->
-  <div class="subsubtab-bar" id="subsubtabBar">
+  <div class="subsubtab-bar" id="subsubtabBar" style="display:flex;align-items:center;">
     <a class="subsubtab active" data-view="recs"       onclick="switchView('recs')">New Recommendations</a>
     <a class="subsubtab"        data-view="competitor" onclick="switchView('competitor')">Competitor Analysis</a>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:10px;padding-right:16px;">
+      <button class="adv-trigger-btn" id="advTriggerBtn" type="button" onclick="openAdvDrawer()">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 3h10M4 7h6M6 11h2"/></svg>
+        Advanced Filters
+        <span class="adv-trigger-badge" id="advTriggerBadge">0</span>
+      </button>
+    </div>
   </div>
 
   <!-- ── Main ── -->
@@ -164,6 +171,7 @@
 
     <!-- New Recommendations view (tree table) -->
     <div class="view" id="viewRecs">
+      <div class="row-count-bar" id="rowCountBar"></div>
       <div class="table-wrap">
         <table class="data-table" id="recsTable">
           <thead id="recsTableHead"></thead>
@@ -248,6 +256,136 @@
 
   </div><!-- /.main -->
 
+  <!-- ── Advanced Filters Drawer ── -->
+  <div class="adv-backdrop" id="advBackdrop" onclick="closeAdvDrawer()"></div>
+  <aside class="adv-drawer" id="advDrawer" aria-hidden="true">
+    <div class="adv-drawer-header">
+      <div style="display:flex;align-items:center;">
+        <span class="adv-drawer-title">Advanced Filters — Flights</span>
+        <a href="#" class="adv-clear-link" onclick="event.preventDefault();clearAdvFilters()">Clear All</a>
+      </div>
+      <button class="adv-close" onclick="closeAdvDrawer()" type="button" aria-label="Close">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+      </button>
+    </div>
+
+    <div class="adv-section">
+      <div class="adv-section-title">Alerts</div>
+      <label class="adv-cb"><input type="checkbox" data-af="alertROS"> Flights with rate of sale alerts</label>
+      <label class="adv-cb"><input type="checkbox" data-af="alertCompCheaper"> Flights where competitor is cheaper</label>
+      <label class="adv-cb"><input type="checkbox" data-af="alertLocked"> Flights with locked prices 🔒</label>
+      <label class="adv-cb"><input type="checkbox" data-af="alertNotes"> Flights with active notes 📝</label>
+      <label class="adv-cb"><input type="checkbox" data-af="alertBehindLF"> Flights behind LF target only</label>
+    </div>
+
+    <div class="adv-section">
+      <div class="adv-section-title">Flight Category</div>
+      <div class="adv-cb-grid">
+        <label class="adv-cb"><input type="checkbox" data-af-cat="Own Flight"> Own Flight</label>
+        <label class="adv-cb"><input type="checkbox" data-af-cat="Risk Block"> Risk Block</label>
+        <label class="adv-cb"><input type="checkbox" data-af-cat="3rd Party"> 3rd Party</label>
+      </div>
+    </div>
+
+    <div class="adv-section">
+      <div class="adv-section-title">Load Factor</div>
+      <div class="adv-range-row">
+        <div class="adv-range-label">Current LF % <span class="adv-range-vals"><span class="dr-min-val">0</span>% — <span class="dr-max-val">100</span>%</span></div>
+        <div class="dr-wrap" data-af="currentLF">
+          <div class="dr-track"></div><div class="dr-fill"></div>
+          <input type="range" class="dr-min" min="0" max="100" value="0">
+          <input type="range" class="dr-max" min="0" max="100" value="100">
+        </div>
+      </div>
+      <div class="adv-range-row">
+        <div class="adv-range-label">Forecast LF % <span class="adv-range-vals"><span class="dr-min-val">0</span>% — <span class="dr-max-val">100</span>%</span></div>
+        <div class="dr-wrap" data-af="forecastLF">
+          <div class="dr-track"></div><div class="dr-fill"></div>
+          <input type="range" class="dr-min" min="0" max="100" value="0">
+          <input type="range" class="dr-max" min="0" max="100" value="100">
+        </div>
+      </div>
+      <div class="adv-range-row">
+        <div class="adv-range-label">Target LF % <span class="adv-range-vals"><span class="dr-min-val">0</span>% — <span class="dr-max-val">100</span>%</span></div>
+        <div class="dr-wrap" data-af="targetLF">
+          <div class="dr-track"></div><div class="dr-fill"></div>
+          <input type="range" class="dr-min" min="0" max="100" value="0">
+          <input type="range" class="dr-max" min="0" max="100" value="100">
+        </div>
+      </div>
+    </div>
+
+    <div class="adv-section">
+      <div class="adv-section-title">Fares &amp; Margin</div>
+      <div class="adv-range-row">
+        <div class="adv-range-label">Current Fare $ <span class="adv-range-vals">$<span class="dr-min-val">0</span> — $<span class="dr-max-val">1000</span></span></div>
+        <div class="dr-wrap" data-af="currentFare">
+          <div class="dr-track"></div><div class="dr-fill"></div>
+          <input type="range" class="dr-min" min="0" max="1000" value="0" step="10">
+          <input type="range" class="dr-max" min="0" max="1000" value="1000" step="10">
+        </div>
+      </div>
+      <div class="adv-range-row">
+        <div class="adv-range-label">Current Margin $ <span class="adv-range-vals">$<span class="dr-min-val">0</span> — $<span class="dr-max-val">300</span></span></div>
+        <div class="dr-wrap" data-af="currentMargin">
+          <div class="dr-track"></div><div class="dr-fill"></div>
+          <input type="range" class="dr-min" min="0" max="300" value="0" step="5">
+          <input type="range" class="dr-max" min="0" max="300" value="300" step="5">
+        </div>
+      </div>
+      <label class="adv-cb" style="margin-top:8px;"><input type="checkbox" data-af="recDiffers"> Show only rows where Rec Fare differs from Current Fare</label>
+    </div>
+
+    <div class="adv-section">
+      <div class="adv-section-title">Capacity &amp; Sales</div>
+      <div class="adv-range-row">
+        <div class="adv-range-label">Capacity (seats) <span class="adv-range-vals"><span class="dr-min-val">0</span> — <span class="dr-max-val">300</span></span></div>
+        <div class="dr-wrap" data-af="capacity">
+          <div class="dr-track"></div><div class="dr-fill"></div>
+          <input type="range" class="dr-min" min="0" max="300" value="0">
+          <input type="range" class="dr-max" min="0" max="300" value="300">
+        </div>
+      </div>
+      <label class="adv-cb"><input type="checkbox" data-af="unsoldGt20"> Show only flights with unsold seats &gt; 20%</label>
+    </div>
+
+    <div class="adv-section">
+      <div class="adv-section-title">Rate of Sale</div>
+      <label class="adv-radio"><input type="radio" name="afROS" value="all" checked> All</label>
+      <label class="adv-radio"><input type="radio" name="afROS" value="ahead"> Ahead of target only</label>
+      <label class="adv-radio"><input type="radio" name="afROS" value="behind"> Behind target only</label>
+    </div>
+
+    <div class="adv-section">
+      <div class="adv-section-title">Competitor</div>
+      <label class="adv-cb"><input type="checkbox" data-af="compCheaper"> Show only flights where comp is cheaper than us</label>
+      <div class="adv-range-row" style="margin-top:10px;">
+        <div class="adv-range-label">Comp delta $ threshold <span class="adv-range-vals">$<span class="dr-min-val">-100</span> — $<span class="dr-max-val">100</span></span></div>
+        <div class="dr-wrap" data-af="compDelta">
+          <div class="dr-track"></div><div class="dr-fill"></div>
+          <input type="range" class="dr-min" min="-100" max="100" value="-100" step="5">
+          <input type="range" class="dr-max" min="-100" max="100" value="100" step="5">
+        </div>
+      </div>
+    </div>
+
+    <div class="adv-section">
+      <div class="adv-section-title">Gateway</div>
+      <div class="adv-cb-grid">
+        <label class="adv-cb"><input type="checkbox" data-af-gw="YYZ"> YYZ</label>
+        <label class="adv-cb"><input type="checkbox" data-af-gw="YVR"> YVR</label>
+        <label class="adv-cb"><input type="checkbox" data-af-gw="YWG"> YWG</label>
+        <label class="adv-cb"><input type="checkbox" data-af-gw="YOW"> YOW</label>
+        <label class="adv-cb"><input type="checkbox" data-af-gw="YHZ"> YHZ</label>
+        <label class="adv-cb"><input type="checkbox" data-af-gw="YYC"> YYC</label>
+      </div>
+    </div>
+
+    <div class="adv-footer">
+      <button class="btn-apply" type="button" onclick="closeAdvDrawer()">Apply Filters</button>
+    </div>
+  </aside>
+
   <!-- ── Notes Modal ── -->
   <div class="modal-backdrop" id="notesModalBackdrop">
     <div class="modal">
@@ -298,6 +436,62 @@ let   activeDateId      = null;
 let   bookingChart      = null;
 let   fareChart         = null;
 // All top-level rows start collapsed by default.
+
+// ── Header filter state (Brand / Region / Destination / Dates / RM) ──
+let headerFilters = { brand: [], region: [], destination: [], rm: [], dates: null };
+
+function passesHeaderFilters(dest) {
+  const hf = headerFilters;
+  if (hf.brand.length       && !hf.brand.includes(dest.brand)) return false;
+  if (hf.region.length      && !hf.region.includes(dest.region)) return false;
+  if (hf.destination.length && !hf.destination.includes(dest.name)) return false;
+  if (hf.rm.length          && !hf.rm.includes(dest.revenueManager)) return false;
+  return true;
+}
+function passesHeaderDate(date) {
+  const hf = headerFilters;
+  if (!hf.dates || !hf.dates.start) return true;
+  if (!date || !date.departureDate) return true;
+  // Find the Monday of the week containing this departure date
+  const d = new Date(date.departureDate);
+  if (isNaN(d)) return true;
+  const day = d.getDay();
+  const offset = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + offset);
+  d.setHours(0, 0, 0, 0);
+  const lo = hf.dates.start.getTime();
+  const hi = (hf.dates.end || hf.dates.start).getTime();
+  const t = d.getTime();
+  return t >= lo && t <= hi;
+}
+function headerFiltersActive() {
+  const hf = headerFilters;
+  return hf.brand.length > 0 || hf.region.length > 0 || hf.destination.length > 0
+      || hf.rm.length > 0 || (hf.dates && hf.dates.start);
+}
+
+// ── Advanced filter state ──────────────────────────────────
+const advFilters = {
+  alertROS:         false,
+  alertCompCheaper: false,
+  alertLocked:      false,
+  alertNotes:       false,
+  alertBehindLF:    false,
+  categories:       new Set(),  // 'Own Flight' | 'Risk Block' | '3rd Party'
+  currentLF:        { min: 0, max: 100 },
+  forecastLF:       { min: 0, max: 100 },
+  targetLF:         { min: 0, max: 100 },
+  currentFare:      { min: 0, max: 1000 },
+  currentMargin:    { min: 0, max: 300 },
+  recDiffers:       false,
+  capacity:         { min: 0, max: 300 },
+  unsoldGt20:       false,
+  ros:              'all',  // 'all' | 'ahead' | 'behind'
+  compCheaper:      false,
+  compDelta:        { min: -100, max: 100 },
+  gateways:         new Set(),
+};
+const advRangeCtl = {};
 
 // Build a map for hotel occupancy lookup by dest.id (used for awareness on dest row)
 const HOTEL_BY_DEST = {};
@@ -463,8 +657,13 @@ function renderRecsHead() {
 function renderRecsTable() {
   const tbody = document.getElementById('recsTableBody');
   const rows = [];
+  let visibleLeaves = 0, totalLeaves = 0;
+  const visibleDestSet = new Set();
+  const totalDestCount = FLIGHT_DATA.length;
 
   FLIGHT_DATA.forEach(dest => {
+    if (!passesHeaderFilters(dest)) return;
+
     // Each route shares the same 8 weekly departure dates, indexed 0-7.
     const weekCount = dest.routes[0]?.dates?.length || 0;
     const ratio  = bedsSeatsRatio(dest);
@@ -472,7 +671,28 @@ function renderRecsTable() {
     for (let weekIdx = 0; weekIdx < weekCount; weekIdx++) {
       const dwKey = `${dest.id}::${weekIdx}`;
       const dwOpen = expandedDestWeeks.has(dwKey);
-      const datesAtWeek = dest.routes.map(r => r.dates[weekIdx]).filter(Boolean);
+
+      // Header date range filter — check the week's reference date
+      const refDate = dest.routes[0]?.dates[weekIdx];
+      if (refDate && !passesHeaderDate(refDate)) continue;
+
+      // Determine which routes pass at this week
+      const matchingRoutes = dest.routes
+        .filter(r => passesRouteLevel(r))
+        .map(r => ({ route: r, date: r.dates[weekIdx] }))
+        .filter(x => x.date && passesFlightDate(x.date));
+
+      // Tally totals
+      dest.routes.forEach(r => { if (r.dates[weekIdx]) totalLeaves++; });
+      matchingRoutes.forEach(() => { visibleLeaves++; });
+
+      if (!matchingRoutes.length && advFiltersActive()) continue;
+
+      visibleDestSet.add(dest.id);
+
+      const datesAtWeek = matchingRoutes.length
+        ? matchingRoutes.map(x => x.date)
+        : dest.routes.map(r => r.dates[weekIdx]).filter(Boolean);
       const dwAgg = aggDates(datesAtWeek);
       if (!dwAgg) continue;
       const refDateStr = datesAtWeek[0]?.departureDate || '';
@@ -511,10 +731,11 @@ function renderRecsTable() {
 
       if (!dwOpen) continue;
 
-      // ── Level 2: Flight Route rows (within this dest+week) ──
-      dest.routes.forEach(route => {
-        const date = route.dates[weekIdx];
-        if (!date) return;
+      // ── Level 2: Flight Route rows (within this dest+week) — filtered ──
+      const routeIterList = matchingRoutes.length
+        ? matchingRoutes
+        : dest.routes.map(r => ({ route: r, date: r.dates[weekIdx] })).filter(x => x.date);
+      routeIterList.forEach(({ route, date }) => {
         const routeKey = `${dest.id}::${weekIdx}::${route.id}`;
         const routeOpen = expandedRoutes.has(routeKey);
         const rAgg = aggDates([date]);
@@ -601,7 +822,21 @@ function renderRecsTable() {
     }
   });
 
+  if (visibleDestSet.size === 0 && (advFiltersActive() || headerFiltersActive())) {
+    rows.push('<tr><td colspan="13" style="text-align:center;color:var(--text-muted);padding:32px;">No results match current filters</td></tr>');
+  }
+
   tbody.innerHTML = rows.join('');
+
+  const rcb = document.getElementById('rowCountBar');
+  if (rcb) {
+    const filterActive = advFiltersActive() || headerFiltersActive();
+    if (filterActive) {
+      rcb.innerHTML = `Showing <strong>${visibleDestSet.size}</strong> of <strong>${totalDestCount}</strong> destinations · <strong>${visibleLeaves}</strong> of <strong>${totalLeaves}</strong> rows`;
+    } else {
+      rcb.innerHTML = `Showing all <strong>${totalDestCount}</strong> destinations · <strong>${totalLeaves}</strong> rows`;
+    }
+  }
 }
 
 // ── Competitor Analysis flat table ─────────────────────────
@@ -889,8 +1124,167 @@ document.addEventListener('click', (e) => {
   if (e.target.id === 'notesModalBackdrop') closeNotesModal();
 });
 
+// ── Advanced filter predicates ─────────────────────────────
+function advFiltersActive() {
+  const af = advFilters;
+  if (af.alertROS || af.alertCompCheaper || af.alertLocked || af.alertNotes || af.alertBehindLF) return true;
+  if (af.categories.size > 0) return true;
+  if (af.recDiffers || af.unsoldGt20 || af.compCheaper) return true;
+  if (af.ros !== 'all') return true;
+  if (af.gateways.size > 0) return true;
+  if (af.currentLF.min !== 0 || af.currentLF.max !== 100) return true;
+  if (af.forecastLF.min !== 0 || af.forecastLF.max !== 100) return true;
+  if (af.targetLF.min !== 0 || af.targetLF.max !== 100) return true;
+  if (af.currentFare.min !== 0 || af.currentFare.max !== 1000) return true;
+  if (af.currentMargin.min !== 0 || af.currentMargin.max !== 300) return true;
+  if (af.capacity.min !== 0 || af.capacity.max !== 300) return true;
+  if (af.compDelta.min !== -100 || af.compDelta.max !== 100) return true;
+  return false;
+}
+function countActiveFilters() {
+  const af = advFilters;
+  let n = 0;
+  ['alertROS','alertCompCheaper','alertLocked','alertNotes','alertBehindLF','recDiffers','unsoldGt20','compCheaper'].forEach(k => { if (af[k]) n++; });
+  if (af.categories.size > 0) n++;
+  if (af.gateways.size > 0) n++;
+  if (af.ros !== 'all') n++;
+  ['currentLF','forecastLF','targetLF','currentFare','currentMargin','capacity'].forEach(k => {
+    const def = (k === 'currentFare') ? 1000 : (k === 'currentMargin' || k === 'capacity') ? 300 : 100;
+    if (af[k].min !== 0 || af[k].max !== def) n++;
+  });
+  if (af.compDelta.min !== -100 || af.compDelta.max !== 100) n++;
+  return n;
+}
+function passesRouteLevel(route) {
+  const af = advFilters;
+  if (af.categories.size > 0 && !af.categories.has(route.category)) return false;
+  if (af.gateways.size   > 0 && !af.gateways.has(route.origin))     return false;
+  return true;
+}
+function passesFlightDate(date) {
+  if (!date) return false;
+  const af = advFilters;
+  const eff = getEffectiveFare(date);
+  const lf = date.capacity ? (date.sold / date.capacity) * 100 : 0;
+  const fLF = date.forecastLF * 100;
+  const tLF = date.targetLF * 100;
+  const unsoldPct = date.capacity ? ((date.capacity - date.sold) / date.capacity) * 100 : 0;
+  const cheapest = Math.min(date.comp1Fare, date.comp2Fare);
+  const compD = eff - cheapest;
+  const rosAhead = date.rateOfSale >= date.rateOfSaleTarget;
+  const hasNote = !!notes[date.id];
+
+  if (af.alertROS && rosAhead) return false;
+  if (af.alertCompCheaper && compD <= 0) return false;
+  if (af.alertLocked && !date.locked) return false;
+  if (af.alertNotes && !hasNote) return false;
+  if (af.alertBehindLF && !(date.forecastLF < date.targetLF - 0.05)) return false;
+
+  if (lf  < af.currentLF.min  || lf  > af.currentLF.max)  return false;
+  if (fLF < af.forecastLF.min || fLF > af.forecastLF.max) return false;
+  if (tLF < af.targetLF.min   || tLF > af.targetLF.max)   return false;
+  if (eff < af.currentFare.min || eff > af.currentFare.max) return false;
+  if (date.currentMargin < af.currentMargin.min || date.currentMargin > af.currentMargin.max) return false;
+  if (date.capacity < af.capacity.min || date.capacity > af.capacity.max) return false;
+
+  if (af.recDiffers && date.recFare === eff) return false;
+  if (af.unsoldGt20 && unsoldPct <= 20) return false;
+  if (af.ros === 'ahead' && !rosAhead) return false;
+  if (af.ros === 'behind' && rosAhead) return false;
+  if (af.compCheaper && compD <= 0) return false;
+  if (compD < af.compDelta.min || compD > af.compDelta.max) return false;
+  return true;
+}
+
+// ── Drawer open/close/clear ───────────────────────────────
+function openAdvDrawer() {
+  document.getElementById('advDrawer').classList.add('open');
+  document.getElementById('advBackdrop').classList.add('open');
+  document.getElementById('advDrawer').setAttribute('aria-hidden', 'false');
+}
+function closeAdvDrawer() {
+  document.getElementById('advDrawer').classList.remove('open');
+  document.getElementById('advBackdrop').classList.remove('open');
+  document.getElementById('advDrawer').setAttribute('aria-hidden', 'true');
+}
+function clearAdvFilters() {
+  ['alertROS','alertCompCheaper','alertLocked','alertNotes','alertBehindLF','recDiffers','unsoldGt20','compCheaper'].forEach(k => { advFilters[k] = false; });
+  advFilters.ros = 'all';
+  advFilters.categories.clear();
+  advFilters.gateways.clear();
+  Object.keys(advRangeCtl).forEach(k => advRangeCtl[k].reset());
+
+  document.querySelectorAll('#advDrawer input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+  const allRadio = document.querySelector('#advDrawer input[name="afROS"][value="all"]');
+  if (allRadio) allRadio.checked = true;
+
+  syncAdvBadge();
+  renderRecsTable();
+}
+function syncAdvBadge() {
+  const btn = document.getElementById('advTriggerBtn');
+  const badge = document.getElementById('advTriggerBadge');
+  const n = countActiveFilters();
+  badge.textContent = n;
+  if (n > 0) btn.classList.add('has-active');
+  else       btn.classList.remove('has-active');
+}
+
+function buildAdvDrawer() {
+  document.querySelectorAll('#advDrawer input[type="checkbox"][data-af]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      advFilters[cb.dataset.af] = cb.checked;
+      syncAdvBadge();
+      renderRecsTable();
+    });
+  });
+  document.querySelectorAll('#advDrawer input[type="checkbox"][data-af-cat]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const v = cb.dataset.afCat;
+      if (cb.checked) advFilters.categories.add(v); else advFilters.categories.delete(v);
+      syncAdvBadge();
+      renderRecsTable();
+    });
+  });
+  document.querySelectorAll('#advDrawer input[type="checkbox"][data-af-gw]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const v = cb.dataset.afGw;
+      if (cb.checked) advFilters.gateways.add(v); else advFilters.gateways.delete(v);
+      syncAdvBadge();
+      renderRecsTable();
+    });
+  });
+  document.querySelectorAll('#advDrawer input[name="afROS"]').forEach(r => {
+    r.addEventListener('change', () => {
+      if (r.checked) {
+        advFilters.ros = r.value;
+        syncAdvBadge();
+        renderRecsTable();
+      }
+    });
+  });
+  ['currentLF','forecastLF','targetLF','currentFare','currentMargin','capacity','compDelta'].forEach(key => {
+    const wrap = document.querySelector(`#advDrawer .dr-wrap[data-af="${key}"]`);
+    if (!wrap) return;
+    advRangeCtl[key] = Filters.initDualRange(wrap, {
+      onChange: (vals) => {
+        advFilters[key] = { min: vals.min, max: vals.max };
+        syncAdvBadge();
+        renderRecsTable();
+      },
+    });
+  });
+}
+
 // ── Init ───────────────────────────────────────────────────
-Filters.populateStandard();
+Filters.populateStandard({
+  onAnyChange: (active) => {
+    headerFilters = active;
+    renderRecsTable();
+  },
+});
+buildAdvDrawer();
+syncAdvBadge();
 renderMetricsBar();
 renderRecsHead();
 renderRecsTable();
