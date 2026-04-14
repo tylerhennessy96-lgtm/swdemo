@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <script src="data.js"></script>
+  <script src="filters.js"></script>
   <style>
     .flight-cat {
       display:inline-block; font-size:10px; font-weight:600;
@@ -91,10 +92,7 @@
         </svg>
         <span class="date-range-text" id="fDatesLabel">15 Jan<span class="date-sep">–</span>28 Feb</span>
       </button>
-      <div class="date-pill-popover">
-        <label>From<input type="date" id="fDatesFrom" onchange="updateDatesLabel()"></label>
-        <label>To<input type="date" id="fDatesTo" onchange="updateDatesLabel()"></label>
-      </div>
+      <div class="date-pill-popover"></div>
     </div>
     <div class="ms-wrap" id="fRM">
       <button class="ms-trigger" onclick="toggleFilter('fRM')">
@@ -878,23 +876,6 @@ function toggleFilter(id) {
 function toggleMenu() {
   document.getElementById('navDropdown').classList.toggle('open');
 }
-function updateDatesLabel() {
-  const f = document.getElementById('fDatesFrom').value;
-  const t = document.getElementById('fDatesTo').value;
-  const fmt = s => {
-    if (!s) return '';
-    const d = new Date(s);
-    if (isNaN(d)) return '';
-    const mons = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return `${d.getDate()} ${mons[d.getMonth()]}`;
-  };
-  const a = fmt(f), b = fmt(t);
-  const label = document.getElementById('fDatesLabel');
-  if (a && b) label.innerHTML = `${a}<span class="date-sep">–</span>${b}`;
-  else if (a) label.innerHTML = `${a}<span class="date-sep">–</span>…`;
-  else if (b) label.innerHTML = `…<span class="date-sep">–</span>${b}`;
-  else label.innerHTML = `15 Jan<span class="date-sep">–</span>28 Feb`;
-}
 function runEvaluation() {}
 function publishChanges() {}
 
@@ -908,46 +889,8 @@ document.addEventListener('click', (e) => {
   if (e.target.id === 'notesModalBackdrop') closeNotesModal();
 });
 
-// ── Filter population (Brand / Region / Destination / RM) ─
-function populateFilters() {
-  function setupDropdown(wrapId, values, onSelect) {
-    const wrap = document.getElementById(wrapId);
-    if (!wrap) return;
-    const opts = wrap.querySelector('.ms-options');
-    if (!opts) return;
-    opts.innerHTML = values.map(v => `<div class="ms-option" data-value="${v}">${v}</div>`).join('');
-    opts.querySelectorAll('.ms-option').forEach(el => {
-      el.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const val = el.dataset.value;
-        const labelEl = wrap.querySelector('button span');
-        if (labelEl) labelEl.textContent = val;
-        wrap.classList.remove('open');
-        if (onSelect) onSelect(val);
-      });
-    });
-  }
-  function destValuesFor(region) {
-    const filtered = region === 'All Regions'
-      ? DESTINATIONS
-      : DESTINATIONS.filter(d => d.region === region);
-    return ['All Destinations', ...filtered.map(d => d.name)];
-  }
-  setupDropdown('fBrand',   ['All Brands', ...BRANDS]);
-  setupDropdown('fRegion',  ['All Regions', 'Caribbean', 'Mexico', 'Central America', 'Europe', 'Sun & Sand'], (val) => {
-    const destWrap = document.getElementById('fDestination');
-    if (destWrap) {
-      const labelEl = destWrap.querySelector('button span');
-      if (labelEl) labelEl.textContent = 'All Destinations';
-    }
-    setupDropdown('fDestination', destValuesFor(val));
-  });
-  setupDropdown('fDestination', destValuesFor('All Regions'));
-  setupDropdown('fRM', REVENUE_MANAGERS);
-}
-
 // ── Init ───────────────────────────────────────────────────
-populateFilters();
+Filters.populateStandard();
 renderMetricsBar();
 renderRecsHead();
 renderRecsTable();
