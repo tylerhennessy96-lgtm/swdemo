@@ -150,11 +150,14 @@ function _makeFlightDate(routeId, idx, category, rand) {
   const spec = _FLIGHT_CATEGORIES[category];
   const dep = _FLIGHT_DEPARTURE_DATES[idx];
 
-  // Aircraft capacity varies by category
-  const capacity = category === 'Own Flight'
+  // Aircraft capacity varies by category, with small per-date jitter to
+  // reflect aircraft swaps and operational variation across weeks.
+  const baseCapacity = category === 'Own Flight'
     ? 189                                  // 737-800
     : category === 'Risk Block' ? 174      // 737 MAX 8
     : 148;                                 // 3rd party narrow-body
+  const jitter = Math.round((rand() - 0.5) * 18); // ±9 seats
+  const capacity = Math.max(120, baseCapacity + jitter);
 
   // Load factor drifts lower further out
   const weeksOut = idx;

@@ -28,6 +28,52 @@
     }
     .dest-extras .dx-label { color:var(--text-muted); }
     .dest-extras .dx-val   { color:var(--text-primary); font-weight:500; }
+
+    /* Compact, outlined region badge on the second line of dest+week rows */
+    tr.row-property .row-region {
+      margin-top: 3px;
+      margin-left: 22px;
+      line-height: 1;
+    }
+    tr.row-property .row-region .region-badge {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 6px;
+      background: transparent;
+      border-width: 1px;
+      border-style: solid;
+      letter-spacing: .02em;
+      opacity: 0.8;
+    }
+
+    /* Compact category abbreviation badges */
+    .flight-cat { font-size: 10px; padding: 2px 7px; }
+
+    /* Legend / key bar above the table */
+    .legend-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 20px;
+      font-size: 11px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .legend-bar .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .legend-bar .legend-key {
+      display: inline-flex;
+      align-items: center;
+    }
+    .legend-bar .legend-sep { color: var(--border-mid); }
+    .legend-bar .ros-up   { color: #047857; font-weight: 600; }
+    .legend-bar .ros-down { color: var(--danger); font-weight: 600; }
   </style>
 </head>
 <body>
@@ -172,6 +218,23 @@
     <!-- New Recommendations view (tree table) -->
     <div class="view" id="viewRecs">
       <div class="row-count-bar" id="rowCountBar"></div>
+      <div class="legend-bar" aria-label="Table legend">
+        <span class="legend-item"><span class="flight-cat flight-cat-own legend-key">OWN</span> Sunwing/WestJet owned</span>
+        <span class="legend-sep">·</span>
+        <span class="legend-item"><span class="flight-cat flight-cat-risk legend-key">RSK</span> Risk block</span>
+        <span class="legend-sep">·</span>
+        <span class="legend-item"><span class="flight-cat flight-cat-thirdparty legend-key">3RD</span> Third party</span>
+        <span class="legend-sep">·</span>
+        <span class="legend-item"><span class="legend-key">⚠️</span> Alert / behind target</span>
+        <span class="legend-sep">·</span>
+        <span class="legend-item"><span class="legend-key">🔒</span> Price locked</span>
+        <span class="legend-sep">·</span>
+        <span class="legend-item"><span class="legend-key">📝</span> Note attached</span>
+        <span class="legend-sep">·</span>
+        <span class="legend-item"><span class="legend-key ros-up">▲</span> ROS ahead of target</span>
+        <span class="legend-sep">·</span>
+        <span class="legend-item"><span class="legend-key ros-down">▼</span> ROS behind target</span>
+      </div>
       <div class="table-wrap">
         <table class="data-table" id="recsTable">
           <thead id="recsTableHead"></thead>
@@ -519,7 +582,8 @@ function regionBadge(region) {
 }
 function flightCatBadge(cat) {
   const cls = cat === 'Own Flight' ? 'own' : cat === 'Risk Block' ? 'risk' : 'thirdparty';
-  return `<span class="flight-cat flight-cat-${cls}">${cat}</span>`;
+  const abbr = cat === 'Own Flight' ? 'OWN' : cat === 'Risk Block' ? 'RSK' : '3RD';
+  return `<span class="flight-cat flight-cat-${cls}" title="${cat}">${abbr}</span>`;
 }
 function lfPill(lf) {
   const pct = Math.round(lf * 100);
@@ -593,6 +657,8 @@ function aggDates(dates) {
   const lf = capacity ? sold / capacity : 0;
   const fCur = dates.reduce((s, x) => s + getEffectiveFare(x), 0) / dates.length;
   const fRec = dates.reduce((s, x) => s + x.recFare, 0) / dates.length;
+  const mCur = dates.reduce((s, x) => s + x.currentMargin, 0) / dates.length;
+  const mRec = dates.reduce((s, x) => s + x.recMargin, 0) / dates.length;
   const forecastLF = dates.reduce((s, x) => s + x.forecastLF, 0) / dates.length;
   const targetLF   = dates.reduce((s, x) => s + x.targetLF, 0) / dates.length;
   const hasAlert = dates.some(x => x.rateOfSale < x.rateOfSaleTarget || x.forecastLF < x.targetLF - 0.05);
@@ -603,6 +669,9 @@ function aggDates(dates) {
     avgCurrentFare: Math.round(fCur),
     avgRecFare: Math.round(fRec),
     deltaFare: Math.round(fRec - fCur),
+    avgCurrentMargin: Math.round(mCur),
+    avgRecMargin: Math.round(mRec),
+    deltaMargin: Math.round(mRec - mCur),
     forecastLF: Math.round(forecastLF * 100) / 100,
     targetLF: Math.round(targetLF * 100) / 100,
     hasAlert,
@@ -638,14 +707,16 @@ function renderRecsHead() {
     <tr>
       <th style="min-width:320px;">Destination / Week</th>
       <th style="width:100px;">Dep. Week</th>
-      <th class="text-right" style="width:80px;">Capacity</th>
-      <th class="text-right" style="width:80px;">Sold</th>
+      <th class="text-right" style="width:110px;">Sold / Cap</th>
       <th class="text-right" style="width:70px;">LF %</th>
       <th class="text-right" style="width:90px;">Current<span class="th-sub">Fare $</span></th>
       <th class="text-right" style="width:90px;">Rec<span class="th-sub">Fare $</span></th>
       <th class="text-right" style="width:80px;">Delta<span class="th-sub">$</span></th>
+      <th class="text-right" style="width:90px;">Current<span class="th-sub">Margin $</span></th>
+      <th class="text-right" style="width:90px;">Rec<span class="th-sub">Margin $</span></th>
+      <th class="text-right" style="width:80px;">Margin<span class="th-sub">Δ $</span></th>
       <th class="text-right" style="width:90px;">Forecast<span class="th-sub">LF %</span></th>
-      <th class="text-right" style="width:90px;">Beds:Seats</th>
+      <th class="text-right" style="width:70px;">B:S</th>
       <th class="text-right" style="width:80px;">Hotel<span class="th-sub">Occ %</span></th>
       <th style="width:80px;">Flags</th>
       <th style="width:110px;">Actions</th>
@@ -706,15 +777,17 @@ function renderRecsTable() {
             <button class="expand-btn ${dwOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleDestWeek('${dwKey}')">${chevron(dwOpen)}</button>
             <span style="font-weight:600;">${dest.name}</span>
             <span style="font-weight:400;color:var(--text-muted);margin-left:6px;">- Wk ${shortDt}</span>
-            ${regionBadge(dest.region)}
+            <div class="row-region">${regionBadge(dest.region)}</div>
           </td>
           <td><span style="font-weight:500;">Wk ${shortDt}</span></td>
-          <td class="text-right num">${dwAgg.capacity.toLocaleString()}</td>
-          <td class="text-right num">${dwAgg.sold.toLocaleString()}</td>
+          <td class="text-right num">${dwAgg.sold.toLocaleString()}<span style="color:var(--text-muted);margin:0 5px;">/</span>${dwAgg.capacity.toLocaleString()}</td>
           <td class="text-right">${lfText(dwAgg.lf)}</td>
           <td class="text-right">${fmt$(dwAgg.avgCurrentFare)}</td>
           <td class="text-right highlight-teal">${fmt$(dwAgg.avgRecFare)}</td>
           <td class="text-right">${deltaCell(dwAgg.deltaFare)}</td>
+          <td class="text-right num">${fmt$(dwAgg.avgCurrentMargin)}</td>
+          <td class="text-right num">${fmt$(dwAgg.avgRecMargin)}</td>
+          <td class="text-right">${deltaCell(dwAgg.deltaMargin)}</td>
           <td class="text-right">${lfPill(dwAgg.forecastLF)}</td>
           <td class="text-right">${ratioBadge(ratio)}</td>
           <td class="text-right">${hOcc != null ? lfPill(hOcc) : '<span class="text-muted">—</span>'}</td>
@@ -751,12 +824,14 @@ function renderRecsTable() {
               ${flightCatBadge(route.category)}
             </td>
             <td class="text-muted">—</td>
-            <td class="text-right num">${rAgg.capacity.toLocaleString()}</td>
-            <td class="text-right num">${rAgg.sold.toLocaleString()}</td>
+            <td class="text-right num">${rAgg.sold.toLocaleString()}<span style="color:var(--text-muted);margin:0 5px;">/</span>${rAgg.capacity.toLocaleString()}</td>
             <td class="text-right">${lfText(rAgg.lf)}</td>
             <td class="text-right">${fmt$(rAgg.avgCurrentFare)}</td>
             <td class="text-right highlight-teal">${fmt$(rAgg.avgRecFare)}</td>
             <td class="text-right">${deltaCell(rAgg.deltaFare)}</td>
+            <td class="text-right num">${fmt$(rAgg.avgCurrentMargin)}</td>
+            <td class="text-right num">${fmt$(rAgg.avgRecMargin)}</td>
+            <td class="text-right">${deltaCell(rAgg.deltaMargin)}</td>
             <td class="text-right">${lfPill(rAgg.forecastLF)}</td>
             <td class="text-muted">—</td>
             <td class="text-muted">—</td>
@@ -782,8 +857,7 @@ function renderRecsTable() {
               ${date.locked ? ' <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--accent);vertical-align:middle;"><rect x="3" y="6" width="8" height="6" rx="1"/><path d="M5 6V4a2 2 0 0 1 4 0v2"/></svg>' : ''}
             </td>
             <td class="text-muted">—</td>
-            <td class="text-right num">${date.capacity}</td>
-            <td class="text-right num">${date.sold}</td>
+            <td class="text-right num">${date.sold}<span style="color:var(--text-muted);margin:0 5px;">/</span>${date.capacity}</td>
             <td class="text-right">${lfText(lf)}</td>
             <td class="text-right">
               <input class="adr-input" type="number" value="${eff}" onchange="updateFare('${date.id}', this.value)" onclick="event.stopPropagation()" />
@@ -792,6 +866,9 @@ function renderRecsTable() {
               <span class="rec-margin-cell" onclick="event.stopPropagation();acceptRec('${date.id}')" title="Click to accept">${fmt$(date.recFare)}</span>
             </td>
             <td class="text-right">${deltaCell(dFare)}</td>
+            <td class="text-right num">${fmt$(date.currentMargin)}</td>
+            <td class="text-right num">${fmt$(date.recMargin)}</td>
+            <td class="text-right">${deltaCell(date.recMargin - date.currentMargin)}</td>
             <td class="text-right">${lfPill(date.forecastLF)}</td>
             <td class="text-muted">—</td>
             <td class="text-muted">—</td>
@@ -823,7 +900,7 @@ function renderRecsTable() {
   });
 
   if (visibleDestSet.size === 0 && (advFiltersActive() || headerFiltersActive())) {
-    rows.push('<tr><td colspan="13" style="text-align:center;color:var(--text-muted);padding:32px;">No results match current filters</td></tr>');
+    rows.push('<tr><td colspan="15" style="text-align:center;color:var(--text-muted);padding:32px;">No results match current filters</td></tr>');
   }
 
   tbody.innerHTML = rows.join('');
