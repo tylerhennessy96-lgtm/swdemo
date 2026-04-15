@@ -996,10 +996,227 @@
       flex-shrink: 0;
     }
     .cp-send:hover { background: #c2185b; }
+
+    /* ── Run Evaluation modal ──────────────────────────────── */
+    .re-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 20, 27, 0.55);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .re-backdrop.open { display: flex; }
+    .re-modal {
+      background: #fff;
+      border-radius: 10px;
+      width: 520px;
+      max-width: calc(100vw - 40px);
+      max-height: calc(100vh - 80px);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+      font-family: 'Inter', sans-serif;
+      color: var(--text-primary);
+      overflow: hidden;
+    }
+    .re-modal-head {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .re-modal-head h3 { margin: 0; font-size: 15px; font-weight: 600; }
+    .re-modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      line-height: 1;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .re-modal-close:hover { color: var(--text-primary); background: #f3f4f6; }
+    .re-modal-body {
+      padding: 18px 22px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .re-modal-section { margin-bottom: 18px; }
+    .re-modal-section:last-child { margin-bottom: 0; }
+    .re-modal-section-title {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 10px;
+    }
+    .re-modal-section .re-intro {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin: 0 0 8px;
+    }
+    .re-modal-cb {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--text-primary);
+      cursor: pointer;
+      padding: 5px 0;
+    }
+    .re-modal-cb input { margin-top: 2px; cursor: pointer; }
+    .re-destlist, .re-weeklist, .re-catlist {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px 10px;
+      margin-top: 6px;
+      padding: 8px 10px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+    .re-destlist label, .re-weeklist label, .re-catlist label {
+      font-size: 11.5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+    }
+    .re-preview {
+      background: rgba(233, 30, 140, 0.08);
+      border: 1px solid rgba(233, 30, 140, 0.28);
+      border-radius: 6px;
+      padding: 11px 14px;
+      font-size: 12.5px;
+      color: #c2185b;
+    }
+    .re-preview strong { color: #e91e8c; font-weight: 700; }
+    .re-modal-foot {
+      padding: 14px 22px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: #fafbfc;
+    }
+    .re-btn {
+      padding: 8px 18px;
+      border-radius: 5px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+    }
+    .re-btn.ghost { background: #fff; color: var(--text-primary); }
+    .re-btn.ghost:hover { border-color: #e91e8c; color: #e91e8c; }
+    .re-btn.primary { background: #e91e8c; color: #fff; border-color: #e91e8c; }
+    .re-btn.primary:hover { background: #c2185b; border-color: #c2185b; }
+
+    /* Toast notification */
+    .re-toast {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      background: #16181d;
+      color: #e5e7eb;
+      border: 1px solid #2d313b;
+      border-radius: 8px;
+      padding: 11px 18px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.28);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      z-index: 220;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .re-toast.shown {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .re-toast .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(245, 166, 35, 0.25);
+      border-top-color: #f5a623;
+      border-radius: 50%;
+      animation: reSpin 0.9s linear infinite;
+    }
+    .re-toast.running { border-color: rgba(245, 166, 35, 0.45); color: #fde9c7; }
+    .re-toast.success .spinner { display: none; }
+    .re-toast .check { display: none; color: #e91e8c; font-weight: 700; }
+    .re-toast.success .check { display: inline; }
+    .re-toast.success { border-color: rgba(233, 30, 140, 0.45); color: #ffe1ef; }
+    @keyframes reSpin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 <div class="analytics-backdrop" id="analyticsBackdrop" onclick="closeExposure()"></div>
+
+<!-- ── Run Evaluation modal + toast ── -->
+<div class="re-backdrop" id="reBackdrop">
+  <div class="re-modal" role="dialog" aria-labelledby="reModalTitle">
+    <div class="re-modal-head">
+      <h3 id="reModalTitle">Run Evaluation — Flights</h3>
+      <button type="button" class="re-modal-close" onclick="closeRunEvalModal()" aria-label="Close">×</button>
+    </div>
+    <div class="re-modal-body">
+      <div class="re-modal-section">
+        <div class="re-modal-section-title">Scope</div>
+        <p class="re-intro">Select what to include in this evaluation:</p>
+        <label class="re-modal-cb">
+          <input type="checkbox" id="reAllDests" checked onchange="onReScopeChange()">
+          <span>All destinations</span>
+        </label>
+        <div id="reDestList" class="re-destlist" style="display:none;"></div>
+        <label class="re-modal-cb">
+          <input type="checkbox" id="reAllWeeks" checked onchange="onReScopeChange()">
+          <span>All departure weeks</span>
+        </label>
+        <div id="reWeekList" class="re-weeklist" style="display:none;"></div>
+        <label class="re-modal-cb">
+          <input type="checkbox" id="reAllCats" checked onchange="onReScopeChange()">
+          <span>All flight categories</span>
+        </label>
+        <div id="reCatList" class="re-catlist" style="display:none;"></div>
+      </div>
+      <div class="re-modal-section">
+        <div class="re-modal-section-title">Options</div>
+        <label class="re-modal-cb"><input type="checkbox" id="reOptRules" checked> Apply package rules automatically</label>
+        <label class="re-modal-cb"><input type="checkbox" id="reOptComp" checked> Include competitor fare adjustments</label>
+        <label class="re-modal-cb"><input type="checkbox" id="reOptLF" checked> Apply load factor thresholds</label>
+        <label class="re-modal-cb"><input type="checkbox" id="reOptFlag" checked> Flag fare changes above $40 for review</label>
+        <label class="re-modal-cb"><input type="checkbox" id="reOptNotify"> Notify RM on completion</label>
+      </div>
+      <div class="re-modal-section">
+        <div class="re-modal-section-title">Preview</div>
+        <div class="re-preview" id="rePreview">—</div>
+      </div>
+    </div>
+    <div class="re-modal-foot">
+      <button type="button" class="re-btn ghost" onclick="closeRunEvalModal()">Cancel</button>
+      <button type="button" class="re-btn primary" onclick="confirmRunEvaluation()">Run Evaluation</button>
+    </div>
+  </div>
+</div>
+<div class="re-toast" id="reToast">
+  <span class="spinner"></span>
+  <span class="check">✓</span>
+  <span id="reToastText">Evaluation running…</span>
+</div>
 
 <!-- ── Row-level RM Copilot side panel ── -->
 <aside class="cprp" id="rowCopilotPanel" aria-hidden="true">
@@ -2391,7 +2608,102 @@ function toggleFilter(id) {
 function toggleMenu() {
   document.getElementById('navDropdown').classList.toggle('open');
 }
-function runEvaluation() {}
+// ── Run Evaluation modal ───────────────────────────────────
+const _RE_FLIGHT_CATEGORIES = ['Own Flight', 'Risk Block', '3rd Party'];
+function runEvaluation() {
+  // Populate destinations from FLIGHT_DATA (destinations that actually have routes)
+  const dl = document.getElementById('reDestList');
+  dl.innerHTML = FLIGHT_DATA.map(d =>
+    `<label><input type="checkbox" class="re-dest-cb" value="${d.id}" checked onchange="onReScopeChange()"> ${d.name}</label>`
+  ).join('');
+  // Populate weeks using the first route's dates array
+  const weekCount = (FLIGHT_DATA[0]?.routes?.[0]?.dates?.length) || 8;
+  const wl = document.getElementById('reWeekList');
+  wl.innerHTML = Array.from({ length: weekCount }, (_, i) => {
+    const refDate = FLIGHT_DATA[0]?.routes?.[0]?.dates?.[i]?.departureDate || `Wk ${i + 1}`;
+    const label = `Wk ${(refDate || '').slice(0, 5)}`;
+    return `<label><input type="checkbox" class="re-week-cb" value="${i}" checked onchange="onReScopeChange()"> ${label}</label>`;
+  }).join('');
+  // Populate flight categories
+  const cl = document.getElementById('reCatList');
+  cl.innerHTML = _RE_FLIGHT_CATEGORIES.map(c =>
+    `<label><input type="checkbox" class="re-cat-cb" value="${c}" checked onchange="onReScopeChange()"> ${c}</label>`
+  ).join('');
+  // Reset toggles to default
+  document.getElementById('reAllDests').checked = true;
+  document.getElementById('reAllWeeks').checked = true;
+  document.getElementById('reAllCats').checked = true;
+  dl.style.display = 'none';
+  wl.style.display = 'none';
+  cl.style.display = 'none';
+  document.getElementById('reOptRules').checked = true;
+  document.getElementById('reOptComp').checked = true;
+  document.getElementById('reOptLF').checked = true;
+  document.getElementById('reOptFlag').checked = true;
+  document.getElementById('reOptNotify').checked = false;
+
+  onReScopeChange();
+  document.getElementById('reBackdrop').classList.add('open');
+}
+function closeRunEvalModal() {
+  document.getElementById('reBackdrop').classList.remove('open');
+}
+function _reScopeCounts() {
+  const allDests = document.getElementById('reAllDests').checked;
+  const allWeeks = document.getElementById('reAllWeeks').checked;
+  const allCats  = document.getElementById('reAllCats').checked;
+
+  const selectedDestIds = allDests
+    ? FLIGHT_DATA.map(d => d.id)
+    : Array.from(document.querySelectorAll('.re-dest-cb:checked')).map(cb => cb.value);
+  const selectedCats = allCats
+    ? _RE_FLIGHT_CATEGORIES.slice()
+    : Array.from(document.querySelectorAll('.re-cat-cb:checked')).map(cb => cb.value);
+  const weekCount = (FLIGHT_DATA[0]?.routes?.[0]?.dates?.length) || 8;
+  const nWeeks = allWeeks
+    ? weekCount
+    : document.querySelectorAll('.re-week-cb:checked').length;
+
+  // Count routes in selected dests that match selected categories
+  let nRoutes = 0;
+  FLIGHT_DATA.forEach(d => {
+    if (!selectedDestIds.includes(d.id)) return;
+    d.routes.forEach(r => { if (selectedCats.includes(r.category)) nRoutes++; });
+  });
+  const nDests = selectedDestIds.length;
+  return { nDests, nWeeks, nRoutes, nDecisions: nRoutes * nWeeks };
+}
+function onReScopeChange() {
+  const allDests = document.getElementById('reAllDests').checked;
+  const allWeeks = document.getElementById('reAllWeeks').checked;
+  const allCats  = document.getElementById('reAllCats').checked;
+  document.getElementById('reDestList').style.display = allDests ? 'none' : 'grid';
+  document.getElementById('reWeekList').style.display = allWeeks ? 'none' : 'grid';
+  document.getElementById('reCatList').style.display  = allCats  ? 'none' : 'grid';
+
+  const { nDests, nWeeks, nRoutes, nDecisions } = _reScopeCounts();
+  document.getElementById('rePreview').innerHTML =
+    `This will evaluate <strong>${nDests}</strong> destinations × <strong>${nWeeks}</strong> weeks × <strong>${nRoutes}</strong> routes = <strong>${nDecisions.toLocaleString()}</strong> pricing decisions`;
+}
+function confirmRunEvaluation() {
+  closeRunEvalModal();
+  const toast = document.getElementById('reToast');
+  const text = document.getElementById('reToastText');
+  toast.classList.remove('success');
+  toast.classList.add('running');
+  text.textContent = '⟳ Evaluation running…';
+  toast.classList.add('shown');
+  setTimeout(() => {
+    const { nDecisions } = _reScopeCounts();
+    toast.classList.remove('running');
+    toast.classList.add('success');
+    text.textContent = `✓ Evaluation complete — ${nDecisions.toLocaleString()} recommendations updated`;
+    setTimeout(() => {
+      toast.classList.remove('shown');
+      toast.classList.remove('success');
+    }, 3000);
+  }, 2500);
+}
 function publishChanges() {}
 
 document.addEventListener('click', (e) => {
