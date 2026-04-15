@@ -642,67 +642,72 @@
     /* ── Ask RM Copilot ─────────────────────────────────────── */
     .ask-rm-btn {
       position: fixed;
-      top: 12px;
-      right: 20px;
-      z-index: 90;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1000;
       background: #0d9488;
       color: #fff;
       border: 1px solid #0b7f73;
-      padding: 7px 14px 7px 12px;
-      border-radius: 20px;
+      padding: 11px 20px 11px 18px;
+      border-radius: 24px;
       font-family: 'Archivo', sans-serif;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.22);
       letter-spacing: .02em;
     }
-    .ask-rm-btn:hover { background: #0b7f73; }
+    .ask-rm-btn:hover { background: #0b7f73; box-shadow: 0 6px 18px rgba(0,0,0,0.28); }
     .ask-rm-btn .sparkle {
       display: inline-block;
-      font-size: 14px;
+      font-size: 15px;
       animation: sparkle 2.5s ease-in-out infinite;
     }
     @keyframes sparkle {
       0%, 100% { opacity: 0.8; transform: scale(1); }
       50%      { opacity: 1;   transform: scale(1.15); }
     }
-    .copilot-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.35);
-      z-index: 99;
-      display: none;
-    }
-    .copilot-backdrop.open { display: block; }
     .copilot-panel {
       position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 42vh;
-      min-height: 360px;
+      bottom: 80px;
+      right: 24px;
+      width: 420px;
+      height: 480px;
+      max-width: calc(100vw - 40px);
+      max-height: calc(100vh - 120px);
       background: #1e2128;
       color: #e5e7eb;
-      z-index: 100;
-      transform: translateY(100%);
-      transition: transform .25s cubic-bezier(.4,0,.2,1);
+      z-index: 999;
+      border-radius: 12px;
+      border: 1px solid #2d313b;
+      transform: translateY(20px) scale(0.96);
+      opacity: 0;
+      pointer-events: none;
+      transform-origin: bottom right;
+      transition: transform .2s cubic-bezier(.4,0,.2,1), opacity .2s;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 -8px 24px rgba(0,0,0,.35);
+      box-shadow: 0 12px 40px rgba(0,0,0,.42);
       font-family: 'Archivo', sans-serif;
+      overflow: hidden;
     }
-    .copilot-panel.open { transform: translateY(0); }
+    .copilot-panel.open {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+      pointer-events: auto;
+    }
     .copilot-head {
-      padding: 12px 20px;
+      padding: 13px 18px;
       border-bottom: 1px solid #2d313b;
       display: flex;
       align-items: center;
       justify-content: space-between;
       background: #16181d;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
     }
     .copilot-head .ct {
       font-size: 13px;
@@ -784,11 +789,16 @@
       30%           { opacity: 1;   transform: scale(1.1); }
     }
     .copilot-suggest {
-      padding: 0 20px 8px;
+      padding: 8px 16px 10px;
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       gap: 6px;
+      overflow-x: auto;
+      border-top: 1px solid #2d313b;
     }
+    .copilot-suggest::-webkit-scrollbar { height: 5px; }
+    .copilot-suggest::-webkit-scrollbar-thumb { background: #353a46; border-radius: 3px; }
+    .cp-pill { white-space: nowrap; flex-shrink: 0; }
     .cp-pill {
       background: #2a2e38;
       color: #d1d5db;
@@ -824,12 +834,14 @@
       background: #0d9488;
       color: #fff;
       border: none;
-      padding: 9px 18px;
-      border-radius: 20px;
-      font-family: inherit;
-      font-size: 12px;
-      font-weight: 600;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
+      flex-shrink: 0;
     }
     .cp-send:hover { background: #0b7f73; }
   </style>
@@ -838,22 +850,23 @@
 <div class="analytics-backdrop" id="analyticsBackdrop" onclick="closeExposure()"></div>
 
 <!-- ── Ask RM button + Copilot panel ── -->
-<button type="button" class="ask-rm-btn" onclick="openCopilot()">
+<button type="button" class="ask-rm-btn" id="askRmBtn" onclick="toggleCopilot()">
   <span class="sparkle">✦</span> Ask RM
 </button>
-<div class="copilot-backdrop" id="copilotBackdrop" onclick="closeCopilot()"></div>
 <aside class="copilot-panel" id="copilotPanel" aria-hidden="true">
   <div class="copilot-head">
     <div class="ct"><span class="sparkle">✦</span> RM Copilot</div>
-    <button type="button" class="copilot-close" onclick="closeCopilot()">×</button>
+    <button type="button" class="copilot-close" onclick="closeCopilot()" aria-label="Close">×</button>
   </div>
   <div class="copilot-chat" id="copilotChat"></div>
   <div class="copilot-suggest" id="copilotSuggest"></div>
   <div class="copilot-input-wrap">
     <input type="text" class="cp-input" id="copilotInput"
-           placeholder="Ask anything about pricing, demand or recommendations..."
+           placeholder="Ask a question..."
            onkeydown="if(event.key==='Enter'){copilotSend();}" />
-    <button type="button" class="cp-send" onclick="copilotSend()">Send</button>
+    <button type="button" class="cp-send" onclick="copilotSend()" aria-label="Send">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h10M8 3l4 4-4 4"/></svg>
+    </button>
   </div>
 </aside>
 
@@ -2933,26 +2946,32 @@ function saveRuleEdit() {
 
 // ── RM Copilot ─────────────────────────────────────────────
 const _copilotSuggestions = [
-  'Why has the fare increased for WS2401?',
+  'Why did fares increase?',
   'Which flights are at risk?',
-  "What's the competitor position for Cancun?",
+  'Competitor position for Cancun?',
+  'Flights behind target?',
 ];
 let _copilotHistory = [];
 
+function toggleCopilot() {
+  const panel = document.getElementById('copilotPanel');
+  if (panel.classList.contains('open')) closeCopilot();
+  else                                  openCopilot();
+}
 function openCopilot() {
-  document.getElementById('copilotBackdrop').classList.add('open');
-  document.getElementById('copilotPanel').classList.add('open');
-  document.getElementById('copilotPanel').setAttribute('aria-hidden', 'false');
+  const panel = document.getElementById('copilotPanel');
+  panel.classList.add('open');
+  panel.setAttribute('aria-hidden', 'false');
   if (_copilotHistory.length === 0) {
-    copilotPush('asst', "Hi — I'm your RM Copilot. Ask me about pricing, demand, recommendations, or competitor position. Try one of the suggestions below.");
+    copilotPush('asst', "Hi! I can help you understand pricing recommendations, demand trends and alerts. What would you like to know?");
   }
   renderCopilotSuggest();
-  setTimeout(() => { const i = document.getElementById('copilotInput'); if (i) i.focus(); }, 180);
+  setTimeout(() => { const i = document.getElementById('copilotInput'); if (i) i.focus(); }, 220);
 }
 function closeCopilot() {
-  document.getElementById('copilotBackdrop').classList.remove('open');
-  document.getElementById('copilotPanel').classList.remove('open');
-  document.getElementById('copilotPanel').setAttribute('aria-hidden', 'true');
+  const panel = document.getElementById('copilotPanel');
+  panel.classList.remove('open');
+  panel.setAttribute('aria-hidden', 'true');
 }
 function renderCopilotSuggest() {
   const el = document.getElementById('copilotSuggest');
@@ -2993,92 +3012,126 @@ function copilotSend() {
   setTimeout(() => {
     copilotHideTyping();
     copilotPush('asst', copilotAnswer(q));
-  }, 800);
+  }, 900);
 }
 function copilotAskSuggest(q) {
   document.getElementById('copilotInput').value = q;
   copilotSend();
 }
 
+function _weekLabel(date) {
+  if (!date || !date.departureDate) return '';
+  const s = date.departureDate;
+  return 'Wk ' + s.slice(0, 5);
+}
+function _topDeltaDestination() {
+  let best = null;
+  FLIGHT_DATA.forEach(dest => {
+    dest.routes.forEach(r => {
+      r.dates.forEach(d => {
+        const delta = d.recFare - (d.currentFare || d.recFare);
+        if (delta > 0 && (!best || delta > best.delta)) {
+          best = { dest, route: r, date: d, delta };
+        }
+      });
+    });
+  });
+  return best;
+}
+
 function copilotAnswer(q) {
   const ql = q.toLowerCase();
-  // Try to detect a flight number mentioned (e.g. WS2401)
-  const flightMatch = q.match(/\b([A-Z]{2}\d{3,4})\b/);
-  // Try to detect a known destination name
-  const destMatch = DESTINATIONS.find(d => ql.includes(d.name.toLowerCase()) || ql.includes(d.id.toLowerCase()));
 
-  // "why did/has * increase"
-  if (/why (has|did|have) .* (increase|increased|gone up|risen)/.test(ql) || /why.*increase/.test(ql)) {
-    if (flightMatch) {
-      let found = null;
-      FLIGHT_DATA.forEach(dest => dest.routes.forEach(r => {
-        if (r.flightNum === flightMatch[1] && !found) {
-          const d0 = r.dates[0];
-          if (d0) {
-            const lf = d0.capacity ? Math.round((d0.sold / d0.capacity) * 100) : 0;
-            const tgt = Math.round(d0.targetLF * 100);
-            const delta = (d0.recFare - (d0.currentFare || d0.recFare));
-            found = `${flightMatch[1]} (${r.origin}→${dest.id}) is currently ${lf}% full vs target ${tgt}%. Rate of sale is ${d0.rateOfSale.toFixed(1)}/day vs target ${d0.rateOfSaleTarget.toFixed(1)}/day. The recommendation engine has suggested a $${d0.recFare} fare${delta ? ` (a ${delta > 0 ? '+' : ''}$${delta} adjustment)` : ''} to capture this demand.`;
-          }
-        }
-      }));
-      if (found) return found;
+  // "why" AND ("fare" OR "price") AND ("increase" OR "up" OR "higher")
+  if (/why/.test(ql) && /(fare|price|rate)/.test(ql) && /(increase|increased|up|higher|risen|rose)/.test(ql)) {
+    const top = _topDeltaDestination();
+    if (top) {
+      const d = top.date, r = top.route, dest = top.dest;
+      const lf = d.capacity ? Math.round((d.sold / d.capacity) * 100) : 0;
+      const tgt = Math.round(d.targetLF * 100);
+      const unsold = Math.max(0, d.capacity - d.sold);
+      return `The fare increase for ${dest.name} is driven by strong demand — current LF is ${lf}% vs target ${tgt}%. The system has recommended a +$${top.delta} adjustment to capture this uplift. ${dest.name} is currently ${unsold} seats from capacity on ${r.flightNum} (${r.origin}→${dest.id}).`;
     }
-    if (destMatch) {
-      const fd = FLIGHT_DATA.find(d => d.id === destMatch.id);
-      if (fd && fd.routes[0] && fd.routes[0].dates[0]) {
-        const d0 = fd.routes[0].dates[0];
-        const lf = d0.capacity ? Math.round((d0.sold / d0.capacity) * 100) : 0;
-        return `${destMatch.name} has seen load factors running at ${lf}% vs target ${Math.round(d0.targetLF * 100)}% on ${fd.routes[0].flightNum}. The recommendation engine has suggested a fare of $${d0.recFare} (current $${d0.currentFare || d0.recFare}) to capture demand uplift.`;
-      }
-    }
-    return "Demand has firmed up over the past 2 weeks — LF tracking ahead of target on several key routes. The recommendation engine has suggested margin adjustments to capture the uplift. Expand a route for full details.";
+    return "Demand has firmed up over the past 2 weeks on several routes, with LF running ahead of target. The recommendation engine has suggested fare uplifts to capture the demand.";
   }
 
-  // "which * behind / at risk / behind plan"
-  if (/which .* (behind|at risk|behind plan|behind target)/.test(ql) || /at risk|behind/.test(ql)) {
+  // "risk" / "behind target" / "behind plan"
+  if (/(risk|behind target|behind plan|at risk)/.test(ql)) {
     const atRisk = [];
     FLIGHT_DATA.forEach(dest => dest.routes.forEach(r => {
       r.dates.forEach(d => {
-        if (d.forecastLF < d.targetLF - 0.05 || d.rateOfSale < d.rateOfSaleTarget * 0.85) {
-          atRisk.push(`${r.flightNum} ${r.origin}→${dest.id} (${shortDate(d.departureDate)}) — fcst ${Math.round(d.forecastLF*100)}% vs tgt ${Math.round(d.targetLF*100)}%`);
+        const lfPct = d.capacity ? (d.sold / d.capacity) * 100 : 0;
+        const tgtPct = d.targetLF * 100;
+        if (lfPct < tgtPct) {
+          atRisk.push({ dest, route: r, date: d, lfPct, tgtPct, gap: tgtPct - lfPct });
         }
       });
     }));
-    if (atRisk.length === 0) return "No flights currently flagged as at risk — all routes are tracking at or above target.";
-    return `The following flights are currently behind target:\n\n• ` + atRisk.slice(0, 6).join('\n• ') + (atRisk.length > 6 ? `\n\n…and ${atRisk.length - 6} more.` : '');
+    atRisk.sort((a, b) => b.gap - a.gap);
+    if (atRisk.length === 0) return "No flights flagged as behind target — all routes are tracking at or above plan.";
+    const top3 = atRisk.slice(0, 3).map(x =>
+      `• ${x.dest.name} ${_weekLabel(x.date)}: ${Math.round(x.lfPct)}% vs target ${Math.round(x.tgtPct)}%`
+    ).join('\n');
+    return `Currently ${atRisk.length} flights are behind LF target:\n${top3}\n\nConsider reviewing pricing or running a new evaluation.`;
   }
 
   // "competitor" / "comp"
-  if (/comp(etitor|etitive)?|competitor position/.test(ql)) {
-    if (destMatch) {
-      const fd = FLIGHT_DATA.find(d => d.id === destMatch.id);
-      if (fd && fd.routes[0] && fd.routes[0].dates[0]) {
-        const d0 = fd.routes[0].dates[0];
-        const cheapest = Math.min(d0.comp1Fare, d0.comp2Fare);
-        const delta = (d0.currentFare || d0.recFare) - cheapest;
-        return `Competitor pricing for ${destMatch.name}: Comp 1 is at $${d0.comp1Fare}, Comp 2 at $${d0.comp2Fare}. Our current fare of $${d0.currentFare || d0.recFare} is ${delta > 0 ? `$${delta} above` : delta < 0 ? `$${Math.abs(delta)} below` : 'at parity with'} the cheapest competitor.`;
-      }
+  if (/(competitor|\bcomp\b)/.test(ql)) {
+    const rows = (typeof COMPETITOR_FLIGHT_DATA !== 'undefined' && COMPETITOR_FLIGHT_DATA.length)
+      ? COMPETITOR_FLIGHT_DATA.slice(0, 3)
+      : [];
+    if (rows.length) {
+      const lines = rows.map(r => {
+        const cheapest = Math.min(r.comp1Fare, r.comp2Fare);
+        const delta = r.ourFare - cheapest;
+        const sign = delta >= 0 ? `+$${delta}` : `-$${Math.abs(delta)}`;
+        return `• ${r.ourFlight} ${r.destination}: Our fare $${r.ourFare} vs cheapest comp $${cheapest} (${sign})`;
+      }).join('\n');
+      return `Competitor snapshot for top routes:\n${lines}`;
     }
-    return "Pick a specific destination (e.g. 'Cancun', 'Punta Cana') and I'll pull the competitor position for you.";
+    // Fallback — pull from FLIGHT_DATA
+    const lines = [];
+    FLIGHT_DATA.slice(0, 3).forEach(dest => {
+      const r = dest.routes[0];
+      const d = r && r.dates[0];
+      if (!d) return;
+      const cheapest = Math.min(d.comp1Fare, d.comp2Fare);
+      const ours = d.currentFare || d.recFare;
+      const delta = ours - cheapest;
+      const sign = delta >= 0 ? `+$${delta}` : `-$${Math.abs(delta)}`;
+      lines.push(`• ${r.flightNum} ${r.origin}→${dest.id}: Our fare $${ours} vs cheapest comp $${cheapest} (${sign})`);
+    });
+    return `Competitor snapshot for top routes:\n${lines.join('\n')}`;
   }
 
-  // "low LF / low load factor"
-  if (/low (lf|load factor|occupancy|occ)/.test(ql)) {
-    const worst = [];
-    FLIGHT_DATA.forEach(dest => dest.routes.forEach(r => {
-      const d = r.dates[0];
-      if (!d || !d.capacity) return;
-      const lf = d.sold / d.capacity;
-      worst.push({ lbl: `${dest.name} (${r.flightNum})`, lf });
-    }));
-    worst.sort((a, b) => a.lf - b.lf);
-    const top = worst.slice(0, 5).map(w => `${w.lbl} — ${Math.round(w.lf * 100)}%`).join('\n• ');
-    return `Lowest-performing flights this week:\n\n• ${top}`;
+  // Destination name match (cancun / punta cana / etc.)
+  const destMatch = DESTINATIONS.find(d => ql.includes(d.name.toLowerCase()) || ql.includes(d.id.toLowerCase()));
+  if (destMatch) {
+    const fd = FLIGHT_DATA.find(d => d.id === destMatch.id);
+    if (fd) {
+      let lfSum = 0, tgtSum = 0, fareSum = 0, recSum = 0, count = 0, behind = 0;
+      fd.routes.forEach(r => r.dates.forEach(d => {
+        const lf = d.capacity ? d.sold / d.capacity : 0;
+        lfSum  += lf;
+        tgtSum += d.targetLF;
+        fareSum += (d.currentFare || d.recFare);
+        recSum  += d.recFare;
+        count++;
+        if (lf < d.targetLF) behind++;
+      }));
+      if (count) {
+        const avgLF  = Math.round((lfSum / count) * 100);
+        const avgTgt = Math.round((tgtSum / count) * 100);
+        const avgFare = Math.round(fareSum / count);
+        const avgRec  = Math.round(recSum / count);
+        const ratio = fd.bedsToSeatsRatio ? fd.bedsToSeatsRatio.toFixed(2) : '—';
+        return `Here's the current position for ${destMatch.name}:\n• Avg LF: ${avgLF}% (target ${avgTgt}%)\n• Avg Fare: $${avgFare} | Rec Fare: $${avgRec}\n• Beds:Seats ratio: ${ratio}\n• ${behind} flights behind target this week`;
+      }
+    }
   }
 
   // Fallback
-  return "I don't have specific data on that right now. You can check the detailed view by expanding a destination in the list, running a new evaluation, or asking about a specific flight number or destination.";
+  return "I can help with pricing trends, demand analysis and alerts. Try asking about a specific destination, flight or hotel, or use one of the suggested questions above.";
 }
 
 // Override default suggestions — this is flight.html
