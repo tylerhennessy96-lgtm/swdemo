@@ -639,86 +639,89 @@
     .toggle-sw input:checked + .sl { background: #0d9488; }
     .toggle-sw input:checked + .sl::before { transform: translateX(16px); }
 
-    /* ── Ask RM Copilot ─────────────────────────────────────── */
-    .ask-rm-btn {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 1000;
-      background: #0d9488;
-      color: #fff;
-      border: 1px solid #0b7f73;
-      padding: 11px 20px 11px 18px;
-      border-radius: 24px;
-      font-family: 'Archivo', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
+    /* ── Row-level Ask button + Copilot side panel ───────────── */
+    .ask-row-btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+      gap: 3px;
+      padding: 3px 9px;
+      border: 1px solid #0d9488;
+      border-radius: 11px;
+      background: transparent;
+      color: #0d9488;
+      font-family: 'Archivo', sans-serif;
+      font-size: 10.5px;
+      font-weight: 600;
+      cursor: pointer;
       letter-spacing: .02em;
+      line-height: 1.4;
     }
-    .ask-rm-btn:hover { background: #0b7f73; box-shadow: 0 6px 18px rgba(0,0,0,0.28); }
-    .ask-rm-btn .sparkle {
-      display: inline-block;
-      font-size: 15px;
-      animation: sparkle 2.5s ease-in-out infinite;
+    .ask-row-btn:hover {
+      background: #0d9488;
+      color: #fff;
     }
-    @keyframes sparkle {
-      0%, 100% { opacity: 0.8; transform: scale(1); }
-      50%      { opacity: 1;   transform: scale(1.15); }
-    }
-    .copilot-panel {
+    .ask-row-btn .spk { font-size: 11px; }
+
+    .cprp {
       position: fixed;
-      bottom: 80px;
-      right: 24px;
-      width: 420px;
-      height: 480px;
-      max-width: calc(100vw - 40px);
-      max-height: calc(100vh - 120px);
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 360px;
       background: #1e2128;
       color: #e5e7eb;
-      z-index: 999;
-      border-radius: 12px;
-      border: 1px solid #2d313b;
-      transform: translateY(20px) scale(0.96);
-      opacity: 0;
-      pointer-events: none;
-      transform-origin: bottom right;
-      transition: transform .2s cubic-bezier(.4,0,.2,1), opacity .2s;
+      border-left: 1px solid #2d313b;
+      box-shadow: -8px 0 24px rgba(0,0,0,0.35);
+      transform: translateX(100%);
+      transition: transform .25s cubic-bezier(.4,0,.2,1);
+      z-index: 60;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 12px 40px rgba(0,0,0,.42);
       font-family: 'Archivo', sans-serif;
-      overflow: hidden;
+      font-size: 12.5px;
     }
-    .copilot-panel.open {
-      transform: translateY(0) scale(1);
-      opacity: 1;
-      pointer-events: auto;
-    }
-    .copilot-head {
-      padding: 13px 18px;
+    .cprp.open { transform: translateX(0); }
+    .cprp-head {
+      padding: 14px 18px 12px;
       border-bottom: 1px solid #2d313b;
+      background: #16181d;
+      position: relative;
+    }
+    .cprp-head .cprp-dest {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .cprp-head .cprp-wk {
+      font-size: 11.5px;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+    .cprp-head .cprp-metrics {
+      font-size: 11px;
+      color: #d1d5db;
+      margin-top: 8px;
+      line-height: 1.6;
+    }
+    .cprp-head .cprp-metrics .cprp-sep { color: #4b5563; margin: 0 6px; }
+    .cprp-head .cprp-label-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #16181d;
-      border-top-left-radius: 12px;
-      border-top-right-radius: 12px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid #2d313b;
     }
-    .copilot-head .ct {
-      font-size: 13px;
+    .cprp-head .cprp-label {
+      font-size: 11px;
       font-weight: 600;
-      color: #fff;
+      color: #0d9488;
+      letter-spacing: .03em;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 5px;
     }
-    .copilot-head .ct .sparkle { color: #0d9488; font-size: 15px; }
-    .copilot-close {
+    .cprp-close {
       background: none;
       border: none;
       color: #9ca3af;
@@ -728,20 +731,20 @@
       padding: 4px 8px;
       border-radius: 4px;
     }
-    .copilot-close:hover { color: #fff; background: #2d313b; }
-    .copilot-chat {
+    .cprp-close:hover { color: #fff; background: #2d313b; }
+    .cprp-chat {
       flex: 1;
       overflow-y: auto;
-      padding: 16px 20px;
+      padding: 14px 18px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
     .cp-msg {
-      max-width: 78%;
-      padding: 10px 14px;
+      max-width: 90%;
+      padding: 10px 13px;
       border-radius: 10px;
-      font-size: 12.5px;
+      font-size: 12px;
       line-height: 1.55;
       white-space: pre-wrap;
     }
@@ -759,7 +762,7 @@
       margin-right: 4px;
     }
     .cp-msg.cp-user {
-      background: #3a4049;
+      background: #0d9488;
       color: #fff;
       align-self: flex-end;
       border-top-right-radius: 2px;
@@ -788,45 +791,43 @@
       0%, 60%, 100% { opacity: .35; transform: scale(0.85); }
       30%           { opacity: 1;   transform: scale(1.1); }
     }
-    .copilot-suggest {
-      padding: 8px 16px 10px;
+    .cprp-suggest {
+      padding: 8px 14px 8px;
       display: flex;
-      flex-wrap: nowrap;
-      gap: 6px;
-      overflow-x: auto;
+      flex-wrap: wrap;
+      gap: 5px;
       border-top: 1px solid #2d313b;
+      background: #16181d;
     }
-    .copilot-suggest::-webkit-scrollbar { height: 5px; }
-    .copilot-suggest::-webkit-scrollbar-thumb { background: #353a46; border-radius: 3px; }
-    .cp-pill { white-space: nowrap; flex-shrink: 0; }
     .cp-pill {
       background: #2a2e38;
       color: #d1d5db;
       border: 1px solid #353a46;
-      border-radius: 14px;
-      padding: 5px 12px;
-      font-size: 11px;
+      border-radius: 12px;
+      padding: 4px 10px;
+      font-size: 10.5px;
       cursor: pointer;
       font-family: inherit;
+      white-space: nowrap;
     }
     .cp-pill:hover { background: #0d9488; border-color: #0d9488; color: #fff; }
-    .copilot-input-wrap {
-      padding: 12px 20px 16px;
-      border-top: 1px solid #2d313b;
+    .cprp-input-wrap {
+      padding: 10px 14px 14px;
       background: #16181d;
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
+      border-top: 1px solid #2d313b;
     }
     .cp-input {
       flex: 1;
       background: #0f1116;
       border: 1px solid #353a46;
       color: #fff;
-      padding: 9px 14px;
-      border-radius: 20px;
+      padding: 8px 13px;
+      border-radius: 18px;
       font-family: inherit;
-      font-size: 12.5px;
+      font-size: 12px;
       outline: none;
     }
     .cp-input:focus { border-color: #0d9488; }
@@ -834,8 +835,8 @@
       background: #0d9488;
       color: #fff;
       border: none;
-      width: 34px;
-      height: 34px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       display: inline-flex;
       align-items: center;
@@ -849,22 +850,16 @@
 <body>
 <div class="analytics-backdrop" id="analyticsBackdrop" onclick="closeExposure()"></div>
 
-<!-- ── Ask RM button + Copilot panel ── -->
-<button type="button" class="ask-rm-btn" id="askRmBtn" onclick="toggleCopilot()">
-  <span class="sparkle">✦</span> Ask RM
-</button>
-<aside class="copilot-panel" id="copilotPanel" aria-hidden="true">
-  <div class="copilot-head">
-    <div class="ct"><span class="sparkle">✦</span> RM Copilot</div>
-    <button type="button" class="copilot-close" onclick="closeCopilot()" aria-label="Close">×</button>
-  </div>
-  <div class="copilot-chat" id="copilotChat"></div>
-  <div class="copilot-suggest" id="copilotSuggest"></div>
-  <div class="copilot-input-wrap">
-    <input type="text" class="cp-input" id="copilotInput"
-           placeholder="Ask a question..."
-           onkeydown="if(event.key==='Enter'){copilotSend();}" />
-    <button type="button" class="cp-send" onclick="copilotSend()" aria-label="Send">
+<!-- ── Row-level RM Copilot side panel ── -->
+<aside class="cprp" id="rowCopilotPanel" aria-hidden="true">
+  <div class="cprp-head" id="rowCopilotHead"></div>
+  <div class="cprp-chat" id="rowCopilotChat"></div>
+  <div class="cprp-suggest" id="rowCopilotSuggest"></div>
+  <div class="cprp-input-wrap">
+    <input type="text" class="cp-input" id="rowCopilotInput"
+           placeholder="Ask a question about this row..."
+           onkeydown="if(event.key==='Enter'){rowCopilotSend();}" />
+    <button type="button" class="cp-send" onclick="rowCopilotSend()" aria-label="Send">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h10M8 3l4 4-4 4"/></svg>
     </button>
   </div>
@@ -1631,9 +1626,12 @@ function renderRecsTable() {
           <td class="text-right">${hOcc != null ? lfPill(hOcc) : '<span class="text-muted">—</span>'}</td>
           <td>${dwAgg.hasAlert ? '<span class="cost-change-flag" title="Alerts in this week">⚠️</span>' : ''}</td>
           <td>
-            <span class="pkg-action-icons">
+            <span class="pkg-action-icons" style="display:inline-flex;align-items:center;gap:6px;">
               <button title="Booking curve" onclick="event.stopPropagation();openDestWeekCurve('${dest.id}', ${weekIdx})">
                 <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="2,11 5,7 8,9 12,3"/><line x1="2" y1="12" x2="12" y2="12"/></svg>
+              </button>
+              <button type="button" class="ask-row-btn" onclick="event.stopPropagation();openRowCopilot('${dest.id}', ${weekIdx})" title="Ask RM Copilot about this row">
+                <span class="spk">✦</span> Ask
               </button>
             </span>
           </td>
@@ -2294,6 +2292,9 @@ function renderCalendar() {
       <td class="cal-name" onclick="toggleCalDest('${dest.id}')" style="cursor:pointer;">
         <button class="expand-btn ${destOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleCalDest('${dest.id}')">${chevron(destOpen)}</button>
         ${dest.name}
+        <button type="button" class="ask-row-btn" style="margin-left:8px;" onclick="event.stopPropagation();openRowCopilot('${dest.id}', 0)" title="Ask RM Copilot">
+          <span class="spk">✦</span> Ask
+        </button>
       </td>
       ${destCells}
     </tr>`);
@@ -2944,194 +2945,229 @@ function saveRuleEdit() {
   renderRuleEditor();
 }
 
-// ── RM Copilot ─────────────────────────────────────────────
-const _copilotSuggestions = [
-  'Why did fares increase?',
-  'Which flights are at risk?',
-  'Competitor position for Cancun?',
-  'Flights behind target?',
-];
-let _copilotHistory = [];
+// ── Row-level RM Copilot ───────────────────────────────────
+let _rowCopilotCtx = null;     // { destId, weekIdx } — null when closed
+let _rowCopilotCtxData = null; // precomputed context for current ctx
 
-function toggleCopilot() {
-  const panel = document.getElementById('copilotPanel');
-  if (panel.classList.contains('open')) closeCopilot();
-  else                                  openCopilot();
+function _flightRowContext(destId, weekIdx) {
+  const dest = FLIGHT_DATA.find(d => d.id === destId);
+  if (!dest) return null;
+  const datesAtWeek = dest.routes.map(r => r.dates[weekIdx]).filter(Boolean);
+  if (!datesAtWeek.length) return null;
+  const agg = aggDates(datesAtWeek);
+  const refDate = datesAtWeek[0].departureDate;
+  const wkLbl = 'Wk ' + (refDate || '').slice(0, 5);
+
+  const lfPct      = Math.round((agg.lf || 0) * 100);
+  const tgtPct     = Math.round((agg.targetLF || 0) * 100);
+  const fcstPct    = Math.round((agg.forecastLF || 0) * 100);
+  const deltaFare  = agg.deltaFare;
+  const deltaMarg  = agg.deltaMargin;
+  const ratio      = bedsSeatsRatio(dest);
+  const hOcc       = hotelOccForWeek(dest, weekIdx);
+  const hOccPct    = hOcc != null ? Math.round(hOcc * 100) : null;
+  const rosAlerts  = datesAtWeek.filter(d => d.rateOfSale < d.rateOfSaleTarget).length;
+  const paceLbl    = fcstPct >= tgtPct ? 'ahead' : 'behind';
+  const compCheaperRoutes = datesAtWeek.filter(d => Math.min(d.comp1Fare, d.comp2Fare) < (getEffectiveFare(d))).length;
+  let ratioLbl = 'balanced';
+  if (ratio != null) {
+    if (ratio < 0.95)      ratioLbl = 'under-bedded';
+    else if (ratio > 1.05) ratioLbl = 'over-bedded';
+  }
+  const routes = dest.routes.map(r => ({ route: r, date: r.dates[weekIdx] })).filter(x => x.date);
+
+  return {
+    kind: 'flight',
+    dest, weekIdx, wkLbl, refDate,
+    agg, datesAtWeek, routes,
+    lfPct, tgtPct, fcstPct, paceLbl,
+    deltaFare, deltaMarg,
+    ratio, ratioLbl, hOccPct,
+    rosAlerts, compCheaperRoutes,
+  };
 }
-function openCopilot() {
-  const panel = document.getElementById('copilotPanel');
+
+function openRowCopilot(destId, weekIdx) {
+  const ctx = _flightRowContext(destId, weekIdx);
+  if (!ctx) return;
+  _rowCopilotCtx = { destId, weekIdx };
+  _rowCopilotCtxData = ctx;
+
+  // Reset chat
+  const chat = document.getElementById('rowCopilotChat');
+  chat.innerHTML = '';
+
+  // Header
+  const head = document.getElementById('rowCopilotHead');
+  head.innerHTML = `
+    <button type="button" class="cprp-close" onclick="closeRowCopilot()" aria-label="Close" style="position:absolute;top:10px;right:10px;">×</button>
+    <div class="cprp-dest">${ctx.dest.name}</div>
+    <div class="cprp-wk">${ctx.wkLbl}</div>
+    <div class="cprp-metrics">
+      LF: ${ctx.lfPct}%
+      <span class="cprp-sep">·</span>Avg Fare: ${fmt$(ctx.agg.avgCurrentFare)}
+      <span class="cprp-sep">·</span>Margin: ${fmt$(ctx.agg.avgCurrentMargin)}
+    </div>
+    <div class="cprp-label-bar">
+      <span class="cprp-label">✦ RM Copilot</span>
+    </div>
+  `;
+
+  // Render suggestions
+  renderRowCopilotSuggest();
+
+  // Slide in
+  const panel = document.getElementById('rowCopilotPanel');
   panel.classList.add('open');
   panel.setAttribute('aria-hidden', 'false');
-  if (_copilotHistory.length === 0) {
-    copilotPush('asst', "Hi! I can help you understand pricing recommendations, demand trends and alerts. What would you like to know?");
-  }
-  renderCopilotSuggest();
-  setTimeout(() => { const i = document.getElementById('copilotInput'); if (i) i.focus(); }, 220);
+
+  // Push pre-loaded context message (with typing delay)
+  rowCopilotShowTyping();
+  setTimeout(() => {
+    rowCopilotHideTyping();
+    rowCopilotPush('asst', _flightContextMessage(ctx));
+  }, 400);
 }
-function closeCopilot() {
-  const panel = document.getElementById('copilotPanel');
+
+function closeRowCopilot() {
+  const panel = document.getElementById('rowCopilotPanel');
   panel.classList.remove('open');
   panel.setAttribute('aria-hidden', 'true');
+  _rowCopilotCtx = null;
+  _rowCopilotCtxData = null;
 }
-function renderCopilotSuggest() {
-  const el = document.getElementById('copilotSuggest');
-  el.innerHTML = _copilotSuggestions.map(q =>
-    `<button type="button" class="cp-pill" onclick="copilotAskSuggest('${q.replace(/'/g, "\\'")}')">${q}</button>`
+
+function _flightContextMessage(ctx) {
+  const deltaStr = ctx.deltaFare > 0 ? `+$${ctx.deltaFare}` : ctx.deltaFare < 0 ? `-$${Math.abs(ctx.deltaFare)}` : '$0';
+  const hOccStr  = ctx.hOccPct != null ? `${ctx.hOccPct}%` : 'n/a';
+  const ratioStr = ctx.ratio != null ? ctx.ratio.toFixed(2) : '—';
+  return `Here's the current position for ${ctx.dest.name} departing ${ctx.wkLbl}:\n`
+    + `- Load Factor: ${ctx.lfPct}% vs target ${ctx.tgtPct}% (${ctx.paceLbl})\n`
+    + `- Avg Fare: ${fmt$(ctx.agg.avgCurrentFare)} | Rec Fare: ${fmt$(ctx.agg.avgRecFare)} | Delta: ${deltaStr}\n`
+    + `- Avg Margin: ${fmt$(ctx.agg.avgCurrentMargin)} | Rec Margin: ${fmt$(ctx.agg.avgRecMargin)}\n`
+    + `- Beds:Seats ratio: ${ratioStr} (${ctx.ratioLbl})\n`
+    + `- Hotel occupancy same week: ${hOccStr}\n`
+    + `- ${ctx.rosAlerts} flights have rate of sale alerts this week\n`
+    + `What would you like to explore?`;
+}
+
+function renderRowCopilotSuggest() {
+  const ctx = _rowCopilotCtxData;
+  if (!ctx) return;
+  const qs = [];
+  if (ctx.lfPct < ctx.tgtPct)           qs.push('Why is LF behind target?');
+  if (ctx.deltaFare < 0)                qs.push('Why is rec fare lower?');
+  if (ctx.compCheaperRoutes > 0)        qs.push('How do we compare to competitors?');
+  qs.push("What's driving demand here?");
+  qs.push('Show me the booking pace');
+  const uniq = Array.from(new Set(qs)).slice(0, 4);
+  const el = document.getElementById('rowCopilotSuggest');
+  el.innerHTML = uniq.map(q =>
+    `<button type="button" class="cp-pill" onclick="rowCopilotAskSuggest('${q.replace(/'/g, "\\'")}')">${q}</button>`
   ).join('');
 }
-function copilotPush(role, text) {
-  _copilotHistory.push({ role, text });
-  const chat = document.getElementById('copilotChat');
-  const cls  = role === 'asst' ? 'cp-asst' : 'cp-user';
+
+function rowCopilotPush(role, text) {
+  const chat = document.getElementById('rowCopilotChat');
   const div = document.createElement('div');
-  div.className = 'cp-msg ' + cls;
+  div.className = 'cp-msg ' + (role === 'asst' ? 'cp-asst' : 'cp-user');
   div.textContent = text;
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
 }
-function copilotShowTyping() {
-  const chat = document.getElementById('copilotChat');
+function rowCopilotShowTyping() {
+  const chat = document.getElementById('rowCopilotChat');
   const div = document.createElement('div');
   div.className = 'cp-typing';
-  div.id = 'cpTyping';
+  div.id = 'rowCpTyping';
   div.innerHTML = '<span></span><span></span><span></span>';
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
 }
-function copilotHideTyping() {
-  const t = document.getElementById('cpTyping');
+function rowCopilotHideTyping() {
+  const t = document.getElementById('rowCpTyping');
   if (t) t.remove();
 }
-function copilotSend() {
-  const input = document.getElementById('copilotInput');
+function rowCopilotSend() {
+  const input = document.getElementById('rowCopilotInput');
   const q = (input.value || '').trim();
   if (!q) return;
   input.value = '';
-  copilotPush('user', q);
-  copilotShowTyping();
+  rowCopilotPush('user', q);
+  rowCopilotShowTyping();
   setTimeout(() => {
-    copilotHideTyping();
-    copilotPush('asst', copilotAnswer(q));
+    rowCopilotHideTyping();
+    rowCopilotPush('asst', _flightAnswer(q));
   }, 900);
 }
-function copilotAskSuggest(q) {
-  document.getElementById('copilotInput').value = q;
-  copilotSend();
+function rowCopilotAskSuggest(q) {
+  const input = document.getElementById('rowCopilotInput');
+  input.value = q;
+  rowCopilotSend();
 }
 
-function _weekLabel(date) {
-  if (!date || !date.departureDate) return '';
-  const s = date.departureDate;
-  return 'Wk ' + s.slice(0, 5);
-}
-function _topDeltaDestination() {
-  let best = null;
-  FLIGHT_DATA.forEach(dest => {
-    dest.routes.forEach(r => {
-      r.dates.forEach(d => {
-        const delta = d.recFare - (d.currentFare || d.recFare);
-        if (delta > 0 && (!best || delta > best.delta)) {
-          best = { dest, route: r, date: d, delta };
-        }
-      });
-    });
-  });
-  return best;
-}
-
-function copilotAnswer(q) {
+function _flightAnswer(q) {
+  const ctx = _rowCopilotCtxData;
+  if (!ctx) return "Open a row to scope the copilot to that destination and week.";
   const ql = q.toLowerCase();
 
-  // "why" AND ("fare" OR "price") AND ("increase" OR "up" OR "higher")
-  if (/why/.test(ql) && /(fare|price|rate)/.test(ql) && /(increase|increased|up|higher|risen|rose)/.test(ql)) {
-    const top = _topDeltaDestination();
-    if (top) {
-      const d = top.date, r = top.route, dest = top.dest;
-      const lf = d.capacity ? Math.round((d.sold / d.capacity) * 100) : 0;
-      const tgt = Math.round(d.targetLF * 100);
-      const unsold = Math.max(0, d.capacity - d.sold);
-      return `The fare increase for ${dest.name} is driven by strong demand — current LF is ${lf}% vs target ${tgt}%. The system has recommended a +$${top.delta} adjustment to capture this uplift. ${dest.name} is currently ${unsold} seats from capacity on ${r.flightNum} (${r.origin}→${dest.id}).`;
-    }
-    return "Demand has firmed up over the past 2 weeks on several routes, with LF running ahead of target. The recommendation engine has suggested fare uplifts to capture the demand.";
-  }
-
-  // "risk" / "behind target" / "behind plan"
-  if (/(risk|behind target|behind plan|at risk)/.test(ql)) {
-    const atRisk = [];
-    FLIGHT_DATA.forEach(dest => dest.routes.forEach(r => {
-      r.dates.forEach(d => {
-        const lfPct = d.capacity ? (d.sold / d.capacity) * 100 : 0;
-        const tgtPct = d.targetLF * 100;
-        if (lfPct < tgtPct) {
-          atRisk.push({ dest, route: r, date: d, lfPct, tgtPct, gap: tgtPct - lfPct });
-        }
-      });
-    }));
-    atRisk.sort((a, b) => b.gap - a.gap);
-    if (atRisk.length === 0) return "No flights flagged as behind target — all routes are tracking at or above plan.";
-    const top3 = atRisk.slice(0, 3).map(x =>
-      `• ${x.dest.name} ${_weekLabel(x.date)}: ${Math.round(x.lfPct)}% vs target ${Math.round(x.tgtPct)}%`
+  // Behind target / why LF behind
+  if ((/why/.test(ql) && /(lf|load factor|behind)/.test(ql)) || /behind target/.test(ql)) {
+    const byLF = ctx.routes.map(({ route, date }) => {
+      const lf = date.capacity ? date.sold / date.capacity : 0;
+      return { route, date, lfPct: Math.round(lf * 100), unsold: Math.max(0, date.capacity - date.sold) };
+    }).sort((a, b) => a.lfPct - b.lfPct);
+    const top = byLF.slice(0, 2).map(x =>
+      `• ${x.route.flightNum} ${x.route.origin}→${ctx.dest.id}: ${x.lfPct}% LF (${x.unsold} unsold seats)`
     ).join('\n');
-    return `Currently ${atRisk.length} flights are behind LF target:\n${top3}\n\nConsider reviewing pricing or running a new evaluation.`;
+    const avgRos       = ctx.datesAtWeek.reduce((s, d) => s + d.rateOfSale, 0) / ctx.datesAtWeek.length;
+    const avgRosTarget = ctx.datesAtWeek.reduce((s, d) => s + d.rateOfSaleTarget, 0) / ctx.datesAtWeek.length;
+    return `For ${ctx.dest.name} ${ctx.wkLbl}, LF is ${ctx.lfPct}% against a target of ${ctx.tgtPct}%. The main routes contributing to this gap are:\n${top}\nRate of sale is currently ${avgRos.toFixed(1)}/day vs a target of ${avgRosTarget.toFixed(1)}/day. Consider a fare adjustment or targeted promotion.`;
   }
 
-  // "competitor" / "comp"
+  // Competitor
   if (/(competitor|\bcomp\b)/.test(ql)) {
-    const rows = (typeof COMPETITOR_FLIGHT_DATA !== 'undefined' && COMPETITOR_FLIGHT_DATA.length)
-      ? COMPETITOR_FLIGHT_DATA.slice(0, 3)
-      : [];
-    if (rows.length) {
-      const lines = rows.map(r => {
-        const cheapest = Math.min(r.comp1Fare, r.comp2Fare);
-        const delta = r.ourFare - cheapest;
-        const sign = delta >= 0 ? `+$${delta}` : `-$${Math.abs(delta)}`;
-        return `• ${r.ourFlight} ${r.destination}: Our fare $${r.ourFare} vs cheapest comp $${cheapest} (${sign})`;
-      }).join('\n');
-      return `Competitor snapshot for top routes:\n${lines}`;
-    }
-    // Fallback — pull from FLIGHT_DATA
-    const lines = [];
-    FLIGHT_DATA.slice(0, 3).forEach(dest => {
-      const r = dest.routes[0];
-      const d = r && r.dates[0];
-      if (!d) return;
-      const cheapest = Math.min(d.comp1Fare, d.comp2Fare);
-      const ours = d.currentFare || d.recFare;
-      const delta = ours - cheapest;
-      const sign = delta >= 0 ? `+$${delta}` : `-$${Math.abs(delta)}`;
-      lines.push(`• ${r.flightNum} ${r.origin}→${dest.id}: Our fare $${ours} vs cheapest comp $${cheapest} (${sign})`);
-    });
-    return `Competitor snapshot for top routes:\n${lines.join('\n')}`;
+    const first = ctx.datesAtWeek[0];
+    const ours  = getEffectiveFare(first);
+    const cheapest = Math.min(first.comp1Fare, first.comp2Fare);
+    const d1 = ours - first.comp1Fare;
+    const d2 = ours - first.comp2Fare;
+    const gap = ours - cheapest;
+    const sign1 = d1 >= 0 ? `+$${d1}` : `-$${Math.abs(d1)}`;
+    const sign2 = d2 >= 0 ? `+$${d2}` : `-$${Math.abs(d2)}`;
+    const pos = gap > 0 ? 'above' : gap < 0 ? 'below' : 'at parity with';
+    return `Competitor pricing for ${ctx.dest.name} ${ctx.wkLbl}:\n• Comp 1: $${first.comp1Fare} (${sign1} vs our $${ours})\n• Comp 2: $${first.comp2Fare} (${sign2} vs our $${ours})\nWe are currently ${pos} the cheapest competitor by $${Math.abs(gap)}.`;
   }
 
-  // Destination name match (cancun / punta cana / etc.)
-  const destMatch = DESTINATIONS.find(d => ql.includes(d.name.toLowerCase()) || ql.includes(d.id.toLowerCase()));
-  if (destMatch) {
-    const fd = FLIGHT_DATA.find(d => d.id === destMatch.id);
-    if (fd) {
-      let lfSum = 0, tgtSum = 0, fareSum = 0, recSum = 0, count = 0, behind = 0;
-      fd.routes.forEach(r => r.dates.forEach(d => {
-        const lf = d.capacity ? d.sold / d.capacity : 0;
-        lfSum  += lf;
-        tgtSum += d.targetLF;
-        fareSum += (d.currentFare || d.recFare);
-        recSum  += d.recFare;
-        count++;
-        if (lf < d.targetLF) behind++;
-      }));
-      if (count) {
-        const avgLF  = Math.round((lfSum / count) * 100);
-        const avgTgt = Math.round((tgtSum / count) * 100);
-        const avgFare = Math.round(fareSum / count);
-        const avgRec  = Math.round(recSum / count);
-        const ratio = fd.bedsToSeatsRatio ? fd.bedsToSeatsRatio.toFixed(2) : '—';
-        return `Here's the current position for ${destMatch.name}:\n• Avg LF: ${avgLF}% (target ${avgTgt}%)\n• Avg Fare: $${avgFare} | Rec Fare: $${avgRec}\n• Beds:Seats ratio: ${ratio}\n• ${behind} flights behind target this week`;
-      }
+  // Booking pace / demand
+  if (/(booking pace|pace|demand|driving demand)/.test(ql)) {
+    const avgRos       = ctx.datesAtWeek.reduce((s, d) => s + d.rateOfSale, 0) / ctx.datesAtWeek.length;
+    const avgRosTarget = ctx.datesAtWeek.reduce((s, d) => s + d.rateOfSaleTarget, 0) / ctx.datesAtWeek.length;
+    const paceAhead = avgRos >= avgRosTarget;
+    const recAction = ctx.fcstPct >= ctx.tgtPct ? 'increasing' : (ctx.fcstPct < ctx.tgtPct - 5 ? 'reducing' : 'maintaining');
+    const goal      = ctx.fcstPct >= ctx.tgtPct ? 'optimise' : 'protect';
+    return `Booking pace for ${ctx.dest.name} ${ctx.wkLbl} is ${paceAhead ? 'ahead' : 'behind'} target.\nCurrent rate of sale: ${avgRos.toFixed(1)} bookings/day vs target ${avgRosTarget.toFixed(1)}/day.\nAt this pace, forecast LF at departure is ${ctx.fcstPct}%.\nRecommend ${recAction} fares to ${goal} load.`;
+  }
+
+  // Rec fare lower / why lower / decrease
+  if (/(rec fare lower|why lower|why decrease|decrease|lower fare)/.test(ql)) {
+    const dec = ctx.deltaFare < 0 ? Math.abs(ctx.deltaFare) : 0;
+    if (dec === 0) {
+      return `The rec fare for ${ctx.dest.name} ${ctx.wkLbl} is currently not being reduced — delta is ${ctx.deltaFare >= 0 ? '+' : ''}$${ctx.deltaFare}.`;
     }
+    const dtd = (() => {
+      const [mm, dd, yy] = (ctx.refDate || '').split('/').map(Number);
+      if (!mm) return 21;
+      const ref = new Date(2000 + (yy || 26), (mm || 1) - 1, dd || 1);
+      const today = new Date();
+      return Math.max(0, Math.round((ref - today) / 86400000));
+    })();
+    const lift = Math.round((dec / 10) * 2);
+    return `The system is recommending a fare decrease of $${dec} for ${ctx.dest.name} ${ctx.wkLbl} because current LF of ${ctx.lfPct}% is below the ${ctx.tgtPct}% target with ${dtd} days to departure. Reducing the fare by $${dec} is projected to improve LF by approximately ${lift}% based on historical price elasticity for this route.`;
   }
 
   // Fallback
-  return "I can help with pricing trends, demand analysis and alerts. Try asking about a specific destination, flight or hotel, or use one of the suggested questions above.";
+  return `I can help you analyse ${ctx.dest.name} ${ctx.wkLbl} in more detail. Try asking about occupancy, pricing, competitors or booking pace, or use one of the suggested questions above.`;
 }
 
 // Override default suggestions — this is flight.html
