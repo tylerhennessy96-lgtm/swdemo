@@ -484,16 +484,146 @@
       gap: 5px;
     }
     .cprp-close {
-      background: none;
-      border: none;
-      color: #9ca3af;
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 5;
+      background: #2a2e38;
+      border: 1px solid #353a46;
+      color: #e5e7eb;
       cursor: pointer;
       font-size: 18px;
       line-height: 1;
-      padding: 4px 8px;
-      border-radius: 4px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
     }
-    .cprp-close:hover { color: #fff; background: #2d313b; }
+    .cprp-close:hover { color: #fff; background: #0d9488; border-color: #0d9488; }
+
+    /* ── General Ask RM floating button + panel ─────────────── */
+    .gcp-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1000;
+      background: #0d9488;
+      color: #fff;
+      border: 1px solid #0b7f73;
+      padding: 11px 20px 11px 18px;
+      border-radius: 24px;
+      font-family: 'Archivo', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+      letter-spacing: .02em;
+    }
+    .gcp-btn:hover { background: #0b7f73; box-shadow: 0 6px 18px rgba(0,0,0,0.28); }
+    .gcp-btn .spk {
+      display: inline-block;
+      font-size: 15px;
+      animation: gcpSparkle 2.5s ease-in-out infinite;
+    }
+    @keyframes gcpSparkle {
+      0%, 100% { opacity: 0.85; transform: scale(1); }
+      50%      { opacity: 1;    transform: scale(1.15); }
+    }
+    .gcp {
+      position: fixed;
+      bottom: 80px;
+      right: 24px;
+      width: 420px;
+      height: 480px;
+      max-width: calc(100vw - 40px);
+      max-height: calc(100vh - 120px);
+      background: #1e2128;
+      color: #e5e7eb;
+      z-index: 999;
+      border-radius: 12px;
+      border: 1px solid #2d313b;
+      transform: translateY(20px) scale(0.96);
+      opacity: 0;
+      pointer-events: none;
+      transform-origin: bottom right;
+      transition: transform .2s cubic-bezier(.4,0,.2,1), opacity .2s, right .25s cubic-bezier(.4,0,.2,1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 40px rgba(0,0,0,.42);
+      font-family: 'Archivo', sans-serif;
+      overflow: hidden;
+    }
+    .gcp.open {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .gcp.row-open { right: 396px; }
+    .gcp-head {
+      padding: 13px 18px;
+      border-bottom: 1px solid #2d313b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #16181d;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+    .gcp-head .gcp-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .gcp-head .gcp-title .spk { color: #0d9488; font-size: 15px; }
+    .gcp-close {
+      background: #2a2e38;
+      border: 1px solid #353a46;
+      color: #e5e7eb;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    .gcp-close:hover { color: #fff; background: #0d9488; border-color: #0d9488; }
+    .gcp-chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .gcp-suggest {
+      padding: 8px 14px 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      border-top: 1px solid #2d313b;
+      background: #16181d;
+    }
+    .gcp-input-wrap {
+      padding: 10px 14px 14px;
+      background: #16181d;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      border-top: 1px solid #2d313b;
+    }
     .cprp-chat {
       flex: 1;
       overflow-y: auto;
@@ -614,6 +744,7 @@
 
 <!-- ── Row-level RM Copilot side panel ── -->
 <aside class="cprp" id="rowCopilotPanel" aria-hidden="true">
+  <button type="button" class="cprp-close" onclick="closeRowCopilot()" aria-label="Close copilot">×</button>
   <div class="cprp-head" id="rowCopilotHead"></div>
   <div class="cprp-chat" id="rowCopilotChat"></div>
   <div class="cprp-suggest" id="rowCopilotSuggest"></div>
@@ -622,6 +753,27 @@
            placeholder="Ask a question about this row..."
            onkeydown="if(event.key==='Enter'){rowCopilotSend();}" />
     <button type="button" class="cp-send" onclick="rowCopilotSend()" aria-label="Send">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h10M8 3l4 4-4 4"/></svg>
+    </button>
+  </div>
+</aside>
+
+<!-- ── General Ask RM floating button + panel ── -->
+<button type="button" class="gcp-btn" id="gcpBtn" onclick="toggleGeneralCopilot()">
+  <span class="spk">✦</span> Ask RM
+</button>
+<aside class="gcp" id="gcpPanel" aria-hidden="true">
+  <div class="gcp-head">
+    <div class="gcp-title"><span class="spk">✦</span> RM Copilot</div>
+    <button type="button" class="gcp-close" onclick="closeGeneralCopilot()" aria-label="Close">×</button>
+  </div>
+  <div class="gcp-chat" id="gcpChat"></div>
+  <div class="gcp-suggest" id="gcpSuggest"></div>
+  <div class="gcp-input-wrap">
+    <input type="text" class="cp-input" id="gcpInput"
+           placeholder="Ask a question..."
+           onkeydown="if(event.key==='Enter'){generalCopilotSend();}" />
+    <button type="button" class="cp-send" onclick="generalCopilotSend()" aria-label="Send">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h10M8 3l4 4-4 4"/></svg>
     </button>
   </div>
@@ -2476,7 +2628,6 @@ function openRowCopilot(destId, weekIdx) {
 
   const head = document.getElementById('rowCopilotHead');
   head.innerHTML = `
-    <button type="button" class="cprp-close" onclick="closeRowCopilot()" aria-label="Close" style="position:absolute;top:10px;right:10px;">×</button>
     <div class="cprp-dest">${ctx.dest.name}</div>
     <div class="cprp-wk">${ctx.wkLbl}</div>
     <div class="cprp-metrics">
@@ -2494,6 +2645,7 @@ function openRowCopilot(destId, weekIdx) {
   const panel = document.getElementById('rowCopilotPanel');
   panel.classList.add('open');
   panel.setAttribute('aria-hidden', 'false');
+  document.getElementById('gcpPanel').classList.add('row-open');
 
   rowCopilotShowTyping();
   setTimeout(() => {
@@ -2508,7 +2660,16 @@ function closeRowCopilot() {
   panel.setAttribute('aria-hidden', 'true');
   _rowCopilotCtx = null;
   _rowCopilotCtxData = null;
+  document.getElementById('gcpPanel').classList.remove('row-open');
 }
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const rp = document.getElementById('rowCopilotPanel');
+    if (rp && rp.classList.contains('open')) closeRowCopilot();
+    const gp = document.getElementById('gcpPanel');
+    if (gp && gp.classList.contains('open')) closeGeneralCopilot();
+  }
+});
 
 function _hotelContextMessage(ctx) {
   const deltaStr = ctx.dwAgg.deltaADR > 0 ? `+$${ctx.dwAgg.deltaADR}` : ctx.dwAgg.deltaADR < 0 ? `-$${Math.abs(ctx.dwAgg.deltaADR)}` : '$0';
@@ -2659,6 +2820,131 @@ function _hotelAnswer(q) {
 
   // Fallback
   return `I can help you analyse ${ctx.dest.name} ${ctx.wkLbl} in more detail. Try asking about occupancy, pricing, competitors or booking pace, or use one of the suggested questions above.`;
+}
+
+// ── General RM Copilot (floating bottom-right widget) ─────
+const _gcpSuggestions = [
+  'Which hotels are behind plan?',
+  'Where is occupancy lowest?',
+  'Any active cost change alerts?',
+  'Best performing destination this week?',
+];
+let _gcpHistory = [];
+
+function toggleGeneralCopilot() {
+  const panel = document.getElementById('gcpPanel');
+  if (panel.classList.contains('open')) closeGeneralCopilot();
+  else                                  openGeneralCopilot();
+}
+function openGeneralCopilot() {
+  const panel = document.getElementById('gcpPanel');
+  panel.classList.add('open');
+  panel.setAttribute('aria-hidden', 'false');
+  if (document.getElementById('rowCopilotPanel').classList.contains('open')) {
+    panel.classList.add('row-open');
+  } else {
+    panel.classList.remove('row-open');
+  }
+  if (_gcpHistory.length === 0) {
+    gcpPush('asst', "Hi! I can help you with hotel pricing, occupancy trends and alerts across all destinations. Ask me anything or select a specific destination row for more detailed analysis.");
+  }
+  renderGcpSuggest();
+  setTimeout(() => { const i = document.getElementById('gcpInput'); if (i) i.focus(); }, 220);
+}
+function closeGeneralCopilot() {
+  const panel = document.getElementById('gcpPanel');
+  panel.classList.remove('open');
+  panel.setAttribute('aria-hidden', 'true');
+}
+function renderGcpSuggest() {
+  const el = document.getElementById('gcpSuggest');
+  el.innerHTML = _gcpSuggestions.map(q =>
+    `<button type="button" class="cp-pill" onclick="gcpAskSuggest('${q.replace(/'/g, "\\'")}')">${q}</button>`
+  ).join('');
+}
+function gcpPush(role, text) {
+  _gcpHistory.push({ role, text });
+  const chat = document.getElementById('gcpChat');
+  const div = document.createElement('div');
+  div.className = 'cp-msg ' + (role === 'asst' ? 'cp-asst' : 'cp-user');
+  div.textContent = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+function gcpShowTyping() {
+  const chat = document.getElementById('gcpChat');
+  const div = document.createElement('div');
+  div.className = 'cp-typing';
+  div.id = 'gcpTyping';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+function gcpHideTyping() {
+  const t = document.getElementById('gcpTyping');
+  if (t) t.remove();
+}
+function generalCopilotSend() {
+  const input = document.getElementById('gcpInput');
+  const q = (input.value || '').trim();
+  if (!q) return;
+  input.value = '';
+  gcpPush('user', q);
+  gcpShowTyping();
+  setTimeout(() => {
+    gcpHideTyping();
+    gcpPush('asst', _generalHotelAnswer(q));
+  }, 900);
+}
+function gcpAskSuggest(q) {
+  document.getElementById('gcpInput').value = q;
+  generalCopilotSend();
+}
+
+function _generalHotelAnswer(q) {
+  const ql = q.toLowerCase();
+
+  // Behind plan
+  if (/(behind plan|behind target|behind|at risk|underperform)/.test(ql)) {
+    const behind = [];
+    HOTEL_DATA.forEach(dest => {
+      dest.hotels.forEach(h => {
+        if (h.forecastOcc < 0.60) {
+          behind.push({ hotel: h, dest, occ: h.forecastOcc });
+        }
+      });
+    });
+    behind.sort((a, b) => a.occ - b.occ);
+    if (behind.length === 0) return "No hotels flagged as behind plan — forecast occupancy is tracking at or above threshold everywhere.";
+    const lines = behind.slice(0, 5).map(x => `• ${x.hotel.name} (${x.dest.name}): ${Math.round(x.occ * 100)}% forecast occ`).join('\n');
+    return `${behind.length} hotels are behind occupancy plan. Lowest:\n${lines}`;
+  }
+
+  // Lowest occupancy
+  if (/(lowest|low occ|low occupancy|weak occupancy|where is occupancy)/.test(ql)) {
+    const worst = HOTEL_DATA.slice().sort((a, b) => a.forecastOcc - b.forecastOcc).slice(0, 5);
+    const lines = worst.map(d => `• ${d.name}: ${Math.round(d.forecastOcc * 100)}% avg forecast occ`).join('\n');
+    return `Destinations with the lowest occupancy right now:\n${lines}`;
+  }
+
+  // Cost change alerts
+  if (/(cost change|supplier cost|cost alert)/.test(ql)) {
+    const rows = (typeof COST_CHANGE_DATA !== 'undefined') ? COST_CHANGE_DATA : [];
+    if (rows.length === 0) return "No active supplier cost changes right now.";
+    const pending = rows.filter(r => r.status === 'Pending').length;
+    const hotelNames = [...new Set(rows.map(r => r.hotel))].slice(0, 5);
+    return `${rows.length} active supplier cost changes (${pending} pending). Affected hotels: ${hotelNames.join(', ')}${hotelNames.length >= 5 ? '…' : ''}. Review the Cost Change Exceptions tab for details.`;
+  }
+
+  // Best performing
+  if (/(best|top performing|strongest|best performing)/.test(ql)) {
+    const top = HOTEL_DATA.slice().sort((a, b) => b.forecastOcc - a.forecastOcc).slice(0, 3);
+    const lines = top.map(d => `• ${d.name}: ${Math.round(d.forecastOcc * 100)}% avg forecast occ · ADR ${fmt$(d.avgCurrentADR)}`).join('\n');
+    return `Top-performing destinations by forecast occupancy:\n${lines}`;
+  }
+
+  // Fallback
+  return "I can help with hotel pricing, occupancy trends and alerts across all destinations. Try asking about hotels behind plan, lowest occupancy, cost changes or top performers — or click ✦ Ask on a specific row for scoped analysis.";
 }
 </script>
 
