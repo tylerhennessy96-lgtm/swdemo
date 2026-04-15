@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demand Forecast — Sunwing RMS</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="data.js"></script>
+  <script src="filters.js"></script>
+  <style>
+    /* ── Page-specific demand styles ───────────────────────── */
+    .page-title-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .page-title {
+      font-family: 'Archivo', sans-serif;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .page-title-sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-left: 8px;
+    }
+
+    .demand-scroll {
+      flex: 1;
+      overflow-y: auto;
+      background: var(--body-bg);
+    }
+
+    .section {
+      padding: 16px 20px 4px;
+    }
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin: 0 0 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .section-title .st-hint { font-size: 11px; text-transform: none; letter-spacing: normal; font-weight: 400; color: var(--text-muted); }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 18px 18px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .card-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-left: 6px;
+    }
+
+    .chart-legend-inline {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+    .chart-legend-inline .lg-swatch {
+      display: inline-block;
+      width: 18px;
+      height: 2px;
+      background: #0d9488;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+    .chart-legend-inline .lg-swatch.dash { background: transparent; border-top: 2px dashed #6b7280; height: 0; }
+
+    .chart-wrap {
+      position: relative;
+      width: 100%;
+      height: 280px;
+    }
+    .chart-wrap.tall { height: 320px; }
+    .chart-wrap.short { height: 220px; }
+
+    /* Demand overview layout */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 16px;
+      padding: 0 20px 16px;
+    }
+    .grid-1 { padding: 0 20px 16px; }
+    .grid-drivers {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .driver-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--border-mid, #d1d5db);
+      border-radius: 6px;
+      padding: 12px 14px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .driver-card.impact-positive { border-left-color: #0d9488; }
+    .driver-card.impact-negative { border-left-color: var(--danger); }
+    .driver-card.impact-neutral  { border-left-color: var(--warn); }
+    .driver-card .di {
+      font-size: 22px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .driver-card .dc { flex: 1; min-width: 0; }
+    .driver-card .dt {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .driver-card .dtag {
+      font-size: 9.5px;
+      font-weight: 500;
+      padding: 1px 6px;
+      border-radius: 9px;
+      background: #f3f4f6;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: .03em;
+    }
+    .driver-card .dtag.positive { background: rgba(13,148,136,0.12); color: #0f766e; }
+    .driver-card .dtag.negative { background: rgba(224,82,82,0.12);  color: #b45454; }
+    .driver-card .dtag.neutral  { background: rgba(245,166,35,0.14); color: #b45309; }
+    .driver-card .dd {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 4px;
+    }
+    .driver-card .dmeta {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Velocity heatmap grid */
+    .velo-grid {
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 4px;
+      overflow: auto;
+      max-height: 280px;
+    }
+    table.velo-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: max-content;
+      min-width: 100%;
+      font-size: 10.5px;
+    }
+    table.velo-table thead th {
+      position: sticky;
+      top: 0;
+      background: var(--nav-bg);
+      color: #fff;
+      padding: 5px 8px;
+      font-size: 10px;
+      font-weight: 500;
+      text-align: center;
+      min-width: 38px;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      z-index: 2;
+    }
+    table.velo-table thead th.velo-corner {
+      left: 0;
+      z-index: 3;
+      min-width: 140px;
+      text-align: left;
+      padding-left: 10px;
+    }
+    table.velo-table td.velo-name {
+      position: sticky;
+      left: 0;
+      background: #fff;
+      z-index: 1;
+      padding: 4px 10px;
+      min-width: 140px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-primary);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    table.velo-table td.velo-cell {
+      padding: 0;
+      width: 28px;
+      height: 22px;
+      border-right: 1px solid rgba(255,255,255,0.5);
+      border-bottom: 1px solid rgba(255,255,255,0.5);
+    }
+    td.velo-cell.v-hi   { background: rgba(13,148,136,0.82); }
+    td.velo-cell.v-ok   { background: rgba(232,160,32,0.78); }
+    td.velo-cell.v-lo   { background: rgba(217,95,95,0.78); }
+    td.velo-cell.v-hi:hover, td.velo-cell.v-ok:hover, td.velo-cell.v-lo:hover { filter: brightness(1.12); }
+
+    /* Outlook tables */
+    .tbl-wrap { overflow-x: auto; }
+    table.outlook {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 12px;
+    }
+    table.outlook thead th {
+      text-align: left;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      background: #f9fafb;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 10px;
+      white-space: nowrap;
+    }
+    table.outlook thead th.text-right { text-align: right; }
+    table.outlook tbody td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-primary);
+    }
+    table.outlook tbody td.text-right { text-align: right; font-variant-numeric: tabular-nums; }
+    table.outlook tbody tr:hover { background: #fafbfc; }
+    .gap-pos { color: #0f766e; font-weight: 500; }
+    .gap-neg { color: var(--danger); font-weight: 500; }
+    .trend-up { color: #0f766e; }
+    .trend-dn { color: var(--danger); }
+    .rec-action {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 9px;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      color: var(--text-primary);
+    }
+    .rec-action.ra-up      { background: rgba(13,148,136,0.10); color: #0f766e; border-color: rgba(13,148,136,0.35); }
+    .rec-action.ra-hold    { background: #f3f4f6; color: var(--text-secondary); border-color: var(--border); }
+    .rec-action.ra-down    { background: rgba(245,166,35,0.14); color: #b45309; border-color: rgba(245,166,35,0.4); }
+    .rec-action.ra-urgent  { background: rgba(224,82,82,0.12); color: #b45454; border-color: rgba(224,82,82,0.35); }
+
+    /* Scenario builder */
+    .scn-shell {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 16px;
+    }
+    .scn-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+    }
+    .scn-panel h4 {
+      margin: 0 0 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .scn-field { margin-bottom: 14px; }
+    .scn-label {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 6px;
+    }
+    .scn-input, .scn-select {
+      width: 100%;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: #fff;
+      font-family: 'Archivo', sans-serif;
+      font-size: 12.5px;
+      color: var(--text-primary);
+      box-sizing: border-box;
+    }
+    .scn-input:focus, .scn-select:focus { outline: none; border-color: #0d9488; }
+    .scn-radio-list { display: flex; flex-direction: column; gap: 6px; }
+    .scn-radio, .scn-cb {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+    .scn-inline { display: inline-flex; gap: 14px; flex-wrap: wrap; }
+    .scn-slider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .scn-slider-row input[type=range] { flex: 1; }
+    .scn-slider-row .scn-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      color: var(--text-primary);
+      min-width: 46px;
+      text-align: right;
+    }
+    .scn-footer {
+      display: flex;
+      gap: 8px;
+      padding-top: 12px;
+      margin-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .btn-teal {
+      background: #0d9488;
+      color: #fff;
+      border: 1px solid #0d9488;
+      padding: 7px 16px;
+      border-radius: 4px;
+      font-family: 'Archivo', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .btn-teal:hover { background: #0b7f73; }
+    .btn-ghost-std {
+      background: #fff;
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      padding: 7px 16px;
+      border-radius: 4px;
+      font-family: 'Archivo', sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .btn-ghost-std:hover { border-color: #0d9488; color: #0d9488; }
+
+    .scn-output-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 320px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 12px;
+      padding: 20px;
+    }
+    .scn-output-empty svg { margin-bottom: 10px; color: var(--text-muted); }
+    .scn-output-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 12px 0 14px;
+    }
+    .scn-kpi {
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 10px 12px;
+    }
+    .scn-kpi .k-lbl {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .scn-kpi .k-val {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+    .scn-kpi .k-val.pos { color: #0f766e; }
+    .scn-kpi .k-val.neg { color: var(--danger); }
+    .scn-rec-text {
+      background: rgba(13,148,136,0.08);
+      border: 1px solid rgba(13,148,136,0.28);
+      border-radius: 5px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: #0f766e;
+      line-height: 1.55;
+      margin-top: 10px;
+    }
+
+    .scn-status {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 9px;
+      border-radius: 10px;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+    }
+    .scn-status.s-active   { background: rgba(13,148,136,0.14); color: #0f766e; }
+    .scn-status.s-draft    { background: rgba(245,166,35,0.15); color: #b45309; }
+    .scn-status.s-archived { background: #f3f4f6; color: var(--text-secondary); }
+
+    /* Velocity legend */
+    .velo-legend {
+      display: inline-flex;
+      gap: 14px;
+      font-size: 10.5px;
+      color: var(--text-secondary);
+    }
+    .velo-legend .vl { display: inline-flex; align-items: center; gap: 5px; }
+    .velo-legend .vl-sw {
+      display: inline-block;
+      width: 14px;
+      height: 10px;
+      border-radius: 2px;
+    }
+    .velo-legend .vl-sw.v-hi { background: rgba(13,148,136,0.82); }
+    .velo-legend .vl-sw.v-ok { background: rgba(232,160,32,0.78); }
+    .velo-legend .vl-sw.v-lo { background: rgba(217,95,95,0.78); }
+
+    .view { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .view.hidden { display: none !important; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Top Nav ── -->
+  <nav class="topnav">
+    <a href="pricing.html" class="logo">
+      <img src="engine_logo.png" alt="Simon-Kucher Engine" style="height:32px;width:auto;display:block;vertical-align:middle;" />
+    </a>
+
+    <div class="nav-tabs">
+      <a href="pricing.html" class="nav-tab">Pricing</a>
+      <a href="demand.html"  class="nav-tab active">Demand Forecast</a>
+      <a href="#"            class="nav-tab">Rules &amp; Parameters</a>
+    </div>
+
+    <div class="nav-divider"></div>
+
+    <div style="position:relative;">
+      <button class="nav-menu-btn" id="menuBtn" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-dropdown" id="navDropdown">
+        <a href="#">Settings</a>
+        <a href="#">Reports</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Filter Bar ── -->
+  <div class="filter-bar" id="filterBar">
+    <div class="ms-wrap" id="fBrand">
+      <button class="ms-trigger" onclick="toggleFilter('fBrand')">
+        <span>All Brands</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown"><div class="ms-options"></div></div>
+    </div>
+    <div class="ms-wrap" id="fRegion">
+      <button class="ms-trigger" onclick="toggleFilter('fRegion')">
+        <span>All Regions</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown"><div class="ms-options"></div></div>
+    </div>
+    <div class="ms-wrap" id="fDestination">
+      <button class="ms-trigger" onclick="toggleFilter('fDestination')">
+        <span>All Destinations</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown"><div class="ms-options"></div></div>
+    </div>
+    <div class="ms-wrap" id="fDates">
+      <button class="date-pill" onclick="toggleFilter('fDates')">
+        <svg class="cal" width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6">
+          <rect x="2" y="3" width="10" height="9" rx="1"/>
+          <line x1="2" y1="6" x2="12" y2="6"/>
+          <line x1="5" y1="1.5" x2="5" y2="4"/>
+          <line x1="9" y1="1.5" x2="9" y2="4"/>
+        </svg>
+        <span class="date-range-text" id="fDatesLabel">15 Apr<span class="date-sep">–</span>Next 52 wks</span>
+      </button>
+      <div class="date-pill-popover"></div>
+    </div>
+    <div class="ms-wrap" id="fRM">
+      <button class="ms-trigger" onclick="toggleFilter('fRM')">
+        <span>All RMs</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="ms-dropdown"><div class="ms-options"></div></div>
+    </div>
+  </div>
+
+  <!-- ── Page title ── -->
+  <div class="page-title-bar">
+    <div class="page-title">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="1,11 5,6 8,9 13,2"/></svg>
+      Demand Forecast
+      <span class="page-title-sub">Forward 52 Weeks · Forward-looking intelligence feeding pricing recommendations</span>
+    </div>
+  </div>
+
+  <!-- ── Sub-tab Bar ── -->
+  <div class="subtab-bar">
+    <a class="subtab active" data-view="overview"  onclick="switchDemandView('overview')">Destination Overview</a>
+    <a class="subtab"        data-view="flight"    onclick="switchDemandView('flight')">Flight Demand</a>
+    <a class="subtab"        data-view="hotel"     onclick="switchDemandView('hotel')">Hotel Demand</a>
+    <a class="subtab"        data-view="scenario"  onclick="switchDemandView('scenario')">Scenario Modelling</a>
+    <div class="subtab-spacer"></div>
+  </div>
+
+  <!-- ── Main scrollable area ── -->
+  <div class="demand-scroll">
+
+    <!-- ─────────────────────────────────────────────────────── -->
+    <!-- View: Destination Overview                              -->
+    <!-- ─────────────────────────────────────────────────────── -->
+    <div class="view" id="viewOverview">
+      <!-- Summary metrics -->
+      <div class="metrics-bar">
+        <div class="metric-card metric-emphasis">
+          <div class="metric-card-label">Demand uplift destinations</div>
+          <div class="metric-card-value" id="mUplift">—</div>
+          <div class="metric-card-sub" id="mUpliftSub">vs last year baseline</div>
+        </div>
+        <div class="metric-card metric-emphasis">
+          <div class="metric-card-label">Demand decline destinations</div>
+          <div class="metric-card-value metric-warn" id="mDecline">—</div>
+          <div class="metric-card-sub" id="mDeclineSub">vs last year baseline</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-card-label">Avg forward booking index</div>
+          <div class="metric-card-value" id="mForwardIdx">—</div>
+          <div class="metric-card-sub">100 = normal</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-card-label">Search trend index</div>
+          <div class="metric-card-value" id="mSearchIdx">—</div>
+          <div class="metric-card-sub">Google / internal search signals</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-card-label">Top trending destination</div>
+          <div class="metric-card-value" id="mTopTrend" style="font-size:17px;">—</div>
+          <div class="metric-card-sub" id="mTopTrendSub">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-card-label">Biggest demand risk</div>
+          <div class="metric-card-value metric-neg" id="mBigRisk" style="font-size:17px;">—</div>
+          <div class="metric-card-sub" id="mBigRiskSub">—</div>
+        </div>
+      </div>
+
+      <!-- Main chart + velocity heatmap -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <span class="card-title">Forward Demand Index by Destination</span>
+              <span class="card-sub">Next 52 weeks · 100 = normal</span>
+            </div>
+            <div class="chart-legend-inline" id="demandLegend"></div>
+          </div>
+          <div class="chart-wrap tall"><canvas id="demandIndexChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <span class="card-title">Booking Velocity Heatmap</span>
+              <span class="card-sub">Destinations × next 26 weeks</span>
+            </div>
+            <div class="velo-legend">
+              <span class="vl"><span class="vl-sw v-hi"></span>Ahead of target</span>
+              <span class="vl"><span class="vl-sw v-ok"></span>On track</span>
+              <span class="vl"><span class="vl-sw v-lo"></span>Behind target</span>
+            </div>
+          </div>
+          <div class="velo-grid" id="veloGrid"></div>
+        </div>
+      </div>
+
+      <!-- Demand drivers -->
+      <div class="section">
+        <h2 class="section-title">Demand Drivers <span class="st-hint">External signals feeding the forecast</span></h2>
+      </div>
+      <div class="grid-1">
+        <div class="grid-drivers" id="driverGrid"></div>
+      </div>
+    </div><!-- /viewOverview -->
+
+    <!-- ─────────────────────────────────────────────────────── -->
+    <!-- View: Flight Demand                                     -->
+    <!-- ─────────────────────────────────────────────────────── -->
+    <div class="view hidden" id="viewFlight">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <span class="card-title">Load Factor Forecast by Route</span>
+              <span class="card-sub">Next 26 weeks · solid = actual, dotted = forecast</span>
+            </div>
+            <div class="chart-legend-inline" id="lfForecastLegend"></div>
+          </div>
+          <div class="chart-wrap tall"><canvas id="lfForecastChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <span class="card-title">Rate of Sale Trend</span>
+              <span class="card-sub">Last 12 weeks + next 4</span>
+            </div>
+            <div class="chart-legend-inline">
+              <span><span class="lg-swatch" style="background:#0d9488"></span>Cancun</span>
+              <span><span class="lg-swatch" style="background:#60a5fa"></span>Punta Cana</span>
+              <span><span class="lg-swatch" style="background:#a78bfa"></span>Montego Bay</span>
+              <span><span class="lg-swatch dash"></span>Target ROS</span>
+            </div>
+          </div>
+          <div class="chart-wrap tall"><canvas id="rosChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title">Flight Demand Outlook <span class="st-hint">Forecast gap vs target · auto-generated RM action</span></h2>
+      </div>
+      <div class="grid-1">
+        <div class="card" style="padding:0;">
+          <div class="tbl-wrap">
+            <table class="outlook" id="flightOutlookTable">
+              <thead>
+                <tr>
+                  <th>Route</th>
+                  <th>Destination</th>
+                  <th class="text-right">Current LF %</th>
+                  <th class="text-right">Forecast LF @ Dep</th>
+                  <th class="text-right">Target LF</th>
+                  <th class="text-right">Gap</th>
+                  <th class="text-right">Trend</th>
+                  <th>Recommended Action</th>
+                </tr>
+              </thead>
+              <tbody id="flightOutlookBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div><!-- /viewFlight -->
+
+    <!-- ─────────────────────────────────────────────────────── -->
+    <!-- View: Hotel Demand                                      -->
+    <!-- ─────────────────────────────────────────────────────── -->
+    <div class="view hidden" id="viewHotel">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <span class="card-title">Occupancy Forecast by Destination</span>
+              <span class="card-sub">Next 26 weeks · solid = actual, dotted = forecast</span>
+            </div>
+            <div class="chart-legend-inline" id="occForecastLegend"></div>
+          </div>
+          <div class="chart-wrap tall"><canvas id="occForecastChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <span class="card-title">ADR Trend</span>
+              <span class="card-sub">Last 12 weeks + next 12 · our ADR vs comp avg</span>
+            </div>
+            <div class="chart-legend-inline">
+              <span><span class="lg-swatch" style="background:#0d9488"></span>Current ADR</span>
+              <span><span class="lg-swatch" style="background:#e8007d"></span>Rec ADR</span>
+              <span><span class="lg-swatch" style="background:#9ca3af"></span>Comp avg</span>
+              <span><span class="lg-swatch" style="background:rgba(13,148,136,0.18);border-top:2px solid rgba(13,148,136,0.55)"></span>Gap vs comp</span>
+            </div>
+          </div>
+          <div class="chart-wrap tall"><canvas id="adrTrendChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title">Hotel Demand Outlook</h2>
+      </div>
+      <div class="grid-1">
+        <div class="card" style="padding:0;">
+          <div class="tbl-wrap">
+            <table class="outlook" id="hotelOutlookTable">
+              <thead>
+                <tr>
+                  <th>Destination</th>
+                  <th>Hotel</th>
+                  <th class="text-right">Current Occ %</th>
+                  <th class="text-right">Forecast Occ %</th>
+                  <th class="text-right">Target Occ %</th>
+                  <th class="text-right">Gap</th>
+                  <th class="text-right">ADR vs Comp $</th>
+                  <th class="text-right">Trend</th>
+                  <th>Recommended Action</th>
+                </tr>
+              </thead>
+              <tbody id="hotelOutlookBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div><!-- /viewHotel -->
+
+    <!-- ─────────────────────────────────────────────────────── -->
+    <!-- View: Scenario Modelling                                -->
+    <!-- ─────────────────────────────────────────────────────── -->
+    <div class="view hidden" id="viewScenario">
+      <div class="section">
+        <h2 class="section-title">Scenario Builder <span class="st-hint">Model new programs, demand shocks or competitor entry</span></h2>
+      </div>
+      <div class="grid-1">
+        <div class="scn-shell">
+          <!-- Inputs -->
+          <div class="scn-panel">
+            <h4>Scenario Inputs</h4>
+
+            <div class="scn-field">
+              <label class="scn-label">Scenario Name</label>
+              <input type="text" class="scn-input" id="scnName" placeholder="e.g. New Tulum Program" />
+            </div>
+
+            <div class="scn-field">
+              <label class="scn-label">Base Destination</label>
+              <select class="scn-select" id="scnBaseDest"></select>
+            </div>
+
+            <div class="scn-field">
+              <label class="scn-label">Scenario Type</label>
+              <div class="scn-radio-list" id="scnTypeList"></div>
+            </div>
+
+            <!-- Dynamic params host -->
+            <div id="scnDynamicParams"></div>
+
+            <div class="scn-footer">
+              <button type="button" class="btn-teal" onclick="runScenario()">Run Scenario</button>
+              <button type="button" class="btn-ghost-std" onclick="resetScenario()">Reset</button>
+            </div>
+          </div>
+
+          <!-- Output -->
+          <div class="scn-panel">
+            <h4>Scenario Output</h4>
+            <div id="scnOutputEmpty" class="scn-output-empty">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 12h3l3-9 4 18 3-9h5"/></svg>
+              <div>Configure a scenario on the left and click <strong>Run Scenario</strong> to see projected impact.</div>
+            </div>
+            <div id="scnOutputFilled" style="display:none;">
+              <div class="chart-wrap short"><canvas id="scnChart"></canvas></div>
+              <div class="scn-output-grid">
+                <div class="scn-kpi">
+                  <div class="k-lbl">Revenue Impact / wk</div>
+                  <div class="k-val" id="scnRevenue">—</div>
+                </div>
+                <div class="scn-kpi">
+                  <div class="k-lbl">Margin Impact / booking</div>
+                  <div class="k-val" id="scnMargin">—</div>
+                </div>
+                <div class="scn-kpi">
+                  <div class="k-lbl">Projected LF / Occ</div>
+                  <div class="k-val" id="scnLoadFactor">—</div>
+                </div>
+              </div>
+              <div class="scn-rec-text" id="scnRecText"></div>
+              <div class="scn-footer">
+                <button type="button" class="btn-teal" onclick="saveScenario()">Save Scenario</button>
+                <button type="button" class="btn-ghost-std" onclick="applyScenarioToPricing()">Apply to Pricing</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title">Saved Scenarios</h2>
+      </div>
+      <div class="grid-1">
+        <div class="card" style="padding:0;">
+          <div class="tbl-wrap">
+            <table class="outlook" id="scenarioTable">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Base</th>
+                  <th>Created</th>
+                  <th>Projected Impact</th>
+                  <th class="text-right">Revenue</th>
+                  <th class="text-right">Margin</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="scenarioTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div style="height:24px;"></div>
+    </div><!-- /viewScenario -->
+
+  </div><!-- /.demand-scroll -->
+</div><!-- /.app -->
+
+<script>
+// ── Utilities ──────────────────────────────────────────────
+const REGION_COLORS = {
+  'Caribbean':       '#0d9488',
+  'Mexico':          '#e8007d',
+  'Central America': '#f59e0b',
+  'Europe':          '#60a5fa',
+  'Sun & Sand':      '#a78bfa',
+};
+function fmt$(n) {
+  if (n == null || isNaN(n)) return '—';
+  const r = Math.round(n);
+  return (r < 0 ? '-$' : '$') + Math.abs(r).toLocaleString('en-CA');
+}
+function fmtSignedDollar(n) {
+  const r = Math.round(n);
+  if (r > 0) return '+$' + r.toLocaleString('en-CA');
+  if (r < 0) return '-$' + Math.abs(r).toLocaleString('en-CA');
+  return '$0';
+}
+function fmtSignedPct(n) {
+  const r = Math.round(n);
+  return (r > 0 ? '+' : '') + r + '%';
+}
+
+// ── Nav / filter wiring (shared shell) ────────────────────
+function toggleFilter(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const open = el.classList.contains('open');
+  document.querySelectorAll('.ms-wrap.open').forEach(w => w.classList.remove('open'));
+  if (!open) el.classList.add('open');
+}
+function toggleMenu() {
+  document.getElementById('navDropdown').classList.toggle('open');
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.ms-wrap')) {
+    document.querySelectorAll('.ms-wrap.open').forEach(w => w.classList.remove('open'));
+  }
+  if (!e.target.closest('#menuBtn') && !e.target.closest('#navDropdown')) {
+    document.getElementById('navDropdown').classList.remove('open');
+  }
+});
+Filters.populateStandard();
+
+// ── Sub-tab switching ──────────────────────────────────────
+function switchDemandView(view) {
+  document.querySelectorAll('.subtab-bar .subtab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.subtab-bar .subtab[data-view="${view}"]`).classList.add('active');
+  document.querySelectorAll('.demand-scroll .view').forEach(v => v.classList.add('hidden'));
+  const map = { overview: 'viewOverview', flight: 'viewFlight', hotel: 'viewHotel', scenario: 'viewScenario' };
+  document.getElementById(map[view]).classList.remove('hidden');
+
+  // Lazy render the heavier views
+  if (view === 'flight'  && !_flightRendered)  { renderFlightDemand();  _flightRendered = true; }
+  if (view === 'hotel'   && !_hotelRendered)   { renderHotelDemand();   _hotelRendered  = true; }
+  if (view === 'scenario' && !_scenarioRendered) { renderScenarioView(); _scenarioRendered = true; }
+}
+let _flightRendered = false, _hotelRendered = false, _scenarioRendered = false;
+
+// ── Destination Overview: metrics ─────────────────────────
+function avgSeries(arr) { return arr.reduce((s, x) => s + x, 0) / arr.length; }
+function computeOverviewMetrics() {
+  let uplift = 0, decline = 0;
+  const destAvgs = [];
+  DESTINATIONS.forEach(d => {
+    const series = DEMAND_INDEX_DATA[d.id];
+    const avg = avgSeries(series);
+    destAvgs.push({ dest: d, avg });
+    if (avg > 105) uplift++;
+    else if (avg < 95) decline++;
+  });
+  destAvgs.sort((a, b) => b.avg - a.avg);
+  const top = destAvgs[0];
+  const risk = destAvgs[destAvgs.length - 1];
+  const total = DESTINATIONS.length;
+  const forwardIdx = Math.round(avgSeries(destAvgs.map(x => x.avg)));
+  // Fake search trend = forwardIdx with a slight positive bias
+  const searchIdx = Math.round(forwardIdx + 6 + Math.sin(Date.now() / 1e9) * 3);
+
+  return {
+    uplift,
+    upliftPct: Math.round((uplift / total) * 100),
+    decline,
+    declinePct: Math.round((decline / total) * 100),
+    forwardIdx,
+    searchIdx,
+    top: top.dest,
+    topIdx: Math.round(top.avg),
+    risk: risk.dest,
+    riskIdx: Math.round(risk.avg),
+    total,
+  };
+}
+function renderOverviewMetrics() {
+  const m = computeOverviewMetrics();
+  document.getElementById('mUplift').textContent    = `${m.uplift} (${m.upliftPct}%)`;
+  document.getElementById('mUpliftSub').textContent = `${m.uplift} of ${m.total} destinations trending up`;
+  document.getElementById('mDecline').textContent   = `${m.decline} (${m.declinePct}%)`;
+  document.getElementById('mDeclineSub').textContent = `${m.decline} of ${m.total} destinations trending down`;
+  document.getElementById('mForwardIdx').textContent = m.forwardIdx;
+  document.getElementById('mSearchIdx').textContent  = m.searchIdx;
+  document.getElementById('mTopTrend').textContent   = m.top.name;
+  document.getElementById('mTopTrendSub').textContent = `Avg demand index ${m.topIdx}`;
+  document.getElementById('mBigRisk').textContent    = m.risk.name;
+  document.getElementById('mBigRiskSub').textContent = `Avg demand index ${m.riskIdx}`;
+}
+
+// ── Destination Overview: forward demand chart ────────────
+let demandIndexChart;
+function renderDemandIndexChart() {
+  // Pick top 5 destinations by absolute deviation from 100 (most interesting)
+  const ranked = DESTINATIONS.map(d => {
+    const avg = avgSeries(DEMAND_INDEX_DATA[d.id]);
+    return { dest: d, avg, dev: Math.abs(avg - 100) };
+  }).sort((a, b) => b.dev - a.dev).slice(0, 5);
+
+  const labels = DEMAND_WEEKS.map(w => w.label);
+  const datasets = ranked.map(x => ({
+    label: x.dest.name,
+    data: DEMAND_INDEX_DATA[x.dest.id],
+    borderColor: REGION_COLORS[x.dest.region] || '#0d9488',
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    tension: 0.3,
+    pointRadius: 0,
+  }));
+  // Baseline
+  datasets.push({
+    label: 'Baseline (100)',
+    data: Array(labels.length).fill(100),
+    borderColor: 'rgba(107,114,128,0.65)',
+    borderDash: [4, 4],
+    borderWidth: 1.2,
+    pointRadius: 0,
+  });
+
+  if (demandIndexChart) demandIndexChart.destroy();
+  demandIndexChart = new Chart(document.getElementById('demandIndexChart'), {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+      interaction: { mode: 'nearest', axis: 'x' },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#6b7280', maxTicksLimit: 12, autoSkip: true } },
+        y: { min: 50, max: 150, grid: { color: '#eef0f3' }, ticks: { font: { size: 10 }, color: '#6b7280', stepSize: 25 }, title: { display: true, text: 'Demand Index', color: '#6b7280', font: { size: 10 } } },
+      },
+    },
+  });
+  // Inline legend
+  const legend = document.getElementById('demandLegend');
+  legend.innerHTML = ranked.map(x =>
+    `<span><span class="lg-swatch" style="background:${REGION_COLORS[x.dest.region] || '#0d9488'}"></span>${x.dest.name}</span>`
+  ).join('') + `<span><span class="lg-swatch dash"></span>Baseline</span>`;
+}
+
+// ── Destination Overview: velocity heatmap ────────────────
+function renderVelocityHeatmap() {
+  const weeksToShow = 26;
+  const wrap = document.getElementById('veloGrid');
+
+  // Pick top ~12 destinations for heatmap density
+  const rows = DESTINATIONS.slice(0, 12);
+
+  const headCells = DEMAND_WEEKS.slice(0, weeksToShow).map(w => {
+    const short = w.label.replace('Wk ', '');
+    return `<th title="${w.label}">${short.slice(0, 3)}</th>`;
+  }).join('');
+
+  const bodyRows = rows.map(d => {
+    const series = BOOKING_VELOCITY_DATA[d.id];
+    const cells = series.slice(0, weeksToShow).map((v, i) => {
+      const cls = v >= 1.05 ? 'v-hi' : v >= 0.92 ? 'v-ok' : 'v-lo';
+      const title = `${d.name} ${DEMAND_WEEKS[i].label}: ${Math.round(v * 100)}% of target`;
+      return `<td class="velo-cell ${cls}" title="${title}"></td>`;
+    }).join('');
+    return `<tr><td class="velo-name" title="${d.name}">${d.name}</td>${cells}</tr>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <table class="velo-table">
+      <thead><tr><th class="velo-corner">Destination</th>${headCells}</tr></thead>
+      <tbody>${bodyRows}</tbody>
+    </table>
+  `;
+}
+
+// ── Destination Overview: demand drivers ──────────────────
+function renderDemandDrivers() {
+  const el = document.getElementById('driverGrid');
+  el.innerHTML = DEMAND_DRIVERS.map(d => `
+    <div class="driver-card impact-${d.impact}">
+      <div class="di">${d.icon}</div>
+      <div class="dc">
+        <div class="dt">${d.title} <span class="dtag ${d.impact}">${d.category}</span></div>
+        <div class="dd">${d.description}</div>
+        <div class="dmeta">${d.date}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Flight Demand view ────────────────────────────────────
+let lfForecastChart, rosChart;
+function renderFlightDemand() {
+  // Pick top 5 routes by LF deviation
+  const pickRoutes = [];
+  FLIGHT_DATA.forEach(dest => {
+    dest.routes.forEach(r => {
+      const avgLf = avgSeries(r.dates.map(d => (d.capacity ? d.sold / d.capacity : 0)));
+      pickRoutes.push({ dest, route: r, avgLf });
+    });
+  });
+  pickRoutes.sort((a, b) => Math.abs(0.80 - a.avgLf) < Math.abs(0.80 - b.avgLf) ? 1 : -1);
+  const chosen = pickRoutes.slice(0, 5);
+
+  const palette = ['#0d9488', '#e8007d', '#60a5fa', '#f59e0b', '#a78bfa'];
+  const weeks = 26;
+  const labels = Array.from({ length: weeks }, (_, i) => `Wk ${i + 1}`);
+
+  const datasets = [];
+  chosen.forEach((x, idx) => {
+    const color = palette[idx % palette.length];
+    // Build a per-week LF series: start from current avg LF, drift realistically
+    const baseLf = x.avgLf || 0.60;
+    const actual = [];
+    const fcst = [];
+    for (let w = 0; w < weeks; w++) {
+      // 8 weeks of actual, rest forecast
+      const trend = Math.sin((w + idx * 3) * 0.3) * 0.06;
+      const v = Math.max(0.25, Math.min(0.98, baseLf + trend + (w * 0.004)));
+      if (w < 8)  actual.push(Math.round(v * 100));
+      else        actual.push(null);
+      if (w >= 8) fcst.push(Math.round(v * 100));
+      else        fcst.push(null);
+    }
+    datasets.push({
+      label: `${x.route.flightNum} — ${x.dest.name}`,
+      data: actual,
+      borderColor: color,
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      tension: 0.3,
+      pointRadius: 0,
+      spanGaps: false,
+    });
+    datasets.push({
+      label: `${x.route.flightNum} forecast`,
+      data: fcst,
+      borderColor: color,
+      borderDash: [3, 3],
+      borderWidth: 1.8,
+      tension: 0.3,
+      pointRadius: 0,
+      spanGaps: false,
+    });
+  });
+  // Target line
+  datasets.push({
+    label: 'Target LF',
+    data: Array(weeks).fill(80),
+    borderColor: 'rgba(107,114,128,0.75)',
+    borderDash: [5, 4],
+    borderWidth: 1.4,
+    pointRadius: 0,
+  });
+
+  if (lfForecastChart) lfForecastChart.destroy();
+  lfForecastChart = new Chart(document.getElementById('lfForecastChart'), {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#6b7280', maxTicksLimit: 13 } },
+        y: { min: 30, max: 100, grid: { color: '#eef0f3' }, ticks: { font: { size: 10 }, color: '#6b7280', callback: v => v + '%' }, title: { display: true, text: 'LF %', color: '#6b7280', font: { size: 10 } } },
+      },
+    },
+  });
+  // Inline legend
+  const legend = document.getElementById('lfForecastLegend');
+  legend.innerHTML = chosen.map((x, idx) =>
+    `<span><span class="lg-swatch" style="background:${palette[idx % palette.length]}"></span>${x.route.flightNum}</span>`
+  ).join('') + `<span><span class="lg-swatch dash"></span>Target</span>`;
+
+  // ── ROS chart ─────────────────────────────────────────
+  const rosWeeks = 16; // 12 past + 4 future
+  const rosLabels = Array.from({ length: rosWeeks }, (_, i) => {
+    if (i < 12) return `W-${12 - i}`;
+    return `W+${i - 11}`;
+  });
+  const rosDests = ['Cancun', 'Punta Cana', 'Montego Bay'];
+  const rosColors = ['#0d9488', '#60a5fa', '#a78bfa'];
+  const rosDatasets = rosDests.map((name, i) => {
+    const seed = name.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
+    const data = Array.from({ length: rosWeeks }, (_, w) => {
+      const base = 12 + (i * 2);
+      const trend = Math.sin((w + seed) * 0.35) * 3.2;
+      const noise = ((seed + w * 7) % 5) - 2;
+      return Math.max(3, Math.round(base + trend + noise));
+    });
+    return {
+      label: name,
+      data,
+      backgroundColor: rosColors[i],
+      borderRadius: 3,
+      barPercentage: 0.75,
+      categoryPercentage: 0.8,
+    };
+  });
+  rosDatasets.push({
+    label: 'Target ROS',
+    data: Array(rosWeeks).fill(14),
+    type: 'line',
+    borderColor: 'rgba(107,114,128,0.85)',
+    borderDash: [4, 4],
+    borderWidth: 1.4,
+    pointRadius: 0,
+    tension: 0,
+  });
+
+  if (rosChart) rosChart.destroy();
+  rosChart = new Chart(document.getElementById('rosChart'), {
+    type: 'bar',
+    data: { labels: rosLabels, datasets: rosDatasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#6b7280' } },
+        y: { beginAtZero: true, grid: { color: '#eef0f3' }, ticks: { font: { size: 10 }, color: '#6b7280' }, title: { display: true, text: 'Bookings / day', color: '#6b7280', font: { size: 10 } } },
+      },
+    },
+  });
+
+  // ── Flight demand outlook table ────────────────────────
+  const tbody = document.getElementById('flightOutlookBody');
+  const rows = [];
+  FLIGHT_DATA.forEach(dest => {
+    dest.routes.forEach(r => {
+      const cap = r.dates.reduce((s, d) => s + d.capacity, 0);
+      const sold = r.dates.reduce((s, d) => s + d.sold, 0);
+      const currentLF = cap ? sold / cap : 0;
+      const forecastLF = avgSeries(r.dates.map(d => d.forecastLF));
+      const targetLF   = avgSeries(r.dates.map(d => d.targetLF));
+      const gap = forecastLF - targetLF;
+      const gapPct = Math.round(gap * 100);
+      const trend = forecastLF >= currentLF ? 'up' : 'dn';
+      let action, actionCls;
+      if (gap >= 0.05)      { action = 'Yield up — high demand';            actionCls = 'ra-up'; }
+      else if (gap >= -0.03){ action = 'Hold — tracking to plan';            actionCls = 'ra-hold'; }
+      else if (gap >= -0.10){ action = 'Stimulate — below pace';             actionCls = 'ra-down'; }
+      else                  { action = 'Urgent — deep promotional action';   actionCls = 'ra-urgent'; }
+
+      rows.push({
+        route: r.flightNum, origin: r.origin, dest: dest.name,
+        currentLF: Math.round(currentLF * 100),
+        forecastLF: Math.round(forecastLF * 100),
+        targetLF: Math.round(targetLF * 100),
+        gapPct, trend, action, actionCls,
+      });
+    });
+  });
+  rows.sort((a, b) => a.gapPct - b.gapPct); // most behind first
+  tbody.innerHTML = rows.slice(0, 18).map(r => `
+    <tr>
+      <td><span class="font-mono" style="font-family:'JetBrains Mono',monospace;font-weight:500;">${r.route}</span> <span style="color:var(--text-muted);font-size:11px;">${r.origin}→</span></td>
+      <td>${r.dest}</td>
+      <td class="text-right">${r.currentLF}%</td>
+      <td class="text-right">${r.forecastLF}%</td>
+      <td class="text-right">${r.targetLF}%</td>
+      <td class="text-right ${r.gapPct >= 0 ? 'gap-pos' : 'gap-neg'}">${r.gapPct >= 0 ? '+' : ''}${r.gapPct}%</td>
+      <td class="text-right ${r.trend === 'up' ? 'trend-up' : 'trend-dn'}">${r.trend === 'up' ? '▲' : '▼'}</td>
+      <td><span class="rec-action ${r.actionCls}">${r.action}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ── Hotel Demand view ─────────────────────────────────────
+let occForecastChart, adrTrendChart;
+function renderHotelDemand() {
+  const weeks = 26;
+  const labels = Array.from({ length: weeks }, (_, i) => `Wk ${i + 1}`);
+  const chosen = HOTEL_DATA.slice(0, 5);
+  const palette = ['#0d9488', '#e8007d', '#60a5fa', '#f59e0b', '#a78bfa'];
+
+  const datasets = [];
+  chosen.forEach((dest, idx) => {
+    const color = palette[idx % palette.length];
+    const base = dest.forecastOcc || 0.65;
+    const actual = [], fcst = [];
+    for (let w = 0; w < weeks; w++) {
+      const trend = Math.sin((w + idx * 2) * 0.28) * 0.07;
+      const v = Math.max(0.3, Math.min(0.97, base + trend + (w * 0.003)));
+      if (w < 8)  actual.push(Math.round(v * 100));
+      else        actual.push(null);
+      if (w >= 8) fcst.push(Math.round(v * 100));
+      else        fcst.push(null);
+    }
+    datasets.push({
+      label: dest.name, data: actual,
+      borderColor: color, backgroundColor: 'transparent',
+      borderWidth: 2, tension: 0.3, pointRadius: 0, spanGaps: false,
+    });
+    datasets.push({
+      label: dest.name + ' fcst', data: fcst,
+      borderColor: color, borderDash: [3, 3],
+      borderWidth: 1.8, tension: 0.3, pointRadius: 0, spanGaps: false,
+    });
+  });
+  datasets.push({
+    label: 'Target Occ',
+    data: Array(weeks).fill(75),
+    borderColor: 'rgba(107,114,128,0.75)',
+    borderDash: [5, 4],
+    borderWidth: 1.4,
+    pointRadius: 0,
+  });
+
+  if (occForecastChart) occForecastChart.destroy();
+  occForecastChart = new Chart(document.getElementById('occForecastChart'), {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#6b7280', maxTicksLimit: 13 } },
+        y: { min: 30, max: 100, grid: { color: '#eef0f3' }, ticks: { font: { size: 10 }, color: '#6b7280', callback: v => v + '%' }, title: { display: true, text: 'Occ %', color: '#6b7280', font: { size: 10 } } },
+      },
+    },
+  });
+  const legend = document.getElementById('occForecastLegend');
+  legend.innerHTML = chosen.map((d, idx) =>
+    `<span><span class="lg-swatch" style="background:${palette[idx % palette.length]}"></span>${d.name}</span>`
+  ).join('') + `<span><span class="lg-swatch dash"></span>Target</span>`;
+
+  // ── ADR Trend chart ────────────────────────────────────
+  const adrWeeks = 24; // 12 past + 12 future
+  const adrLabels = Array.from({ length: adrWeeks }, (_, i) => i < 12 ? `W-${12 - i}` : `W+${i - 11}`);
+  // Use aggregate across top 5 destinations
+  const baseADR = Math.round(avgSeries(chosen.map(d => d.avgCurrentADR)));
+  const baseRec = Math.round(avgSeries(chosen.map(d => d.avgRecADR)));
+  const current = [], rec = [], comp = [], gapUpper = [], gapLower = [];
+  for (let i = 0; i < adrWeeks; i++) {
+    const t = Math.sin(i * 0.35) * 12;
+    const noise = (i % 3 - 1) * 4;
+    const cur = Math.round(baseADR + t + noise);
+    const rc  = Math.round(baseRec + t * 1.1 + noise + 8);
+    const cp  = Math.round(baseADR * 0.96 + t * 0.8 + noise - 4);
+    current.push(cur);
+    rec.push(rc);
+    comp.push(cp);
+    gapUpper.push(Math.max(cur, cp));
+    gapLower.push(Math.min(cur, cp));
+  }
+
+  if (adrTrendChart) adrTrendChart.destroy();
+  adrTrendChart = new Chart(document.getElementById('adrTrendChart'), {
+    type: 'line',
+    data: {
+      labels: adrLabels,
+      datasets: [
+        // Gap corridor: upper envelope filled to lower
+        { label: 'Gap upper', data: gapUpper, borderColor: 'rgba(13,148,136,0.0)', backgroundColor: 'rgba(13,148,136,0.12)', borderWidth: 0, pointRadius: 0, fill: '+1', tension: 0.3 },
+        { label: 'Gap lower', data: gapLower, borderColor: 'rgba(13,148,136,0.0)', backgroundColor: 'rgba(13,148,136,0.0)',  borderWidth: 0, pointRadius: 0, fill: false, tension: 0.3 },
+        { label: 'Current ADR', data: current, borderColor: '#0d9488', borderWidth: 2.2, pointRadius: 0, tension: 0.3, fill: false },
+        { label: 'Rec ADR',     data: rec,     borderColor: '#e8007d', borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false, borderDash: [2, 2] },
+        { label: 'Comp avg',    data: comp,    borderColor: '#9ca3af', borderWidth: 1.6, pointRadius: 0, tension: 0.3, fill: false },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#6b7280' } },
+        y: { grid: { color: '#eef0f3' }, ticks: { font: { size: 10 }, color: '#6b7280', callback: v => '$' + v }, title: { display: true, text: 'ADR $', color: '#6b7280', font: { size: 10 } } },
+      },
+    },
+  });
+
+  // ── Hotel outlook table ────────────────────────────────
+  const tbody = document.getElementById('hotelOutlookBody');
+  const rows = [];
+  HOTEL_DATA.forEach(dest => {
+    dest.hotels.forEach(h => {
+      const currentOcc  = Math.round(h.currentOcc * 100);
+      const forecastOcc = Math.round(h.forecastOcc * 100);
+      const targetOcc   = 75;
+      const gap = forecastOcc - targetOcc;
+      const trend = h.forecastOcc >= h.currentOcc ? 'up' : 'dn';
+      const adrVsComp = Math.round((h.avgCurrentADR * 0.96) - h.avgCurrentADR); // comp approx 4% below
+      let action, actionCls;
+      if (gap >= 3)       { action = 'Yield up — push ADR';            actionCls = 'ra-up'; }
+      else if (gap >= -3) { action = 'Hold — tracking to plan';         actionCls = 'ra-hold'; }
+      else if (gap >= -10){ action = 'Promotional ADR — build pace';    actionCls = 'ra-down'; }
+      else                { action = 'Urgent — discount required';      actionCls = 'ra-urgent'; }
+      rows.push({
+        destName: dest.name, hotel: h.name,
+        currentOcc, forecastOcc, targetOcc, gap, trend,
+        adrVsComp, action, actionCls,
+      });
+    });
+  });
+  rows.sort((a, b) => a.gap - b.gap);
+  tbody.innerHTML = rows.slice(0, 20).map(r => `
+    <tr>
+      <td>${r.destName}</td>
+      <td>${r.hotel}</td>
+      <td class="text-right">${r.currentOcc}%</td>
+      <td class="text-right">${r.forecastOcc}%</td>
+      <td class="text-right">${r.targetOcc}%</td>
+      <td class="text-right ${r.gap >= 0 ? 'gap-pos' : 'gap-neg'}">${r.gap >= 0 ? '+' : ''}${r.gap}%</td>
+      <td class="text-right ${r.adrVsComp >= 0 ? 'gap-pos' : 'gap-neg'}">${r.adrVsComp >= 0 ? '+' : ''}$${r.adrVsComp}</td>
+      <td class="text-right ${r.trend === 'up' ? 'trend-up' : 'trend-dn'}">${r.trend === 'up' ? '▲' : '▼'}</td>
+      <td><span class="rec-action ${r.actionCls}">${r.action}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ── Scenario Modelling view ───────────────────────────────
+let scnChart;
+let scnState = {
+  name: '',
+  baseDest: DESTINATIONS[0]?.id || '',
+  type: 'New destination',
+  params: {},
+  lastOutput: null,
+};
+
+function renderScenarioView() {
+  // Populate base destination dropdown
+  const sel = document.getElementById('scnBaseDest');
+  sel.innerHTML = DESTINATIONS.map(d => `<option value="${d.id}">${d.name} — ${d.region}</option>`).join('');
+  sel.addEventListener('change', () => { scnState.baseDest = sel.value; });
+
+  // Scenario type radio list
+  const tl = document.getElementById('scnTypeList');
+  tl.innerHTML = SCENARIO_TYPES.map((t, i) => `
+    <label class="scn-radio">
+      <input type="radio" name="scnType" value="${t}" ${i === 0 ? 'checked' : ''} onchange="onScnTypeChange(this.value)"> ${t}
+    </label>
+  `).join('');
+  scnState.type = SCENARIO_TYPES[0];
+  renderScnParams();
+
+  // Saved scenarios table
+  renderScenarioTable();
+}
+
+function onScnTypeChange(t) {
+  scnState.type = t;
+  scnState.params = {};
+  renderScnParams();
+}
+
+function renderScnParams() {
+  const el = document.getElementById('scnDynamicParams');
+  const t = scnState.type;
+  const destOptions = DESTINATIONS.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+
+  if (t === 'New destination') {
+    el.innerHTML = `
+      <div class="scn-field">
+        <label class="scn-label">Similar Destination to Model</label>
+        <select class="scn-select" id="scnSim">${destOptions}</select>
+      </div>
+      <div class="scn-field">
+        <label class="scn-label">Expected Demand Index vs Similar</label>
+        <div class="scn-slider-row">
+          <input type="range" min="50" max="150" value="110" id="scnDemandIdx" oninput="scnBindVal('scnDemandIdxVal', this.value + '%')">
+          <div class="scn-val" id="scnDemandIdxVal">110%</div>
+        </div>
+      </div>
+      <div class="scn-field">
+        <label class="scn-label">Hotel Classification Mix (% Exclusive)</label>
+        <div class="scn-slider-row">
+          <input type="range" min="0" max="100" value="60" id="scnClassMix" oninput="scnBindVal('scnClassMixVal', this.value + '% Exclusive')">
+          <div class="scn-val" id="scnClassMixVal">60% Exclusive</div>
+        </div>
+      </div>
+      <div class="scn-field">
+        <label class="scn-label">Seasons to Model</label>
+        <div class="scn-inline">
+          <label class="scn-cb"><input type="checkbox" value="Spring" checked class="scnSeason"> Spring</label>
+          <label class="scn-cb"><input type="checkbox" value="Summer" class="scnSeason"> Summer</label>
+          <label class="scn-cb"><input type="checkbox" value="Fall" checked class="scnSeason"> Fall</label>
+          <label class="scn-cb"><input type="checkbox" value="Winter" class="scnSeason"> Winter</label>
+        </div>
+      </div>
+    `;
+  } else if (t === 'Existing destination — demand shock') {
+    el.innerHTML = `
+      <div class="scn-field">
+        <label class="scn-label">Shock Type</label>
+        <div class="scn-inline">
+          <label class="scn-radio"><input type="radio" name="scnShockDir" value="Positive" checked> Positive</label>
+          <label class="scn-radio"><input type="radio" name="scnShockDir" value="Negative"> Negative</label>
+        </div>
+      </div>
+      <div class="scn-field">
+        <label class="scn-label">Magnitude</label>
+        <div class="scn-slider-row">
+          <input type="range" min="-50" max="50" value="20" id="scnMag" oninput="scnBindVal('scnMagVal', (this.value >= 0 ? '+' : '') + this.value + '%')">
+          <div class="scn-val" id="scnMagVal">+20%</div>
+        </div>
+      </div>
+      <div class="scn-field">
+        <label class="scn-label">Duration (weeks)</label>
+        <input type="number" class="scn-input" id="scnDuration" value="6" min="1" max="52" />
+      </div>
+      <div class="scn-field">
+        <label class="scn-label">Start Week</label>
+        <input type="date" class="scn-input" id="scnStart" value="2026-07-01" />
+      </div>
+    `;
+  } else if (t === 'Capacity change') {
+    el.innerHTML = `
+      <div class="scn-field">
+        <label class="scn-label">Capacity Change %</label>
+        <div class="scn-slider-row">
+          <input type="range" min="-50" max="50" value="15" id="scnCap" oninput="scnBindVal('scnCapVal', (this.value >= 0 ? '+' : '') + this.value + '%')">
+          <div class="scn-val" id="scnCapVal">+15%</div>
+        </div>
+      </div>
+      <div class="scn-field">
+        <label class="scn-label">Applies To</label>
+        <div class="scn-inline">
+          <label class="scn-radio"><input type="radio" name="scnCapScope" value="Flights" checked> Flights</label>
+          <label class="scn-radio"><input type="radio" name="scnCapScope" value="Hotel beds"> Hotel beds</label>
+          <label class="scn-radio"><input type="radio" name="scnCapScope" value="Both"> Both</label>
+        </div>
+      </div>
+    `;
+  } else if (t === 'New competitor entry') {
+    el.innerHTML = `
+      <div class="scn-field">
+        <label class="scn-label">Competitor Name</label>
+        <input type="text" class="scn-input" id="scnCompName" placeholder="e.g. Air Transat" value="Air Transat" />
+      </div>
+      <div class="scn-field">
+        <label class="scn-label">Estimated Pricing vs Our Fares</label>
+        <div class="scn-slider-row">
+          <input type="range" min="-20" max="20" value="-10" id="scnCompPrice" oninput="scnBindVal('scnCompPriceVal', (this.value >= 0 ? '+' : '') + this.value + '%')">
+          <div class="scn-val" id="scnCompPriceVal">-10%</div>
+        </div>
+      </div>
+      <div class="scn-field">
+        <label class="scn-label">Routes Affected</label>
+        <select class="scn-select" id="scnCompRoutes" multiple size="4">${destOptions}</select>
+      </div>
+    `;
+  } else { // Price war simulation
+    el.innerHTML = `
+      <div class="scn-field">
+        <label class="scn-label">Cumulative Price Erosion</label>
+        <div class="scn-slider-row">
+          <input type="range" min="-30" max="0" value="-15" id="scnErode" oninput="scnBindVal('scnErodeVal', this.value + '%')">
+          <div class="scn-val" id="scnErodeVal">-15%</div>
+        </div>
+      </div>
+      <div class="scn-field">
+        <label class="scn-label">Duration (weeks)</label>
+        <input type="number" class="scn-input" id="scnPwDur" value="8" min="1" max="52" />
+      </div>
+    `;
+  }
+}
+
+function scnBindVal(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+function runScenario() {
+  scnState.name = document.getElementById('scnName').value || 'Untitled Scenario';
+  const t = scnState.type;
+
+  // Compute rough projected impacts by scenario type
+  let lfOffset = 0, revDelta = 0, marginDelta = 0, headline = '', recText = '';
+  const weeks = 26;
+  const baseLine = Array.from({ length: weeks }, (_, i) => 72 + Math.sin(i * 0.3) * 6);
+  let scenarioLine = baseLine.slice();
+
+  if (t === 'New destination') {
+    const demand = parseInt(document.getElementById('scnDemandIdx').value, 10);
+    const mult = demand / 100;
+    scenarioLine = baseLine.map(v => Math.round(v * mult));
+    lfOffset = Math.round((mult - 1) * 100);
+    revDelta = Math.round(48000 * (mult - 1) * 10);
+    marginDelta = Math.round(32 * (mult - 1) * 2);
+    headline = `${lfOffset >= 0 ? '+' : ''}${lfOffset}% projected demand vs similar destination`;
+    recText = `Launch pricing should sit within ~${Math.abs(lfOffset)}% of the modelled baseline. Recommend ${lfOffset > 0 ? 'premium positioning' : 'introductory pricing'} and phased allotment ramp over the first two seasons.`;
+  } else if (t === 'Existing destination — demand shock') {
+    const mag = parseInt(document.getElementById('scnMag').value, 10);
+    const dur = parseInt(document.getElementById('scnDuration').value, 10) || 6;
+    scenarioLine = baseLine.map((v, i) => i < dur ? Math.round(v * (1 + mag / 100)) : v);
+    lfOffset = mag;
+    revDelta = Math.round(mag * 6500);
+    marginDelta = Math.round(mag * 1.8);
+    headline = `${mag >= 0 ? '+' : ''}${mag}% demand shock over ${dur} weeks`;
+    recText = mag >= 0
+      ? `Capture upside by tightening discounts and moving margin up by ~$${Math.round(mag / 3)} over the shock window. Protect allotment for full-fare bookings.`
+      : `Stimulate with promotional fares of up to ${Math.abs(mag)}% off baseline in the first ${Math.min(4, dur)} weeks to defend load factor.`;
+  } else if (t === 'Capacity change') {
+    const cap = parseInt(document.getElementById('scnCap').value, 10);
+    scenarioLine = baseLine.map(v => Math.max(30, Math.min(100, Math.round(v / (1 + cap / 100)))));
+    lfOffset = -cap;
+    revDelta = Math.round(cap * 4200);
+    marginDelta = Math.round(cap * 1.1);
+    headline = `${cap >= 0 ? '+' : ''}${cap}% capacity — projected LF ${cap >= 0 ? 'dilution' : 'tightening'}`;
+    recText = `With capacity ${cap >= 0 ? 'added' : 'removed'}, recommend a ${cap >= 0 ? 'fare reduction' : 'fare lift'} of roughly ${Math.abs(Math.round(cap / 2))}% to hold load factor steady.`;
+  } else if (t === 'New competitor entry') {
+    const p = parseInt(document.getElementById('scnCompPrice').value, 10);
+    scenarioLine = baseLine.map(v => Math.round(v * (1 + p / 400)));
+    lfOffset = Math.round(p / 2);
+    revDelta = Math.round(p * 4800);
+    marginDelta = Math.round(p * 0.9);
+    headline = `Competitor pricing ${p >= 0 ? '+' : ''}${p}% vs ours`;
+    recText = p < 0
+      ? `Recommend matching competitor within $${Math.round(Math.abs(p) * 3)} to protect share. Monitor weekly and reassess after 4 weeks.`
+      : `Competitor undercuts not a threat — hold pricing and invest in ancillary upsell. Review after 4 weeks.`;
+  } else {
+    const er = parseInt(document.getElementById('scnErode').value, 10);
+    const dur = parseInt(document.getElementById('scnPwDur').value, 10) || 8;
+    scenarioLine = baseLine.map((v, i) => i < dur ? Math.round(v * (1 + er / 200)) : v);
+    lfOffset = Math.round(er / 2);
+    revDelta = Math.round(er * 6200);
+    marginDelta = Math.round(er * 2.1);
+    headline = `Price war: ${er}% erosion over ${dur} weeks`;
+    recText = `Recommend holding margin floor at 8%. Respond tactically on low-demand weeks only; do not match full erosion across the board.`;
+  }
+
+  // Show output
+  document.getElementById('scnOutputEmpty').style.display = 'none';
+  document.getElementById('scnOutputFilled').style.display = '';
+
+  const labels = Array.from({ length: weeks }, (_, i) => `Wk ${i + 1}`);
+  if (scnChart) scnChart.destroy();
+  scnChart = new Chart(document.getElementById('scnChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Baseline',  data: baseLine,     borderColor: 'rgba(107,114,128,0.85)', borderDash: [4, 4], borderWidth: 1.4, pointRadius: 0, tension: 0.3 },
+        { label: 'Scenario',  data: scenarioLine, borderColor: '#0d9488', backgroundColor: 'rgba(13,148,136,0.10)', borderWidth: 2.2, pointRadius: 0, tension: 0.3, fill: true },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#6b7280', maxTicksLimit: 10 } },
+        y: { min: 30, max: 100, grid: { color: '#eef0f3' }, ticks: { font: { size: 10 }, color: '#6b7280', callback: v => v + '%' } },
+      },
+    },
+  });
+
+  document.getElementById('scnRevenue').textContent = fmtSignedDollar(revDelta);
+  document.getElementById('scnRevenue').className   = 'k-val ' + (revDelta >= 0 ? 'pos' : 'neg');
+  document.getElementById('scnMargin').textContent  = fmtSignedDollar(marginDelta);
+  document.getElementById('scnMargin').className    = 'k-val ' + (marginDelta >= 0 ? 'pos' : 'neg');
+  document.getElementById('scnLoadFactor').textContent = headline;
+  document.getElementById('scnRecText').textContent  = recText;
+
+  scnState.lastOutput = { name: scnState.name, type: t, headline, revDelta, marginDelta, recText };
+}
+
+function resetScenario() {
+  document.getElementById('scnName').value = '';
+  document.getElementById('scnOutputFilled').style.display = 'none';
+  document.getElementById('scnOutputEmpty').style.display = '';
+  if (scnChart) { scnChart.destroy(); scnChart = null; }
+}
+
+function saveScenario() {
+  if (!scnState.lastOutput) { alert('Run a scenario first.'); return; }
+  const out = scnState.lastOutput;
+  SCENARIOS.unshift({
+    id: 'SCN-' + String(Date.now()).slice(-6),
+    name: out.name,
+    type: out.type,
+    baseDestination: (DESTINATIONS.find(x => x.id === scnState.baseDest) || {}).name || '—',
+    createdBy: 'Current User',
+    createdDate: new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' }),
+    projectedImpact: out.headline,
+    revenueImpact: fmtSignedDollar(out.revDelta) + ' / week',
+    marginImpact: fmtSignedDollar(out.marginDelta) + ' / booking',
+    status: 'Draft',
+  });
+  renderScenarioTable();
+}
+
+function applyScenarioToPricing() {
+  if (!scnState.lastOutput) { alert('Run a scenario first.'); return; }
+  alert('Scenario staged for pricing. A new evaluation run has been queued on the flight and hotel tabs.');
+}
+
+function renderScenarioTable() {
+  const tbody = document.getElementById('scenarioTableBody');
+  tbody.innerHTML = SCENARIOS.map(s => {
+    const sCls = s.status === 'Active' ? 's-active' : s.status === 'Draft' ? 's-draft' : 's-archived';
+    return `
+      <tr>
+        <td style="font-weight:600;">${s.name}</td>
+        <td>${s.type}</td>
+        <td>${s.baseDestination || s.modelledOn || '—'}</td>
+        <td class="font-mono" style="font-family:'JetBrains Mono',monospace;font-size:11px;">${s.createdDate}</td>
+        <td>${s.projectedImpact || '—'}</td>
+        <td class="text-right">${s.revenueImpact || '—'}</td>
+        <td class="text-right">${s.marginImpact || '—'}</td>
+        <td><span class="scn-status ${sCls}">${s.status}</span></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ── Initial render ────────────────────────────────────────
+renderOverviewMetrics();
+renderDemandIndexChart();
+renderVelocityHeatmap();
+renderDemandDrivers();
+</script>
+
+</body>
+</html>

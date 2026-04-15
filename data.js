@@ -685,3 +685,191 @@ const COMMITMENT_TYPES = [
   'Allotment — Not Committed',
   'Any',
 ];
+
+// ── Demand Forecast seed data ──────────────────────────────
+// 52 forward weeks starting from the current demo "today" (2026-04-15).
+const DEMAND_WEEKS = (() => {
+  const out = [];
+  const start = new Date(2026, 3, 15); // 2026-04-15
+  for (let i = 0; i < 52; i++) {
+    const d = new Date(start);
+    d.setDate(d.getDate() + i * 7);
+    const mo = d.toLocaleString('en-US', { month: 'short' });
+    out.push({
+      idx: i,
+      label: `Wk ${mo} ${String(d.getDate()).padStart(2, '0')}`,
+      weekStart: _fmtDate(d),
+      monthIdx: d.getMonth(), // 0-11
+    });
+  }
+  return out;
+})();
+
+// Per-region seasonality factor 0..12 month index → relative demand
+const _REGION_SEASONALITY = {
+  'Caribbean':       [1.28, 1.26, 1.22, 1.10, 0.90, 0.70, 0.68, 0.65, 0.72, 0.85, 1.05, 1.22],
+  'Mexico':          [1.24, 1.22, 1.20, 1.12, 0.92, 0.78, 0.76, 0.80, 0.82, 0.92, 1.08, 1.20],
+  'Central America': [1.15, 1.15, 1.12, 1.02, 0.88, 0.78, 0.82, 0.82, 0.80, 0.88, 1.00, 1.10],
+  'Europe':          [0.70, 0.72, 0.80, 0.95, 1.12, 1.30, 1.40, 1.38, 1.18, 0.98, 0.78, 0.72],
+  'Sun & Sand':      [1.10, 1.10, 1.08, 1.00, 0.92, 0.82, 0.80, 0.82, 0.88, 0.98, 1.05, 1.12],
+};
+
+// DEMAND_INDEX_DATA: destId → array of 52 weekly demand index values (100 = normal)
+const DEMAND_INDEX_DATA = (() => {
+  const out = {};
+  DESTINATIONS.forEach((dest, di) => {
+    const rand = _seededRandom(1009 + di * 137);
+    const bump = (dest.region === 'Europe' ? 2 : -2); // slight base bias
+    const series = DEMAND_WEEKS.map((wk, i) => {
+      const season = (_REGION_SEASONALITY[dest.region] || _REGION_SEASONALITY['Caribbean'])[wk.monthIdx];
+      const noise = (rand() - 0.5) * 10;
+      const trend = Math.sin((i + di * 3) * 0.18) * 4;
+      return Math.round(100 * season + bump + noise + trend);
+    });
+    out[dest.id] = series;
+  });
+  return out;
+})();
+
+// BOOKING_VELOCITY_DATA: destId → array of 52 weekly velocity ratios (1.0 = on target)
+const BOOKING_VELOCITY_DATA = (() => {
+  const out = {};
+  DESTINATIONS.forEach((dest, di) => {
+    const rand = _seededRandom(2053 + di * 211);
+    const series = DEMAND_WEEKS.map((wk, i) => {
+      const season = (_REGION_SEASONALITY[dest.region] || _REGION_SEASONALITY['Caribbean'])[wk.monthIdx];
+      const base = 0.85 + (season - 1) * 0.55;
+      const noise = (rand() - 0.5) * 0.35;
+      return Math.round((base + noise) * 100) / 100;
+    });
+    out[dest.id] = series;
+  });
+  return out;
+})();
+
+// DEMAND_DRIVERS: external signal cards
+const DEMAND_DRIVERS = [
+  {
+    icon: '✈️',
+    title: 'Search Index — Cancun',
+    description: 'Cancun searches up 23% month-over-month on Google Trends; search-to-book conversion also strengthening.',
+    impact: 'positive',
+    date: '04/12/26',
+    category: 'Search',
+  },
+  {
+    icon: '🌤️',
+    title: 'Hurricane Season Outlook',
+    description: 'NOAA forecasts a moderate 2026 Atlantic season with 13-17 named storms; elevated risk for Caribbean Aug–Oct.',
+    impact: 'negative',
+    date: '04/08/26',
+    category: 'Weather',
+  },
+  {
+    icon: '📅',
+    title: 'Spring Break Window',
+    description: 'Spring break demand window Mar 15 – Apr 15 driving sustained last-minute bookings on sun destinations.',
+    impact: 'positive',
+    date: '04/01/26',
+    category: 'Events',
+  },
+  {
+    icon: '💰',
+    title: 'FX — CAD Weakness',
+    description: 'CAD/USD sitting at 0.72 — continued pricing pressure on USD-denominated hotel costs across Caribbean & Mexico.',
+    impact: 'negative',
+    date: '04/14/26',
+    category: 'FX',
+  },
+  {
+    icon: '🏖️',
+    title: 'European Summer Booking Pace',
+    description: 'Lisbon and Barcelona bookings tracking +18% vs 2025 for Jun–Aug; capacity constrained on YYZ gateways.',
+    impact: 'positive',
+    date: '04/10/26',
+    category: 'Pace',
+  },
+  {
+    icon: '⚠️',
+    title: 'Competitor Capacity — Air Transat',
+    description: 'Air Transat announced 6 additional Caribbean frequencies starting May, adds ~3,200 weekly seats.',
+    impact: 'negative',
+    date: '04/05/26',
+    category: 'Competitor',
+  },
+];
+
+// SCENARIOS: pre-built what-if saved scenarios
+const SCENARIOS = [
+  {
+    id: 'SCN-001',
+    name: 'New Tulum Program',
+    type: 'New destination',
+    baseDestination: 'Tulum',
+    modelledOn: 'Cancun',
+    demandVsSimilar: 1.15,
+    classificationMix: 0.65, // Exclusive share
+    seasons: ['Spring', 'Fall'],
+    createdBy: 'Sarah Chen',
+    createdDate: '03/28/26',
+    projectedImpact: '+15% demand premium vs Cancun baseline',
+    revenueImpact: '+$48,200 / week',
+    marginImpact: '+$32 / booking',
+    status: 'Active',
+  },
+  {
+    id: 'SCN-002',
+    name: 'Hurricane Season Impact',
+    type: 'Demand shock',
+    baseDestination: 'Caribbean region',
+    shockType: 'Negative',
+    magnitude: -0.30,
+    durationWeeks: 10,
+    startWeek: '08/03/26',
+    createdBy: 'Marcus Webb',
+    createdDate: '03/20/26',
+    projectedImpact: '-30% Caribbean demand Aug–Oct',
+    revenueImpact: '-$215,000 / week at peak',
+    marginImpact: '-$58 / booking',
+    status: 'Active',
+  },
+  {
+    id: 'SCN-003',
+    name: 'New Air Transat Caribbean Route',
+    type: 'New competitor',
+    baseDestination: 'Caribbean routes',
+    competitorName: 'Air Transat',
+    pricingRelative: -0.10,
+    routesAffected: ['CUN', 'PUJ', 'MBJ', 'VRA'],
+    createdBy: 'Priya Patel',
+    createdDate: '04/02/26',
+    projectedImpact: '-6% avg LF on affected routes',
+    revenueImpact: '-$92,400 / week',
+    marginImpact: '-$18 / booking',
+    status: 'Draft',
+  },
+  {
+    id: 'SCN-004',
+    name: 'Spring Break Surge',
+    type: 'Demand shock',
+    baseDestination: 'All Caribbean',
+    shockType: 'Positive',
+    magnitude: 0.40,
+    durationWeeks: 5,
+    startWeek: '03/15/26',
+    createdBy: 'Jordan Kim',
+    createdDate: '02/18/26',
+    projectedImpact: '+40% demand for 5-week window',
+    revenueImpact: '+$175,000 / week',
+    marginImpact: '+$42 / booking',
+    status: 'Archived',
+  },
+];
+
+const SCENARIO_TYPES = [
+  'New destination',
+  'Existing destination — demand shock',
+  'Capacity change',
+  'New competitor entry',
+  'Price war simulation',
+];
