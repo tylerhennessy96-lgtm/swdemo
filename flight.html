@@ -1232,11 +1232,11 @@
               <div class="exposure-charts">
                 <div class="chart-box">
                   <div class="chart-label">
-                    Booking Curve <span style="font-size:10px;color:#6b7280;">Seats sold</span>
+                    Booking Curve <span style="font-size:10px;color:#6b7280;">Cumulative % sold · Days to departure</span>
                     <div class="chart-legend">
-                      <span class="legend-item"><span class="legend-line" style="background:#e8007d"></span>Actual</span>
-                      <span class="legend-item"><span class="legend-line" style="background:#9ca3af"></span>Target</span>
-                      <span class="legend-item"><span class="legend-line" style="background:#60a5fa"></span>Forecast</span>
+                      <span class="legend-item"><span class="legend-line" style="background:#e91e8c"></span>Actual</span>
+                      <span class="legend-item"><span class="legend-line" style="background:#e5e7eb;border-top:1px dashed #e5e7eb;height:0;width:18px;"></span>Target</span>
+                      <span class="legend-item"><span class="legend-line" style="background:#9ca3af"></span>Forecast</span>
                     </div>
                   </div>
                   <div style="position:relative;width:100%;height:220px;">
@@ -1245,11 +1245,12 @@
                 </div>
                 <div class="chart-box">
                   <div class="chart-label">
-                    Fare History <span style="font-size:10px;color:#6b7280;">CAD $</span>
+                    Fare History <span style="font-size:10px;color:#6b7280;">CAD $ · Days to departure</span>
                     <div class="chart-legend">
-                      <span class="legend-item"><span class="legend-line" style="background:#e8007d"></span>Our fare</span>
-                      <span class="legend-item"><span class="legend-line" style="background:#60a5fa"></span>Comp 1</span>
-                      <span class="legend-item"><span class="legend-line" style="background:#a78bfa"></span>Comp 2</span>
+                      <span class="legend-item"><span class="legend-line" style="background:#e91e8c"></span>Our fare</span>
+                      <span class="legend-item"><span class="legend-line" style="background:#e5e7eb"></span>Comp 1</span>
+                      <span class="legend-item"><span class="legend-line" style="background:#9ca3af"></span>Comp 2</span>
+                      <span class="legend-item"><span class="legend-line" style="background:rgba(233,30,140,0.10);border:1px solid rgba(233,30,140,0.30);"></span>Comp corridor</span>
                     </div>
                   </div>
                   <div style="position:relative;width:100%;height:220px;">
@@ -2098,64 +2099,220 @@ function closeExposure() {
   document.getElementById('analyticsBackdrop').classList.remove('open');
 }
 function toggleExposure() { closeExposure(); }
+// ── 500-day S-curve booking chart + realistic fare worm ─────
+// Piecewise S-curve knots for cumulative % of seats sold vs days-to-departure.
+const _FLIGHT_SCURVE_KNOTS = [
+  [500, 0.00],
+  [365, 0.03],
+  [180, 0.15],
+  [90,  0.40],
+  [60,  0.55],
+  [30,  0.72],
+  [14,  0.85],
+  [7,   0.90],
+  [0,   0.94],
+];
+function _fSCurveActual(d) {
+  if (d >= 500) return 0;
+  if (d <= 0) return 0.94;
+  for (let i = 0; i < _FLIGHT_SCURVE_KNOTS.length - 1; i++) {
+    const [d1, s1] = _FLIGHT_SCURVE_KNOTS[i];
+    const [d2, s2] = _FLIGHT_SCURVE_KNOTS[i + 1];
+    if (d <= d1 && d >= d2) {
+      const t = (d1 - d) / (d1 - d2);
+      return s1 + (s2 - s1) * t;
+    }
+  }
+  return 0.94;
+}
+// Target = ideal sigmoid running slightly ahead of actual
+function _fSCurveTarget(d) {
+  const p = (500 - d) / 500;
+  return Math.max(0, Math.min(0.96, 0.97 / (1 + Math.exp(-7.5 * (p - 0.68)))));
+}
+function _fBookingXAxis() {
+  const xs = [];
+  for (let d = 500; d > 90; d -= 20) xs.push(d);
+  for (let d = 90; d > 14; d -= 5) xs.push(d);
+  for (let d = 14; d >= 0; d--) xs.push(d);
+  return xs;
+}
+const _F_X_LABEL_MARKERS = new Set([500, 365, 180, 90, 60, 30, 14, 7, 0]);
+
 function drawCharts(date) {
-  const weeks = 12;
-  const labels = Array.from({ length: weeks }, (_, i) => `Wk ${i + 1}`);
+  // Anchor "today" at roughly 45 days from departure for the demo.
+  const todayDtc = 45;
 
-  // Booking curve: target ramps from 0 to targetLF*capacity; forecast to forecastLF*capacity; actual to current sold with dropoff in future weeks.
-  const targetCurve = labels.map((_, i) => Math.round((i + 1) / weeks * date.targetLF * date.capacity));
-  const forecastCurve = labels.map((_, i) => Math.round((i + 1) / weeks * date.forecastLF * date.capacity));
-  // Assume we're around week 7 of 12
-  const nowWk = 7;
-  const actualCurve = labels.map((_, i) =>
-    i <= nowWk ? Math.round((i + 1) / (nowWk + 1) * date.sold) : null
-  );
+  // ── Booking S-curve ───────────────────────────────────────
+  const xs = _fBookingXAxis();
+  if (!xs.includes(todayDtc)) {
+    xs.push(todayDtc);
+    xs.sort((a, b) => b - a);
+  }
 
-  // Fare history: slight wobble
-  const seed = (date.id || '').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-  const rnd = (i, k) => ((Math.sin(seed + i * 7.3 + k * 1.7) + 1) / 2);
-  const ours  = labels.map((_, i) => Math.round(date.currentFare + (rnd(i, 1) - 0.5) * 60));
-  const comp1 = labels.map((_, i) => Math.round(date.comp1Fare  + (rnd(i, 2) - 0.5) * 60));
-  const comp2 = labels.map((_, i) => Math.round(date.comp2Fare  + (rnd(i, 3) - 0.5) * 60));
+  const actualPct   = xs.map(d => (d >= todayDtc ? Math.round(_fSCurveActual(d) * 1000) / 10 : null));
+  const targetPct   = xs.map(d => Math.round(_fSCurveTarget(d) * 1000) / 10);
+  const forecastPct = xs.map(d => (d <= todayDtc ? Math.round(_fSCurveActual(d) * 1000) / 10 : null));
+  // Shaded deficit band = target when actual is below (only for past-to-today).
+  const deficitLower = xs.map((d, i) => {
+    if (d < todayDtc) return null;
+    const a = actualPct[i], t = targetPct[i];
+    if (a == null || t == null) return null;
+    return a < t ? a : t;
+  });
+  const deficitUpper = xs.map((d, i) => {
+    if (d < todayDtc) return null;
+    const a = actualPct[i], t = targetPct[i];
+    if (a == null || t == null) return null;
+    return a < t ? t : t;
+  });
+  const todayLine = xs.map(d => (d === todayDtc ? 100 : null));
 
   if (bookingChart) bookingChart.destroy();
   bookingChart = new Chart(document.getElementById('bookingCurveChart'), {
     type: 'line',
     data: {
-      labels,
+      labels: xs,
       datasets: [
-        { label:'Actual',   data:actualCurve,   borderColor:'#e8007d', backgroundColor:'rgba(232,0,125,0.08)', borderWidth:2, tension:.35, pointRadius:3, spanGaps:false },
-        { label:'Target',   data:targetCurve,   borderColor:'#9ca3af', borderDash:[4,4], borderWidth:1.5, pointRadius:0, tension:.35 },
-        { label:'Forecast', data:forecastCurve, borderColor:'#60a5fa', borderWidth:2, tension:.35, pointRadius:0 },
+        // Shaded deficit band (red fill between actual and target when actual is behind)
+        { label: 'DeficitUpper', data: deficitUpper, borderColor: 'rgba(0,0,0,0)', backgroundColor: 'rgba(224,82,82,0.22)', borderWidth: 0, pointRadius: 0, fill: '+1', tension: 0.35, spanGaps: false },
+        { label: 'DeficitLower', data: deficitLower, borderColor: 'rgba(0,0,0,0)', backgroundColor: 'rgba(0,0,0,0)',       borderWidth: 0, pointRadius: 0, fill: false, tension: 0.35, spanGaps: false },
+        // Actual (solid pink) — past → today
+        { label: 'Actual',   data: actualPct,   borderColor: '#e91e8c', backgroundColor: 'rgba(233,30,140,0.10)', borderWidth: 2.4, tension: 0.35, pointRadius: 0, fill: true, spanGaps: false },
+        // Target (dashed white) — full curve
+        { label: 'Target',   data: targetPct,   borderColor: '#e5e7eb', borderDash: [5, 4], borderWidth: 1.6, pointRadius: 0, tension: 0.35, fill: false },
+        // Forecast (dotted light grey) — today → departure
+        { label: 'Forecast', data: forecastPct, borderColor: '#9ca3af', borderDash: [2, 3], borderWidth: 2, pointRadius: 0, tension: 0.35, fill: false, spanGaps: false },
+        // Today marker (vertical white dashed)
+        { label: 'Today',    data: todayLine,   borderColor: '#ffffff', borderWidth: 1.5, pointRadius: 0, borderDash: [3, 3], spanGaps: true },
       ],
     },
     options: {
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false} },
-      scales:{
-        x:{ grid:{display:false}, ticks:{font:{size:10},color:'#9ca3af'} },
-        y:{ grid:{color:'#2a2d35'}, ticks:{font:{size:10},color:'#9ca3af'}, beginAtZero:true },
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { mode: 'nearest', intersect: false } },
+      scales: {
+        x: {
+          type: 'linear',
+          reverse: true,
+          min: 0,
+          max: 500,
+          grid: { display: false },
+          title: { display: true, text: 'Days to Departure', color: '#9ca3af', font: { size: 10 } },
+          ticks: {
+            font: { size: 10 },
+            color: '#9ca3af',
+            autoSkip: false,
+            callback: function(value) { return _F_X_LABEL_MARKERS.has(value) ? value : ''; },
+          },
+        },
+        y: {
+          min: 0,
+          max: 100,
+          grid: { color: '#2a2d35' },
+          ticks: { font: { size: 10 }, color: '#9ca3af', callback: v => v + '%' },
+          title: { display: true, text: '% Sold', color: '#9ca3af', font: { size: 10 } },
+        },
       },
     },
   });
+
+  // ── Fare history "price worm" ─────────────────────────────
+  // Deterministic seeded variation keyed by the flight date id
+  function _hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = (h * 16777619) >>> 0; } return h; }
+  const seed = _hash(date.id || 'flt');
+  function noise(freq, amp, d, offset) {
+    return Math.sin((d / freq) + ((seed % 100) * 0.01) + offset) * amp
+         + Math.cos((d / (freq * 1.8)) + offset * 0.7) * amp * 0.32;
+  }
+
+  const baseFare = date.currentFare || 500;
+  // Realistic airline pricing shape based on days-to-departure
+  // d ≥ 365 : early booker premium (~ +4%)
+  // 365–180 : promotional dip (~ -6% from base)
+  // 180–90  : firming up (~ -1% to +3%)
+  // 90–60   : slight dip (~ -3%)
+  // 60–14   : sharp rise (~ +4% to +8%)
+  // 14–0    : last-minute peak (~ +12%)
+  function ourFareAt(d) {
+    let pct;
+    if (d >= 365)      pct =  0.04;
+    else if (d >= 180) pct = -0.06 + ((365 - d) / 185) * -0.01;
+    else if (d >= 90)  pct = -0.04 + ((180 - d) / 90)  *  0.06;
+    else if (d >= 60)  pct =  0.02 - ((90 - d) / 30)   *  0.05;
+    else if (d >= 14)  pct = -0.03 + ((60 - d) / 46)   *  0.11;
+    else               pct =  0.08 + ((14 - d) / 14)   *  0.06;
+    return Math.round(baseFare * (1 + pct) + noise(50, 5, d, 0.2));
+  }
+  function comp1At(d) {
+    // ~3% below ours on average, slightly different dip timing
+    let pct;
+    if (d >= 365)      pct =  0.01;
+    else if (d >= 180) pct = -0.09;
+    else if (d >= 90)  pct = -0.05;
+    else if (d >= 60)  pct = -0.01;
+    else if (d >= 14)  pct =  0.03 + ((60 - d) / 46) * 0.07;
+    else               pct =  0.09;
+    return Math.round(baseFare * (1 + pct) + noise(42, 6, d, 1.3));
+  }
+  function comp2At(d) {
+    // More aggressive: starts lower, ends higher; crosses ours near 90 days
+    let pct;
+    if (d >= 365)      pct = -0.04;
+    else if (d >= 180) pct = -0.11;
+    else if (d >= 90)  pct = -0.02;
+    else if (d >= 60)  pct =  0.03;
+    else if (d >= 14)  pct =  0.07 + ((60 - d) / 46) * 0.06;
+    else               pct =  0.13;
+    return Math.round(baseFare * (1 + pct) + noise(60, 5, d, 2.6));
+  }
+
+  const ours   = xs.map(ourFareAt);
+  const comp1  = xs.map(comp1At);
+  const comp2  = xs.map(comp2At);
+  const ceiling = xs.map((_, i) => Math.max(comp1[i], comp2[i]));
+  const floor   = xs.map((_, i) => Math.min(comp1[i], comp2[i]));
+  const fareToday = xs.map(d => (d === todayDtc ? Math.max(...ours, ...ceiling) + 10 : null));
 
   if (fareChart) fareChart.destroy();
   fareChart = new Chart(document.getElementById('fareHistoryChart'), {
     type: 'line',
     data: {
-      labels,
+      labels: xs,
       datasets: [
-        { label:'Our fare', data:ours,  borderColor:'#e8007d', backgroundColor:'rgba(232,0,125,0.08)', borderWidth:2, tension:.35, pointRadius:0 },
-        { label:'Comp 1',   data:comp1, borderColor:'#60a5fa', borderWidth:1.5, tension:.35, pointRadius:0 },
-        { label:'Comp 2',   data:comp2, borderColor:'#a78bfa', borderWidth:1.5, tension:.35, pointRadius:0 },
+        // Competitor corridor (ceiling filled to floor)
+        { label: 'Comp ceiling', data: ceiling, borderColor: 'rgba(233,30,140,0.30)', backgroundColor: 'rgba(233,30,140,0.08)', borderWidth: 1, pointRadius: 0, fill: '+1', tension: 0.35 },
+        { label: 'Comp floor',   data: floor,   borderColor: 'rgba(233,30,140,0.30)', backgroundColor: 'rgba(0,0,0,0)',        borderWidth: 1, pointRadius: 0, fill: false, tension: 0.35 },
+        { label: 'Our fare',     data: ours,    borderColor: '#e91e8c', borderWidth: 2.4, pointRadius: 0, tension: 0.35, fill: false },
+        { label: 'Comp 1',       data: comp1,   borderColor: '#e5e7eb', borderWidth: 1.5, pointRadius: 0, tension: 0.35, fill: false },
+        { label: 'Comp 2',       data: comp2,   borderColor: '#9ca3af', borderWidth: 1.5, pointRadius: 0, tension: 0.35, fill: false, borderDash: [4, 3] },
+        { label: 'Today',        data: fareToday, borderColor: '#ffffff', borderWidth: 1.5, pointRadius: 0, borderDash: [3, 3], spanGaps: true },
       ],
     },
     options: {
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false} },
-      scales:{
-        x:{ grid:{display:false}, ticks:{font:{size:10},color:'#9ca3af'} },
-        y:{ grid:{color:'#2a2d35'}, ticks:{font:{size:10},color:'#9ca3af',callback:v=>'$'+v} },
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { mode: 'nearest', intersect: false } },
+      scales: {
+        x: {
+          type: 'linear',
+          reverse: true,
+          min: 0,
+          max: 500,
+          grid: { display: false },
+          title: { display: true, text: 'Days to Departure', color: '#9ca3af', font: { size: 10 } },
+          ticks: {
+            font: { size: 10 },
+            color: '#9ca3af',
+            autoSkip: false,
+            callback: function(value) { return _F_X_LABEL_MARKERS.has(value) ? value : ''; },
+          },
+        },
+        y: {
+          grid: { color: '#2a2d35' },
+          ticks: { font: { size: 10 }, color: '#9ca3af', callback: v => '$' + v },
+          title: { display: true, text: 'Fare CAD $', color: '#9ca3af', font: { size: 10 } },
+        },
       },
     },
   });
