@@ -184,6 +184,9 @@
     table.cal-table td.cal-cell.cal-mid  { background: rgba(250, 240, 160, 0.75); color: #1a1d23; }
     table.cal-table td.cal-cell.cal-ml   { background: rgba(242, 181, 181, 0.75); color: #1a1d23; }
     table.cal-table td.cal-cell.cal-lo   { background: rgba(224, 92, 92, 0.75);   color: #1a1d23; }
+    table.cal-table tbody tr { transition: opacity 0.2s ease; }
+    table.cal-table tbody tr.row-dimmed  { opacity: 0.4; }
+    table.cal-table tbody tr.row-focused { opacity: 1; }
     table.cal-table td.cal-cell.cal-hi .cal-sec .cal-rec,
     table.cal-table td.cal-cell.cal-mh .cal-sec .cal-rec,
     table.cal-table td.cal-cell.cal-mid .cal-sec .cal-rec,
@@ -2450,10 +2453,32 @@ function renderCalendarHead() {
   thead.innerHTML = `<tr><th class="cal-corner" style="cursor:pointer;" onclick="toggleTopSort()" title="Sort destinations by forecast LF">Destination / Route / Flight <span class="sort-ind">${arrow}</span></th>${weekCells}</tr>`;
 }
 
+function _calFocusHelpers() {
+  const anyExpanded = calExpandedDests.size > 0 || calExpandedRoutes.size > 0;
+  const destsWithRouteExpansions = new Set();
+  calExpandedRoutes.forEach(k => destsWithRouteExpansions.add(k.split('::')[0]));
+  const isDestFocused = (destId) => {
+    if (!anyExpanded) return true;
+    return calExpandedDests.has(destId);
+  };
+  const isRouteFocused = (destId, routeId) => {
+    if (!anyExpanded) return true;
+    if (!calExpandedDests.has(destId)) return false;
+    if (!destsWithRouteExpansions.has(destId)) return true;
+    return calExpandedRoutes.has(`${destId}::${routeId}`);
+  };
+  return { anyExpanded, isDestFocused, isRouteFocused };
+}
+function _calCls(focused, anyExpanded) {
+  if (!anyExpanded) return '';
+  return focused ? ' row-focused' : ' row-dimmed';
+}
+
 function renderCalendar() {
   renderCalendarHead();
   const tbody = document.getElementById('calBody');
   const rows = [];
+  const { anyExpanded, isDestFocused, isRouteFocused } = _calFocusHelpers();
 
   // Sort destinations by avg forecast LF (asc/desc per topSortDir)
   const mul = topSortDir === 'asc' ? 1 : -1;
@@ -2494,7 +2519,8 @@ function renderCalendar() {
       </td>`;
     }).join('');
 
-    rows.push(`<tr class="cal-dest">
+    const destCls = _calCls(isDestFocused(dest.id), anyExpanded);
+    rows.push(`<tr class="cal-dest${destCls}">
       <td class="cal-name" onclick="toggleCalDest('${dest.id}')" style="cursor:pointer;">
         <button class="expand-btn ${destOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleCalDest('${dest.id}')">${chevron(destOpen)}</button>
         ${dest.name}
@@ -2529,7 +2555,8 @@ function renderCalendar() {
         </td>`;
       }).join('');
 
-      rows.push(`<tr class="cal-route">
+      const routeCls = _calCls(isRouteFocused(dest.id, route.id), anyExpanded);
+      rows.push(`<tr class="cal-route${routeCls}">
         <td class="cal-name" onclick="toggleCalRoute('${routeKey}')" style="cursor:pointer;">
           <button class="expand-btn ${routeOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleCalRoute('${routeKey}')">${chevron(routeOpen)}</button>
           <span class="font-mono" style="font-weight:500;">${route.flightNum}</span>
@@ -2566,7 +2593,8 @@ function renderCalendar() {
       }).join('');
 
       // One "date detail" row under each route when expanded — departure times per week
-      rows.push(`<tr class="cal-date">
+      const leafCls = _calCls(isRouteFocused(dest.id, route.id), anyExpanded);
+      rows.push(`<tr class="cal-date${leafCls}">
         <td class="cal-name">Flight dates</td>
         ${leafCells}
       </tr>`);
