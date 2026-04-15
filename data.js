@@ -146,50 +146,56 @@ function _generateFlightDepartureDates() {
 
 const _FLIGHT_DEPARTURE_DATES = _generateFlightDepartureDates();
 
-function _makeFlightDate(routeId, idx, category, rand) {
-  const spec = _FLIGHT_CATEGORIES[category];
-  const dep = _FLIGHT_DEPARTURE_DATES[idx];
+// Routes with an explicit daily-flight count per week. Others default to 5.
+const _FLIGHT_DAYS_PER_WEEK = {
+  'WS2401': 7,
+  'WS2601': 6,
+  'WS2201': 5,
+  'WS2801': 6,
+  'WS2403': 5,
+};
+const _DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+// Weekday fare multipliers (Mon cheapest, Sat/Sun slightly up)
+const _DOW_FARE_MULT = [1.08, 0.93, 0.92, 0.95, 0.98, 1.05, 1.10]; // Sun, Mon, Tue, Wed, Thu, Fri, Sat
+const _DEP_TIME_POOL = ['06:30', '08:45', '11:20', '13:05', '14:55', '17:30', '20:15'];
 
-  // Aircraft capacity varies by category, with small per-date jitter to
-  // reflect aircraft swaps and operational variation across weeks.
-  const baseCapacity = category === 'Own Flight'
-    ? 189                                  // 737-800
-    : category === 'Risk Block' ? 174      // 737 MAX 8
-    : 148;                                 // 3rd party narrow-body
-  const jitter = Math.round((rand() - 0.5) * 18); // ±9 seats
-  const capacity = Math.max(120, baseCapacity + jitter);
+function _makeFlightDay(parentId, baseDate, dayIdxInWeek, spec, rand, category, idx, flightNum) {
+  // Pick the day-of-week offset: cycle through Mon, Tue, Thu, Fri, Sat, Sun, Wed depending on how many flights the route has
+  const offsetCycle = [0, 1, 3, 4, 5, 6, 2]; // Mon, Tue, Thu, Fri, Sat, Sun, Wed
+  const dayOffset = offsetCycle[dayIdxInWeek % 7];
+  const d = new Date(baseDate);
+  d.setDate(d.getDate() + dayOffset);
+  const dow = d.getDay();
 
-  // Load factor drifts lower further out
+  // Capacity varies 150-220
+  const baseCap = category === 'Own Flight' ? 195 : category === 'Risk Block' ? 178 : 158;
+  const capacity = Math.max(150, Math.min(220, baseCap + Math.round((rand() - 0.5) * 30)));
+
+  // Load factor drift with some variance per day
   const weeksOut = idx;
   const targetLF = Math.round((0.78 - weeksOut * 0.025) * 100) / 100;
-  const forecastLF = Math.max(0.4, Math.min(0.98,
-    targetLF + (rand() - 0.45) * 0.18));
-  const sold = Math.round(capacity * Math.max(0, forecastLF - 0.06 - rand() * 0.1));
+  const forecastLF = Math.max(0.35, Math.min(0.98, targetLF + (rand() - 0.5) * 0.32));
+  const sold = Math.round(capacity * Math.max(0, forecastLF - 0.06 - rand() * 0.12));
 
-  // Rate of sale (seats per day)
   const daysLeft = Math.max(7, 7 * (idx + 2));
   const rateOfSaleTarget = Math.round(((capacity * targetLF - sold) / daysLeft) * 10) / 10;
-  const rateOfSale = Math.round((rateOfSaleTarget * (0.6 + rand() * 0.8)) * 10) / 10;
+  const rateOfSale = Math.round((rateOfSaleTarget * (0.5 + rand() * 1.0)) * 10) / 10;
 
-  const currentFare = Math.round(spec.fareMin + rand() * (spec.fareMax - spec.fareMin));
-  const recFare = Math.max(spec.fareMin,
-    currentFare + Math.round((rand() - 0.4) * 70));
+  const dowMult = _DOW_FARE_MULT[dow];
+  const baseFare = spec.fareMin + rand() * (spec.fareMax - spec.fareMin);
+  const currentFare = Math.round(baseFare * dowMult);
+  const recFare = Math.max(spec.fareMin, currentFare + Math.round((rand() - 0.4) * 70));
   const currentMargin = Math.round(spec.marginMin + rand() * (spec.marginMax - spec.marginMin));
   const recMargin = Math.max(spec.marginMin, currentMargin + Math.round((rand() - 0.45) * 40));
 
-  // Departure time pool
-  const depHours = ['06:15', '08:40', '10:25', '13:05', '15:30', '17:45', '19:20', '21:10'];
-  const departureTime = depHours[Math.floor(rand() * depHours.length)];
+  const departureTime = _DEP_TIME_POOL[dayIdxInWeek % _DEP_TIME_POOL.length];
 
-  // Competitor fares cluster around ours
   const comp1Fare = Math.round(currentFare + (rand() - 0.45) * 120);
   const comp2Fare = Math.round(currentFare + (rand() - 0.55) * 150);
 
-  const hasCostChange = rand() > 0.88;
-
   return {
-    id: `${routeId}-D${idx + 1}`,
-    departureDate: _fmtDate(dep),
+    id: `${parentId}-${_DOW_LABELS[dow]}`,
+    departureDate: _fmtDate(d),
     departureTime,
     capacity,
     sold,
@@ -205,8 +211,58 @@ function _makeFlightDate(routeId, idx, category, rand) {
     deltaMargin: recMargin - currentMargin,
     comp1Fare,
     comp2Fare,
-    hasCostChange,
+    hasCostChange: rand() > 0.92,
     locked: false,
+  };
+}
+
+function _makeFlightDate(routeId, idx, category, rand, flightNum) {
+  const spec = _FLIGHT_CATEGORIES[category];
+  const dep = _FLIGHT_DEPARTURE_DATES[idx];
+
+  // Determine how many daily flights this route+week has
+  const dayCount = _FLIGHT_DAYS_PER_WEEK[flightNum] || 5;
+
+  const parentId = `${routeId}-W${idx + 1}`;
+  const days = Array.from({ length: dayCount }, (_, di) =>
+    _makeFlightDay(parentId, dep, di, spec, rand, category, idx, flightNum)
+  );
+
+  // Aggregate the week from its days
+  const capacity = days.reduce((s, x) => s + x.capacity, 0);
+  const sold     = days.reduce((s, x) => s + x.sold, 0);
+  const avgTargetLF   = days.reduce((s, x) => s + x.targetLF, 0) / days.length;
+  const avgForecastLF = days.reduce((s, x) => s + x.forecastLF, 0) / days.length;
+  const avgRos       = days.reduce((s, x) => s + x.rateOfSale, 0) / days.length;
+  const avgRosTarget = days.reduce((s, x) => s + x.rateOfSaleTarget, 0) / days.length;
+  const avgCurFare = Math.round(days.reduce((s, x) => s + x.currentFare, 0) / days.length);
+  const avgRecFare = Math.round(days.reduce((s, x) => s + x.recFare, 0) / days.length);
+  const avgCurMargin = Math.round(days.reduce((s, x) => s + x.currentMargin, 0) / days.length);
+  const avgRecMargin = Math.round(days.reduce((s, x) => s + x.recMargin, 0) / days.length);
+  const avgComp1 = Math.round(days.reduce((s, x) => s + x.comp1Fare, 0) / days.length);
+  const avgComp2 = Math.round(days.reduce((s, x) => s + x.comp2Fare, 0) / days.length);
+
+  return {
+    id: parentId,
+    departureDate: _fmtDate(dep),
+    departureTime: days[0].departureTime,
+    capacity,
+    sold,
+    targetLF: Math.round(avgTargetLF * 100) / 100,
+    forecastLF: Math.round(avgForecastLF * 100) / 100,
+    rateOfSale: Math.round(avgRos * 10) / 10,
+    rateOfSaleTarget: Math.round(avgRosTarget * 10) / 10,
+    currentFare: avgCurFare,
+    recFare: avgRecFare,
+    deltaFare: avgRecFare - avgCurFare,
+    currentMargin: avgCurMargin,
+    recMargin: avgRecMargin,
+    deltaMargin: avgRecMargin - avgCurMargin,
+    comp1Fare: avgComp1,
+    comp2Fare: avgComp2,
+    hasCostChange: days.some(x => x.hasCostChange),
+    locked: false,
+    days,
   };
 }
 
@@ -214,7 +270,7 @@ function _makeFlightRoute(destId, routeSpec, destIdx, routeIdx) {
   const rand = _seededRandom((destIdx + 17) * 6301 + (routeIdx + 1) * 53);
   const routeId = `${destId}-${routeSpec.flightNum}`;
   const dates = _FLIGHT_DEPARTURE_DATES.map((_, i) =>
-    _makeFlightDate(routeId, i, routeSpec.category, rand)
+    _makeFlightDate(routeId, i, routeSpec.category, rand, routeSpec.flightNum)
   );
   const totalCapacity = dates.reduce((s, d) => s + d.capacity, 0);
   const totalSold = dates.reduce((s, d) => s + d.sold, 0);
@@ -279,6 +335,12 @@ function getFlightDateById(dateId) {
     for (const r of d.routes) {
       const hit = r.dates.find(x => x.id === dateId);
       if (hit) return { destination: d, route: r, date: hit };
+      // Search inside per-week days
+      for (const weekDate of r.dates) {
+        if (!weekDate.days) continue;
+        const dayHit = weekDate.days.find(x => x.id === dateId);
+        if (dayHit) return { destination: d, route: r, date: dayHit, weekDate };
+      }
     }
   }
   return null;
