@@ -995,7 +995,7 @@
 
 <!-- ── Row-level RM Copilot side panel ── -->
 <aside class="cprp" id="rowCopilotPanel" aria-hidden="true">
-  <button type="button" class="cprp-close" id="rowCopilotCloseBtn" aria-label="Close copilot">×</button>
+  <button id="rowCopilotCloseBtn" aria-label="Close copilot" style="position:absolute;top:12px;right:12px;z-index:30;background:#2a2e38;border:1px solid #4b5563;color:#ffffff;font-size:20px;font-weight:bold;cursor:pointer;padding:4px 8px;line-height:1;border-radius:50%;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;">×</button>
   <div class="cprp-head" id="rowCopilotHead"></div>
   <div class="cprp-chat" id="rowCopilotChat"></div>
   <div class="cprp-suggest" id="rowCopilotSuggest"></div>
@@ -1016,7 +1016,7 @@
 <aside class="gcp" id="gcpPanel" aria-hidden="true">
   <div class="gcp-head">
     <div class="gcp-title"><span class="spk">✦</span> RM Copilot</div>
-    <button type="button" class="gcp-close" onclick="event.stopPropagation();closeGeneralCopilot();" aria-label="Close">×</button>
+    <button id="gcpCloseBtn" aria-label="Close" style="background:#2a2e38;border:1px solid #4b5563;color:#ffffff;font-size:20px;font-weight:bold;cursor:pointer;padding:4px 8px;line-height:1;border-radius:50%;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;">×</button>
   </div>
   <div class="gcp-chat" id="gcpChat"></div>
   <div class="gcp-suggest" id="gcpSuggest"></div>
@@ -3257,6 +3257,7 @@ function openRowCopilot(destId, weekIdx) {
 
   // Slide in
   const panel = document.getElementById('rowCopilotPanel');
+  panel.style.display = '';
   panel.classList.add('open');
   panel.setAttribute('aria-hidden', 'false');
   // Shift general copilot panel left if it's open, so they stack
@@ -3273,29 +3274,31 @@ function openRowCopilot(destId, weekIdx) {
 function closeRowCopilot() {
   const panel = document.getElementById('rowCopilotPanel');
   panel.classList.remove('open');
+  panel.style.display = 'none';
   panel.setAttribute('aria-hidden', 'true');
   _rowCopilotCtx = null;
   _rowCopilotCtxData = null;
   document.getElementById('gcpPanel').classList.remove('row-open');
 }
-// Attach close-button listener directly (avoid relying on inline onclick
-// in case the handler is not in scope when HTML parses).
-(function wireRowCopilotClose() {
-  const btn = document.getElementById('rowCopilotCloseBtn');
-  if (!btn) return;
-  btn.addEventListener('click', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    closeRowCopilot();
-  });
-})();
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    const rp = document.getElementById('rowCopilotPanel');
-    if (rp && rp.classList.contains('open')) closeRowCopilot();
-    const gp = document.getElementById('gcpPanel');
-    if (gp && gp.classList.contains('open')) closeGeneralCopilot();
-  }
+
+// Wire both copilot close buttons via addEventListener after the DOM
+// exists (scripts run at end of body so elements are available here).
+document.getElementById('rowCopilotCloseBtn').addEventListener('click', function(e) {
+  e.stopPropagation();
+  closeRowCopilot();
+});
+document.getElementById('gcpCloseBtn').addEventListener('click', function(e) {
+  e.stopPropagation();
+  closeGeneralCopilot();
+});
+
+// Global Escape: close any open copilot panel.
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Escape') return;
+  const rp = document.getElementById('rowCopilotPanel');
+  if (rp && rp.classList.contains('open')) closeRowCopilot();
+  const gp = document.getElementById('gcpPanel');
+  if (gp && gp.classList.contains('open')) closeGeneralCopilot();
 });
 
 function _flightContextMessage(ctx) {
@@ -3447,6 +3450,7 @@ function toggleGeneralCopilot() {
 }
 function openGeneralCopilot() {
   const panel = document.getElementById('gcpPanel');
+  panel.style.display = '';
   panel.classList.add('open');
   panel.setAttribute('aria-hidden', 'false');
   // Sync row-open offset state on open
@@ -3464,6 +3468,7 @@ function openGeneralCopilot() {
 function closeGeneralCopilot() {
   const panel = document.getElementById('gcpPanel');
   panel.classList.remove('open');
+  panel.style.display = 'none';
   panel.setAttribute('aria-hidden', 'true');
 }
 function renderGcpSuggest() {
