@@ -1755,7 +1755,7 @@ function renderRecsTable() {
           <td class="text-muted">—</td>
           <td class="text-right">${fmt$(dwAgg.currentADR)}</td>
           <td class="text-right num">${fmt$(dwAgg.currentADR * 7)}</td>
-          <td class="text-right highlight-teal">${fmt$(dwAgg.recADR)}</td>
+          <td class="text-right highlight-teal${dwAgg.deltaADR < 0 ? ' rec-down' : ''}">${fmt$(dwAgg.recADR)}</td>
           <td class="text-right">${deltaCell(dwAgg.deltaADR)}</td>
           <td class="text-right num">${dwMargin ? fmt$(dwMargin.currentMargin) : '<span class="text-muted">—</span>'}</td>
           <td class="text-right num">${dwMargin ? fmt$(dwMargin.recMargin) : '<span class="text-muted">—</span>'}</td>
@@ -1803,7 +1803,7 @@ function renderRecsTable() {
             <td class="text-muted">—</td>
             <td class="text-right">${fmt$(hAgg.currentADR)}</td>
             <td class="text-right num">${fmt$(hAgg.currentADR * 7)}</td>
-            <td class="text-right highlight-teal">${fmt$(hAgg.recADR)}</td>
+            <td class="text-right highlight-teal${hAgg.deltaADR < 0 ? ' rec-down' : ''}">${fmt$(hAgg.recADR)}</td>
             <td class="text-right">${deltaCell(hAgg.deltaADR)}</td>
             <td class="text-right num">${hMargin ? fmt$(hMargin.currentMargin) : '<span class="text-muted">—</span>'}</td>
             <td class="text-right num">${hMargin ? fmt$(hMargin.recMargin) : '<span class="text-muted">—</span>'}</td>

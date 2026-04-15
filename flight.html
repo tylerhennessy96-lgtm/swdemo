@@ -1792,7 +1792,7 @@ function renderRecsTable() {
           <td class="text-right">${lfText(dwAgg.lf)}</td>
           <td class="text-right num">${Math.round((dwAgg.targetLF || 0) * 100)}%</td>
           <td class="text-right">${fmt$(dwAgg.avgCurrentFare)}</td>
-          <td class="text-right highlight-teal">${fmt$(dwAgg.avgRecFare)}</td>
+          <td class="text-right highlight-teal${dwAgg.deltaFare < 0 ? ' rec-down' : ''}">${fmt$(dwAgg.avgRecFare)}</td>
           <td class="text-right">${deltaCell(dwAgg.deltaFare)}</td>
           <td class="text-right num">${fmt$(dwAgg.avgCurrentMargin)}</td>
           <td class="text-right num">${fmt$(dwAgg.avgRecMargin)}</td>
@@ -1840,7 +1840,7 @@ function renderRecsTable() {
             <td class="text-right">${lfText(rAgg.lf)}</td>
             <td class="text-right num">${Math.round((rAgg.targetLF || 0) * 100)}%</td>
             <td class="text-right">${fmt$(rAgg.avgCurrentFare)}</td>
-            <td class="text-right highlight-teal">${fmt$(rAgg.avgRecFare)}</td>
+            <td class="text-right highlight-teal${rAgg.deltaFare < 0 ? ' rec-down' : ''}">${fmt$(rAgg.avgRecFare)}</td>
             <td class="text-right">${deltaCell(rAgg.deltaFare)}</td>
             <td class="text-right num">${fmt$(rAgg.avgCurrentMargin)}</td>
             <td class="text-right num">${fmt$(rAgg.avgRecMargin)}</td>
