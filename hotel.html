@@ -173,9 +173,9 @@
       vertical-align: middle;
       position: relative;
     }
-    table.cal-table td.cal-cell.cal-hi   { background: #1a7a4a; }
-    table.cal-table td.cal-cell.cal-mid  { background: #c47a1e; }
-    table.cal-table td.cal-cell.cal-lo   { background: #b03030; }
+    table.cal-table td.cal-cell.cal-hi   { background: rgba(91, 184, 133, 0.88); }
+    table.cal-table td.cal-cell.cal-mid  { background: rgba(232, 160, 32, 0.88); }
+    table.cal-table td.cal-cell.cal-lo   { background: rgba(217, 95, 95, 0.88); }
     table.cal-table td.cal-cell.cal-none {
       background: #f3f4f6;
       color: var(--text-muted);
@@ -400,6 +400,173 @@
       letter-spacing: .02em;
       opacity: 0.8;
     }
+
+    /* ── Alerts cell helpers ───────────────────────────────── */
+    .alerts-cell { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .alert-fast, .alert-slow { font-size: 13px; line-height: 1; cursor: default; }
+
+    /* ── Run Evaluation modal ──────────────────────────────── */
+    .re-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 20, 27, 0.55);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .re-backdrop.open { display: flex; }
+    .re-modal {
+      background: #fff;
+      border-radius: 10px;
+      width: 520px;
+      max-width: calc(100vw - 40px);
+      max-height: calc(100vh - 80px);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+      font-family: 'Archivo', sans-serif;
+      color: var(--text-primary);
+      overflow: hidden;
+    }
+    .re-modal-head {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .re-modal-head h3 { margin: 0; font-size: 15px; font-weight: 600; }
+    .re-modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      line-height: 1;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .re-modal-close:hover { color: var(--text-primary); background: #f3f4f6; }
+    .re-modal-body {
+      padding: 18px 22px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .re-modal-section { margin-bottom: 18px; }
+    .re-modal-section:last-child { margin-bottom: 0; }
+    .re-modal-section-title {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 10px;
+    }
+    .re-modal-section .re-intro {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin: 0 0 8px;
+    }
+    .re-modal-cb {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--text-primary);
+      cursor: pointer;
+      padding: 5px 0;
+    }
+    .re-modal-cb input { margin-top: 2px; cursor: pointer; }
+    .re-destlist, .re-weeklist {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px 10px;
+      margin-top: 6px;
+      padding: 8px 10px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+    .re-destlist label, .re-weeklist label {
+      font-size: 11.5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+    }
+    .re-preview {
+      background: rgba(13, 148, 136, 0.08);
+      border: 1px solid rgba(13, 148, 136, 0.28);
+      border-radius: 6px;
+      padding: 11px 14px;
+      font-size: 12.5px;
+      color: #0f766e;
+    }
+    .re-preview strong { color: #0d9488; font-weight: 700; }
+    .re-modal-foot {
+      padding: 14px 22px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: #fafbfc;
+    }
+    .re-btn {
+      padding: 8px 18px;
+      border-radius: 5px;
+      font-family: 'Archivo', sans-serif;
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+    }
+    .re-btn.ghost { background: #fff; color: var(--text-primary); }
+    .re-btn.ghost:hover { border-color: #0d9488; color: #0d9488; }
+    .re-btn.primary { background: #0d9488; color: #fff; border-color: #0d9488; }
+    .re-btn.primary:hover { background: #0b7f73; border-color: #0b7f73; }
+
+    /* Toast notification */
+    .re-toast {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      background: #16181d;
+      color: #e5e7eb;
+      border: 1px solid #2d313b;
+      border-radius: 8px;
+      padding: 11px 18px;
+      font-family: 'Archivo', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.28);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      z-index: 220;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .re-toast.shown {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .re-toast .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(13, 148, 136, 0.25);
+      border-top-color: #0d9488;
+      border-radius: 50%;
+      animation: reSpin 0.9s linear infinite;
+    }
+    .re-toast.success .spinner { display: none; }
+    .re-toast .check { display: none; color: #0d9488; font-weight: 700; }
+    .re-toast.success .check { display: inline; }
+    @keyframes reSpin { to { transform: rotate(360deg); } }
 
     /* ── Row-level Ask button + Copilot side panel ───────────── */
     .ask-row-btn {
@@ -742,6 +909,52 @@
 <body>
 <div class="analytics-backdrop" id="analyticsBackdrop" onclick="closeExposure()"></div>
 
+<!-- ── Run Evaluation modal + toast ── -->
+<div class="re-backdrop" id="reBackdrop">
+  <div class="re-modal" role="dialog" aria-labelledby="reModalTitle">
+    <div class="re-modal-head">
+      <h3 id="reModalTitle">Run Evaluation</h3>
+      <button type="button" class="re-modal-close" onclick="closeRunEvalModal()" aria-label="Close">×</button>
+    </div>
+    <div class="re-modal-body">
+      <div class="re-modal-section">
+        <div class="re-modal-section-title">Scope</div>
+        <p class="re-intro">Select what to include in this evaluation:</p>
+        <label class="re-modal-cb">
+          <input type="checkbox" id="reAllDests" checked onchange="onReScopeChange()">
+          <span>All destinations</span>
+        </label>
+        <div id="reDestList" class="re-destlist" style="display:none;"></div>
+        <label class="re-modal-cb">
+          <input type="checkbox" id="reAllWeeks" checked onchange="onReScopeChange()">
+          <span>All check-in weeks</span>
+        </label>
+        <div id="reWeekList" class="re-weeklist" style="display:none;"></div>
+      </div>
+      <div class="re-modal-section">
+        <div class="re-modal-section-title">Options</div>
+        <label class="re-modal-cb"><input type="checkbox" id="reOptRules" checked> Apply package rules automatically</label>
+        <label class="re-modal-cb"><input type="checkbox" id="reOptComp" checked> Include competitor pricing adjustments</label>
+        <label class="re-modal-cb"><input type="checkbox" id="reOptFlag" checked> Flag changes above $50 for review</label>
+        <label class="re-modal-cb"><input type="checkbox" id="reOptNotify"> Notify RM on completion</label>
+      </div>
+      <div class="re-modal-section">
+        <div class="re-modal-section-title">Preview</div>
+        <div class="re-preview" id="rePreview">—</div>
+      </div>
+    </div>
+    <div class="re-modal-foot">
+      <button type="button" class="re-btn ghost" onclick="closeRunEvalModal()">Cancel</button>
+      <button type="button" class="re-btn primary" onclick="confirmRunEvaluation()">Run Evaluation</button>
+    </div>
+  </div>
+</div>
+<div class="re-toast" id="reToast">
+  <span class="spinner"></span>
+  <span class="check">✓</span>
+  <span id="reToastText">Evaluation running…</span>
+</div>
+
 <!-- ── Row-level RM Copilot side panel ── -->
 <aside class="cprp" id="rowCopilotPanel" aria-hidden="true">
   <button type="button" class="cprp-close" onclick="closeRowCopilot()" aria-label="Close copilot">×</button>
@@ -936,6 +1149,10 @@
         <span class="legend-sep">·</span>
         <span class="legend-item"><span class="legend-key">⚠️</span> Cost change / alert</span>
         <span class="legend-sep">·</span>
+        <span class="legend-item"><span class="legend-key">🔥</span> Fast seller / high demand</span>
+        <span class="legend-sep">·</span>
+        <span class="legend-item"><span class="legend-key">🐢</span> Slow seller / low demand</span>
+        <span class="legend-sep">·</span>
         <span class="legend-item"><span class="legend-key">🔒</span> Price locked</span>
         <span class="legend-sep">·</span>
         <span class="legend-item"><span class="legend-key">📝</span> Note attached</span>
@@ -967,11 +1184,11 @@
               <div class="exposure-charts">
                 <div class="chart-box">
                   <div class="chart-label">
-                    Booking Curve <span style="font-size:10px;color:#6b7280;" id="chartLabel1Sub">Room nights</span>
+                    Booking Curve <span style="font-size:10px;color:#6b7280;" id="chartLabel1Sub">Cumulative % sold · Days to check-in</span>
                     <div class="chart-legend">
-                      <span class="legend-item"><span class="legend-line" style="background:#e8007d"></span>Actual</span>
-                      <span class="legend-item"><span class="legend-line" style="background:#9ca3af"></span>Target</span>
-                      <span class="legend-item"><span class="legend-line" style="background:#60a5fa"></span>Forecast</span>
+                      <span class="legend-item"><span class="legend-line" style="background:#0d9488"></span>Actual</span>
+                      <span class="legend-item"><span class="legend-line" style="background:#e5e7eb;border-top:1px dashed #e5e7eb;height:0;width:18px;"></span>Target</span>
+                      <span class="legend-item"><span class="legend-line" style="background:#f59e0b;"></span>Forecast</span>
                     </div>
                   </div>
                   <div style="position:relative;width:100%;height:220px;">
@@ -980,11 +1197,13 @@
                 </div>
                 <div class="chart-box">
                   <div class="chart-label">
-                    <span id="chartLabel2Title">Occupancy Trend</span>
-                    <span style="font-size:10px;color:#6b7280;" id="chartLabel2Sub">Current vs forecast</span>
+                    <span id="chartLabel2Title">Price History</span>
+                    <span style="font-size:10px;color:#6b7280;" id="chartLabel2Sub">ADR $ · Days to check-in</span>
                     <div class="chart-legend" id="chart2Legend">
-                      <span class="legend-item"><span class="legend-line" style="background:#e8007d"></span>Current</span>
-                      <span class="legend-item"><span class="legend-line" style="background:#60a5fa"></span>Forecast</span>
+                      <span class="legend-item"><span class="legend-line" style="background:#0d9488"></span>Our ADR</span>
+                      <span class="legend-item"><span class="legend-line" style="background:#e5e7eb"></span>Comp 1</span>
+                      <span class="legend-item"><span class="legend-line" style="background:#9ca3af"></span>Comp 2</span>
+                      <span class="legend-item"><span class="legend-line" style="background:rgba(91,184,133,0.25);border:1px solid rgba(91,184,133,0.5);"></span>Comp Corridor</span>
                     </div>
                   </div>
                   <div style="position:relative;width:100%;height:220px;">
@@ -1415,6 +1634,27 @@ function toggleTopSort() {
   renderRecsHead();
   renderRecsTable();
 }
+// "Today" anchor for days-to-check-in calculations (matches CLAUDE.md current date)
+const _TODAY_FOR_DEMO = new Date(2026, 3, 15);
+function daysToCheckIn(weekStart) {
+  if (!weekStart) return 999;
+  const [mm, dd, yy] = weekStart.split('/').map(Number);
+  if (!mm) return 999;
+  const d = new Date(2000 + (yy || 26), (mm || 1) - 1, dd || 1);
+  return Math.round((d - _TODAY_FOR_DEMO) / 86400000);
+}
+function alertsCellHTML(a) {
+  const parts = [];
+  if (a.hasCostChange) {
+    parts.push('<span class="cost-change-flag" title="Cost change / alert">⚠️</span>');
+  }
+  const fastSeller = (a.soldPct > 0.80) || (a.forecastOcc != null && a.forecastOcc >= 0.85);
+  const slowSeller = (a.soldPct < 0.35) && (a.daysToCheckIn != null && a.daysToCheckIn < 60);
+  if (fastSeller) parts.push('<span class="alert-fast" title="High demand / fast seller — consider yield uplift">🔥</span>');
+  if (slowSeller) parts.push('<span class="alert-slow" title="Slow seller — consider promotional pricing">🐢</span>');
+  return parts.join('');
+}
+
 function renderRecsHead() {
   const thead = document.getElementById('recsTableHead');
   const arrow = topSortDir === 'asc' ? '↑' : '↓';
@@ -1423,18 +1663,18 @@ function renderRecsHead() {
       <th style="min-width:320px;">Destination / Week</th>
       <th style="width:100px;cursor:pointer;user-select:none;" onclick="toggleTopSort()" title="Sort by check-in week">Check-in Wk <span class="sort-ind">${arrow}</span></th>
       <th class="text-right" style="width:110px;">Sold / Alloc</th>
-      <th class="text-right" style="width:70px;">Sold %</th>
       <th class="text-right" style="width:80px;cursor:pointer;user-select:none;" onclick="toggleTopSort()" title="Sort by forecast occ">Forecast<span class="th-sub">Occ % <span class="sort-ind">${arrow}</span></span></th>
       <th class="text-right" style="width:80px;">Current<span class="th-sub">Occ %</span></th>
       <th class="text-right" style="width:90px;">Supp Cost<span class="th-sub">/ night</span></th>
       <th class="text-right" style="width:90px;">Current<span class="th-sub">ADR $</span></th>
+      <th class="text-right" style="width:95px;">Weekly Rate<span class="th-sub">$ / 7 nts</span></th>
       <th class="text-right" style="width:90px;">Rec<span class="th-sub">ADR $</span></th>
       <th class="text-right" style="width:80px;">Delta<span class="th-sub">$</span></th>
       <th class="text-right" style="width:90px;">Current<span class="th-sub">Margin $</span></th>
       <th class="text-right" style="width:90px;">Rec<span class="th-sub">Margin $</span></th>
       <th class="text-right" style="width:80px;">Margin<span class="th-sub">Δ $</span></th>
       <th class="text-right" style="width:80px;">Margin %</th>
-      <th style="width:80px;">Flags</th>
+      <th style="width:100px;">Alerts</th>
       <th style="width:110px;">Actions</th>
     </tr>
   `;
@@ -1489,6 +1729,7 @@ function renderRecsTable() {
       const entry = { weekIdx, forecastOcc: dwAgg.forecastOcc, rows: entryRows };
       entries.push(entry);
 
+      const dtc = daysToCheckIn(wkMeta.weekStart);
       entryRows.push(`
         <tr class="row-property" onclick="toggleWeek('${weekKey}')" style="cursor:pointer;">
           <td>
@@ -1499,18 +1740,18 @@ function renderRecsTable() {
           </td>
           <td><span style="font-weight:500;">Wk ${shortDate}</span></td>
           <td class="text-right num">${dwAgg.sold.toLocaleString()}<span style="color:var(--text-muted);margin:0 5px;">/</span>${dwAgg.alloc.toLocaleString()}</td>
-          <td class="text-right">${soldPctText(dwAgg.soldPct)}</td>
           <td class="text-right">${occPill(dwAgg.forecastOcc)}</td>
           <td class="text-right num">${fmtPct(dwAgg.currentOcc)}</td>
           <td class="text-muted">—</td>
           <td class="text-right">${fmt$(dwAgg.currentADR)}</td>
+          <td class="text-right num">${fmt$(dwAgg.currentADR * 7)}</td>
           <td class="text-right highlight-teal">${fmt$(dwAgg.recADR)}</td>
           <td class="text-right">${deltaCell(dwAgg.deltaADR)}</td>
           <td class="text-right num">${dwMargin ? fmt$(dwMargin.currentMargin) : '<span class="text-muted">—</span>'}</td>
           <td class="text-right num">${dwMargin ? fmt$(dwMargin.recMargin) : '<span class="text-muted">—</span>'}</td>
           <td class="text-right">${dwMargin ? deltaCell(dwMargin.marginDelta) : '<span class="text-muted">—</span>'}</td>
           <td class="text-right">${dwMargin ? marginPctBadge(dwMargin.marginPct) : '<span class="text-muted">—</span>'}</td>
-          <td>${dwAgg.hasCostChange ? '<span class="cost-change-flag" title="Cost change in this week">⚠️</span>' : ''}</td>
+          <td>${alertsCellHTML({ soldPct: dwAgg.soldPct, forecastOcc: dwAgg.forecastOcc, daysToCheckIn: dtc, hasCostChange: dwAgg.hasCostChange })}</td>
           <td>
             <span class="pkg-action-icons" style="display:inline-flex;align-items:center;gap:6px;">
               <button title="Booking curve" onclick="event.stopPropagation();openDestWeekCurve('${dest.id}', ${weekIdx})">
@@ -1547,18 +1788,18 @@ function renderRecsTable() {
             </td>
             <td class="text-muted">—</td>
             <td class="text-right num">${hAgg.sold.toLocaleString()}<span style="color:var(--text-muted);margin:0 5px;">/</span>${hAgg.alloc.toLocaleString()}</td>
-            <td class="text-right">${soldPctText(hAgg.soldPct)}</td>
             <td class="text-right">${occPill(hAgg.forecastOcc)}</td>
             <td class="text-right num">${fmtPct(hAgg.currentOcc)}</td>
             <td class="text-muted">—</td>
             <td class="text-right">${fmt$(hAgg.currentADR)}</td>
+            <td class="text-right num">${fmt$(hAgg.currentADR * 7)}</td>
             <td class="text-right highlight-teal">${fmt$(hAgg.recADR)}</td>
             <td class="text-right">${deltaCell(hAgg.deltaADR)}</td>
             <td class="text-right num">${hMargin ? fmt$(hMargin.currentMargin) : '<span class="text-muted">—</span>'}</td>
             <td class="text-right num">${hMargin ? fmt$(hMargin.recMargin) : '<span class="text-muted">—</span>'}</td>
             <td class="text-right">${hMargin ? deltaCell(hMargin.marginDelta) : '<span class="text-muted">—</span>'}</td>
             <td class="text-right">${hMargin ? marginPctBadge(hMargin.marginPct) : '<span class="text-muted">—</span>'}</td>
-            <td>${hAgg.hasCostChange ? '<span class="cost-change-flag" title="Cost change in a category">⚠️</span>' : ''}</td>
+            <td>${alertsCellHTML({ soldPct: hAgg.soldPct, forecastOcc: hAgg.forecastOcc, daysToCheckIn: dtc, hasCostChange: hAgg.hasCostChange })}</td>
             <td>
               <span class="pkg-action-icons">
                 <button title="Booking curve" onclick="event.stopPropagation();openHotelWeekCurve('${dest.id}', ${weekIdx}, '${hotel.id}')">
@@ -1591,13 +1832,13 @@ function renderRecsTable() {
               </td>
               <td class="text-muted">—</td>
               <td class="text-right num">${week.sold}<span style="color:var(--text-muted);margin:0 5px;">/</span>${week.allocation}</td>
-              <td class="text-right">${soldPctText(wSoldPct)}</td>
               <td class="text-right">${occPill(week.forecastOcc)}</td>
               <td class="text-right num">${fmtPct(week.currentOcc)}</td>
               <td class="text-right num">${fmt$(week.supplierCost)}</td>
               <td class="text-right">
                 <input class="adr-input" type="number" value="${eff}" onchange="updateADR('${week.id}', this.value)" onclick="event.stopPropagation()" />
               </td>
+              <td class="text-right num">${fmt$(eff * 7)}</td>
               <td class="text-right">
                 <span class="rec-margin-cell" onclick="event.stopPropagation();acceptRec('${week.id}')" title="Click to accept">${fmt$(week.recADR)}</span>
               </td>
@@ -1607,10 +1848,12 @@ function renderRecsTable() {
               <td class="text-right">${deltaCell(marginD)}</td>
               <td class="text-right">${marginPctBadge(marginPct)}</td>
               <td>
-                ${week.hasCostChange ? '<span class="cost-change-flag" title="Supplier cost changed">⚠️</span>' : ''}
-                <button class="notes-icon ${hasNote ? 'has-note' : ''}" title="${hasNote ? 'Edit note' : 'Add note'}" onclick="event.stopPropagation();openNotesModal('${week.id}')">
-                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2h8l2 2v8H2z"/><line x1="4" y1="5" x2="10" y2="5"/><line x1="4" y1="8" x2="10" y2="8"/><line x1="4" y1="11" x2="8" y2="11"/></svg>
-                </button>
+                <span class="alerts-cell">
+                  ${alertsCellHTML({ soldPct: wSoldPct, forecastOcc: week.forecastOcc, daysToCheckIn: dtc, hasCostChange: week.hasCostChange })}
+                  <button class="notes-icon ${hasNote ? 'has-note' : ''}" title="${hasNote ? 'Edit note' : 'Add note'}" onclick="event.stopPropagation();openNotesModal('${week.id}')">
+                    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2h8l2 2v8H2z"/><line x1="4" y1="5" x2="10" y2="5"/><line x1="4" y1="8" x2="10" y2="8"/><line x1="4" y1="11" x2="8" y2="11"/></svg>
+                  </button>
+                </span>
               </td>
               <td>
                 <span class="pkg-action-icons">
@@ -1744,30 +1987,13 @@ function openDestWeekCurve(destId, weekIdx) {
      <span style="color:#9ca3af;margin-left:8px;">Sold ${wAgg.sold.toLocaleString()}</span>
      <span style="color:#9ca3af;margin-left:8px;">Occ ${occPct}%</span>`;
 
-  document.getElementById('chartLabel1Sub').textContent = `Room nights — ${wkMeta.weekLabel}`;
-  document.getElementById('chartLabel2Title').textContent = 'ADR by Hotel';
-  document.getElementById('chartLabel2Sub').textContent = 'Current vs rec';
-  document.getElementById('chart2Legend').innerHTML = `
-    <span class="legend-item"><span class="legend-line" style="background:#e8007d"></span>Current ADR</span>
-    <span class="legend-item"><span class="legend-line" style="background:#60a5fa"></span>Rec ADR</span>
-  `;
+  document.getElementById('chartLabel1Sub').textContent = `Cumulative % sold · ${wkMeta.weekLabel}`;
+  document.getElementById('chartLabel2Title').textContent = 'Price History';
+  document.getElementById('chartLabel2Sub').textContent = `ADR $ · ${wkMeta.weekLabel}`;
 
-  const steps = 12;
-  const labels = Array.from({ length: steps }, (_, i) => `T-${steps - i}w`);
-  const targetFinal   = Math.round(wAgg.alloc * 0.78);
-  const forecastFinal = Math.round(wAgg.alloc * wAgg.forecastOcc);
-  const soldFinal     = wAgg.sold;
-  const ease = i => (i + 1) / steps;
-  const sold     = labels.map((_, i) => Math.round(soldFinal * ease(i) * (0.82 + 0.18 * (i + 1) / steps)));
-  const target   = labels.map((_, i) => Math.round(targetFinal * ease(i)));
-  const forecast = labels.map((_, i) => Math.round(forecastFinal * ease(i)));
-
-  const hotelLabels  = dest.hotels.map(h => h.name);
-  const hotelCurrent = dest.hotels.map(h => aggCatsAtWeek(h.categories, weekIdx).currentADR);
-  const hotelRec     = dest.hotels.map(h => aggCatsAtWeek(h.categories, weekIdx).recADR);
-
-  drawBookingLine(labels, sold, target, forecast);
-  drawSecondaryBars(hotelLabels, hotelCurrent, hotelRec, 'ADR $', '$');
+  const dtc = Math.max(0, daysToCheckIn(wkMeta.weekStart));
+  drawBookingSCurve(dtc, dest.id + '::' + weekIdx);
+  drawPriceWorm(dtc, wAgg.currentADR || 220, dest.id + '::' + weekIdx);
 
   showExposure();
 }
@@ -1789,74 +2015,204 @@ function openHotelWeekCurve(destId, weekIdx, hotelId) {
      <span style="color:#9ca3af;margin-left:8px;">Sold ${hAgg.sold.toLocaleString()}</span>
      <span style="color:#9ca3af;margin-left:8px;">Occ ${Math.round(hAgg.forecastOcc * 100)}%</span>`;
 
-  document.getElementById('chartLabel1Sub').textContent = `Room nights — ${hotel.name}`;
-  document.getElementById('chartLabel2Title').textContent = 'ADR by Room Category';
-  document.getElementById('chartLabel2Sub').textContent = 'Current vs rec';
-  document.getElementById('chart2Legend').innerHTML = `
-    <span class="legend-item"><span class="legend-line" style="background:#e8007d"></span>Current ADR</span>
-    <span class="legend-item"><span class="legend-line" style="background:#60a5fa"></span>Rec ADR</span>
-  `;
+  document.getElementById('chartLabel1Sub').textContent = `Cumulative % sold · ${hotel.name}`;
+  document.getElementById('chartLabel2Title').textContent = 'Price History';
+  document.getElementById('chartLabel2Sub').textContent = `ADR $ · ${hotel.name}`;
 
-  const steps = 12;
-  const labels = Array.from({ length: steps }, (_, i) => `T-${steps - i}w`);
-  const targetFinal   = Math.round(hAgg.alloc * 0.78);
-  const forecastFinal = Math.round(hAgg.alloc * hAgg.forecastOcc);
-  const soldFinal     = hAgg.sold;
-  const ease = i => (i + 1) / steps;
-  const sold     = labels.map((_, i) => Math.round(soldFinal * ease(i) * (0.82 + 0.18 * (i + 1) / steps)));
-  const target   = labels.map((_, i) => Math.round(targetFinal * ease(i)));
-  const forecast = labels.map((_, i) => Math.round(forecastFinal * ease(i)));
-
-  const catLabels  = hotel.categories.map(c => c.name);
-  const catCurrent = hotel.categories.map(c => getEffectiveADR(c.checkInWeeks[weekIdx]));
-  const catRec     = hotel.categories.map(c => c.checkInWeeks[weekIdx].recADR);
-
-  drawBookingLine(labels, sold, target, forecast);
-  drawSecondaryBars(catLabels, catCurrent, catRec, 'ADR $', '$');
+  const dtc = Math.max(0, daysToCheckIn(wkMeta.weekStart));
+  drawBookingSCurve(dtc, hotel.id + '::' + weekIdx);
+  drawPriceWorm(dtc, hAgg.currentADR || 220, hotel.id + '::' + weekIdx);
 
   showExposure();
 }
 
-function drawBookingLine(labels, sold, target, forecast) {
+// ── Booking S-curve chart (500 days → 0 days) ─────────────
+// Cumulative % sold as a function of days-to-check-in (d).
+// Piecewise interpolation of real-world S-curve knots.
+const BOOKING_SCURVE_KNOTS = [
+  [500, 0.00],
+  [365, 0.05],
+  [180, 0.20],
+  [90,  0.45],
+  [60,  0.60],
+  [30,  0.75],
+  [14,  0.88],
+  [7,   0.92],
+  [0,   0.95],
+];
+function bookingSCurveActual(d) {
+  if (d >= 500) return 0;
+  if (d <= 0) return 0.95;
+  for (let i = 0; i < BOOKING_SCURVE_KNOTS.length - 1; i++) {
+    const [d1, s1] = BOOKING_SCURVE_KNOTS[i];
+    const [d2, s2] = BOOKING_SCURVE_KNOTS[i + 1];
+    if (d <= d1 && d >= d2) {
+      const t = (d1 - d) / (d1 - d2);
+      return s1 + (s2 - s1) * t;
+    }
+  }
+  return 0.95;
+}
+// Smoother "ideal" target curve — sigmoid
+function bookingSCurveTarget(d) {
+  const p = (500 - d) / 500;
+  return 0.95 / (1 + Math.exp(-7 * (p - 0.72)));
+}
+// Generate a dense x-axis (days-to-check-in) from 500 down to 0
+function bookingXAxis() {
+  const xs = [];
+  // Wide spacing far out, tight near departure
+  for (let d = 500; d > 90; d -= 20) xs.push(d);
+  for (let d = 90; d > 14; d -= 5) xs.push(d);
+  for (let d = 14; d >= 0; d--) xs.push(d);
+  return xs;
+}
+
+function drawBookingSCurve(todayDtc) {
   if (hotelBookingChart) hotelBookingChart.destroy();
+  const xs = bookingXAxis();
+  // Ensure the "today" marker exists in xs so line datasets anchor correctly
+  if (!xs.includes(todayDtc)) xs.push(todayDtc);
+  xs.sort((a, b) => b - a); // descending (500 → 0)
+
+  // Actual: S-curve up to today (set null past today)
+  const actual = xs.map(d => (d >= todayDtc ? Math.round(bookingSCurveActual(d) * 1000) / 10 : null));
+  // Target: full ideal curve
+  const target = xs.map(d => Math.round(bookingSCurveTarget(d) * 1000) / 10);
+  // Forecast: projection from today to departure (null before today)
+  const forecast = xs.map(d => (d <= todayDtc ? Math.round(bookingSCurveActual(d) * 1000) / 10 : null));
+  // Today marker: two-point vertical from 0% to 100%
+  const todayLine = xs.map(d => (d === todayDtc ? 100 : null));
+
+  const xLabelMarkers = new Set([500, 365, 180, 90, 60, 30, 14, 7, 0]);
+
   hotelBookingChart = new Chart(document.getElementById('hotelBookingCurveChart'), {
     type: 'line',
     data: {
-      labels,
+      labels: xs,
       datasets: [
-        { label:'Actual',   data:sold,     borderColor:'#e8007d', backgroundColor:'rgba(232,0,125,0.10)', borderWidth:2, tension:.35, pointRadius:3, fill:true },
-        { label:'Target',   data:target,   borderColor:'#9ca3af', borderDash:[4,4], borderWidth:1.5, pointRadius:0, tension:.35 },
-        { label:'Forecast', data:forecast, borderColor:'#60a5fa', borderWidth:2, tension:.35, pointRadius:0 },
+        { label: 'Actual',   data: actual,   borderColor: '#0d9488', backgroundColor: 'rgba(13,148,136,0.12)', borderWidth: 2.2, tension: 0.35, pointRadius: 0, fill: true, spanGaps: false },
+        { label: 'Target',   data: target,   borderColor: '#e5e7eb', borderDash: [5, 4], borderWidth: 1.6, pointRadius: 0, tension: 0.35, fill: false },
+        { label: 'Forecast', data: forecast, borderColor: '#f59e0b', borderDash: [2, 3], borderWidth: 2, pointRadius: 0, tension: 0.35, fill: false, spanGaps: false },
+        { label: 'Today',    data: todayLine, borderColor: '#ffffff', borderWidth: 1.5, pointRadius: 0, showLine: true, spanGaps: true, borderDash: [3, 3] },
       ],
     },
     options: {
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false} },
-      scales:{
-        x:{ grid:{display:false}, ticks:{font:{size:10},color:'#9ca3af'} },
-        y:{ grid:{color:'#2a2d35'}, ticks:{font:{size:10},color:'#9ca3af'}, beginAtZero:true },
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { mode: 'nearest', intersect: false } },
+      scales: {
+        x: {
+          type: 'linear',
+          reverse: true,
+          min: 0,
+          max: 500,
+          grid: { display: false },
+          title: { display: true, text: 'Days to Check-in', color: '#9ca3af', font: { size: 10 } },
+          ticks: {
+            font: { size: 10 },
+            color: '#9ca3af',
+            autoSkip: false,
+            callback: function(value) { return xLabelMarkers.has(value) ? value : ''; },
+          },
+        },
+        y: {
+          min: 0,
+          max: 100,
+          grid: { color: '#2a2d35' },
+          ticks: { font: { size: 10 }, color: '#9ca3af', callback: v => v + '%' },
+          title: { display: true, text: '% Sold', color: '#9ca3af', font: { size: 10 } },
+        },
       },
     },
   });
 }
 
-function drawSecondaryBars(labels, seriesA, seriesB, yLabel, prefix) {
+// ── Price worm chart (500 days → 0 days) ──────────────────
+// Deterministic synthetic price histories seeded from the key.
+function drawPriceWorm(todayDtc, baseADR, seedKey) {
   if (hotelSecondaryChart) hotelSecondaryChart.destroy();
+  const xs = bookingXAxis();
+  if (!xs.includes(todayDtc)) xs.push(todayDtc);
+  xs.sort((a, b) => b - a);
+
+  // Seeded pseudo-random per series for stability
+  function _hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = (h * 16777619) >>> 0; } return h; }
+  const seed = _hash(seedKey || 'x');
+  function wobble(offset, freq, amp, d) {
+    return Math.sin((d / freq) + (seed % 100) * 0.01 + offset) * amp
+         + Math.cos((d / (freq * 1.7)) + offset * 0.8) * amp * 0.35;
+  }
+
+  // Our ADR: high early, dip mid-window, firm up near check-in
+  const ours = xs.map(d => {
+    const p = (500 - d) / 500;
+    const dip = -18 * Math.sin(Math.PI * p * 0.9);
+    const lateLift = p > 0.85 ? (p - 0.85) * 160 : 0;
+    return Math.round(baseADR + 14 + dip + lateLift + wobble(0.3, 55, 4, d));
+  });
+  // Competitor 1: ~5% below our base early, undercuts mid, follows late
+  const comp1 = xs.map(d => {
+    const p = (500 - d) / 500;
+    const dip = -22 * Math.sin(Math.PI * p * 1.05);
+    const lateLift = p > 0.88 ? (p - 0.88) * 170 : 0;
+    return Math.round(baseADR * 0.95 + 8 + dip + lateLift + wobble(1.7, 42, 5, d));
+  });
+  // Competitor 2: slightly above, smoother
+  const comp2 = xs.map(d => {
+    const p = (500 - d) / 500;
+    const dip = -12 * Math.sin(Math.PI * p * 0.8);
+    const lateLift = p > 0.82 ? (p - 0.82) * 150 : 0;
+    return Math.round(baseADR * 1.04 + 6 + dip + lateLift + wobble(2.9, 63, 4, d));
+  });
+
+  // Corridor: floor = min comp, ceiling = max comp
+  const compFloor   = xs.map((_, i) => Math.min(comp1[i], comp2[i]));
+  const compCeiling = xs.map((_, i) => Math.max(comp1[i], comp2[i]));
+
+  const todayPrice = xs.map(d => (d === todayDtc ? Math.max(...compCeiling, ...ours) + 10 : null));
+
+  const xLabelMarkers = new Set([500, 365, 180, 90, 60, 30, 14, 7, 0]);
+
   hotelSecondaryChart = new Chart(document.getElementById('hotelSecondaryChart'), {
-    type: 'bar',
+    type: 'line',
     data: {
-      labels,
+      labels: xs,
       datasets: [
-        { label:'Current', data:seriesA, backgroundColor:'rgba(232,0,125,0.75)', borderRadius:3 },
-        { label:'Forecast/Rec', data:seriesB, backgroundColor:'rgba(96,165,250,0.75)', borderRadius:3 },
+        // Corridor ceiling (green tint, upper bound), fill to next dataset (floor)
+        { label: 'Comp Ceiling', data: compCeiling, borderColor: 'rgba(91,184,133,0.55)', backgroundColor: 'rgba(91,184,133,0.18)', borderWidth: 1, pointRadius: 0, fill: '+1', tension: 0.35 },
+        // Corridor floor (red tint)
+        { label: 'Comp Floor',   data: compFloor,   borderColor: 'rgba(217,95,95,0.55)',  backgroundColor: 'rgba(217,95,95,0.12)',  borderWidth: 1, pointRadius: 0, fill: false, tension: 0.35 },
+        { label: 'Our ADR',      data: ours,        borderColor: '#0d9488', borderWidth: 2.4, pointRadius: 0, tension: 0.35, fill: false },
+        { label: 'Comp 1',       data: comp1,       borderColor: '#e5e7eb', borderWidth: 1.5, pointRadius: 0, tension: 0.35, fill: false },
+        { label: 'Comp 2',       data: comp2,       borderColor: '#9ca3af', borderWidth: 1.5, pointRadius: 0, tension: 0.35, fill: false },
+        { label: 'Today',        data: todayPrice,  borderColor: '#ffffff', borderWidth: 1.5, pointRadius: 0, borderDash: [3, 3], spanGaps: true },
       ],
     },
     options: {
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false} },
-      scales:{
-        x:{ grid:{display:false}, ticks:{font:{size:10},color:'#9ca3af',maxRotation:0,autoSkip:true} },
-        y:{ grid:{color:'#2a2d35'}, ticks:{font:{size:10},color:'#9ca3af',callback:v => (prefix === '$' ? '$' + v : v + (prefix === '%' ? '%' : ''))}, beginAtZero:true },
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { mode: 'nearest', intersect: false } },
+      scales: {
+        x: {
+          type: 'linear',
+          reverse: true,
+          min: 0,
+          max: 500,
+          grid: { display: false },
+          title: { display: true, text: 'Days to Check-in', color: '#9ca3af', font: { size: 10 } },
+          ticks: {
+            font: { size: 10 },
+            color: '#9ca3af',
+            autoSkip: false,
+            callback: function(value) { return xLabelMarkers.has(value) ? value : ''; },
+          },
+        },
+        y: {
+          grid: { color: '#2a2d35' },
+          ticks: { font: { size: 10 }, color: '#9ca3af', callback: v => '$' + v },
+          title: { display: true, text: 'ADR $', color: '#9ca3af', font: { size: 10 } },
+        },
       },
     },
   });
@@ -1953,7 +2309,70 @@ function toggleFilter(id) {
 function toggleMenu() {
   document.getElementById('navDropdown').classList.toggle('open');
 }
-function runEvaluation() {}
+// ── Run Evaluation modal ───────────────────────────────────
+function runEvaluation() {
+  // Populate dest + week lists once per open
+  const dl = document.getElementById('reDestList');
+  dl.innerHTML = HOTEL_DATA.map(d =>
+    `<label><input type="checkbox" class="re-dest-cb" value="${d.id}" checked onchange="onReScopeChange()"> ${d.name}</label>`
+  ).join('');
+  const wl = document.getElementById('reWeekList');
+  wl.innerHTML = CHECK_IN_WEEKS.map((w, i) =>
+    `<label><input type="checkbox" class="re-week-cb" value="${i}" checked onchange="onReScopeChange()"> ${w.weekLabel}</label>`
+  ).join('');
+  // Reset toggles to default
+  document.getElementById('reAllDests').checked = true;
+  document.getElementById('reAllWeeks').checked = true;
+  dl.style.display = 'none';
+  wl.style.display = 'none';
+  document.getElementById('reOptRules').checked = true;
+  document.getElementById('reOptComp').checked = true;
+  document.getElementById('reOptFlag').checked = true;
+  document.getElementById('reOptNotify').checked = false;
+
+  onReScopeChange();
+  document.getElementById('reBackdrop').classList.add('open');
+}
+function closeRunEvalModal() {
+  document.getElementById('reBackdrop').classList.remove('open');
+}
+function onReScopeChange() {
+  const allDests = document.getElementById('reAllDests').checked;
+  const allWeeks = document.getElementById('reAllWeeks').checked;
+  document.getElementById('reDestList').style.display = allDests ? 'none' : 'grid';
+  document.getElementById('reWeekList').style.display = allWeeks ? 'none' : 'grid';
+
+  const nDests = allDests
+    ? HOTEL_DATA.length
+    : document.querySelectorAll('.re-dest-cb:checked').length;
+  const nWeeks = allWeeks
+    ? CHECK_IN_WEEKS.length
+    : document.querySelectorAll('.re-week-cb:checked').length;
+  const nDecisions = nDests * nWeeks;
+  document.getElementById('rePreview').innerHTML =
+    `This will evaluate <strong>${nDests}</strong> destinations × <strong>${nWeeks}</strong> weeks = <strong>${nDecisions.toLocaleString()}</strong> pricing decisions`;
+}
+function confirmRunEvaluation() {
+  closeRunEvalModal();
+  const toast = document.getElementById('reToast');
+  const text = document.getElementById('reToastText');
+  toast.classList.remove('success');
+  text.textContent = 'Evaluation running…';
+  toast.classList.add('shown');
+  setTimeout(() => {
+    const allDests = document.getElementById('reAllDests').checked;
+    const allWeeks = document.getElementById('reAllWeeks').checked;
+    const nDests = allDests ? HOTEL_DATA.length : document.querySelectorAll('.re-dest-cb:checked').length;
+    const nWeeks = allWeeks ? CHECK_IN_WEEKS.length : document.querySelectorAll('.re-week-cb:checked').length;
+    const nDecisions = nDests * nWeeks;
+    toast.classList.add('success');
+    text.textContent = `Evaluation complete — ${nDecisions.toLocaleString()} recommendations updated`;
+    setTimeout(() => {
+      toast.classList.remove('shown');
+      toast.classList.remove('success');
+    }, 3000);
+  }, 1500);
+}
 function publishChanges() {}
 
 document.addEventListener('click', (e) => {
