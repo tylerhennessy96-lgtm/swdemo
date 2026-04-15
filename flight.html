@@ -395,10 +395,468 @@
       display: none;
     }
     .cdp-confirmation.shown { display: block; }
+
+    /* ── Package Rules builder ─────────────────────────────── */
+    .rules-shell {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      background: var(--body-bg);
+    }
+    .rules-list-pane {
+      width: 380px;
+      min-width: 380px;
+      background: #fff;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .rules-list-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .rules-list-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .btn-sm { padding: 5px 11px; font-size: 11.5px; }
+    .rules-list { flex: 1; overflow-y: auto; padding: 10px 12px; }
+    .rule-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 13px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .rule-card:hover { border-color: #0d9488; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+    .rule-card.active { border-color: #0d9488; box-shadow: 0 0 0 2px rgba(13,148,136,.15); }
+    .rule-card .rc-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .rule-card .rc-name { font-size: 12.5px; font-weight: 600; color: var(--text-primary); }
+    .rule-status {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+    }
+    .rule-status.rs-active   { background: rgba(14,165,164,0.12); color: #0f766e; }
+    .rule-status.rs-inactive { background: #f3f4f6; color: var(--text-secondary); }
+    .rule-status.rs-draft    { background: rgba(245,166,35,0.14); color: #b45309; }
+    .rule-card .rc-meta {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    .rule-card .rc-cond {
+      font-size: 11px;
+      color: var(--text-primary);
+      padding: 4px 7px;
+      background: #f9fafb;
+      border-radius: 3px;
+      margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+    }
+    .rule-card .rc-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+      font-size: 10.5px;
+      color: var(--text-muted);
+    }
+    .rule-card .rc-actions { display: flex; gap: 4px; }
+    .rule-card .rc-icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+    .rule-card .rc-icon-btn:hover { color: #0d9488; background: #f3f4f6; }
+
+    .rules-editor-pane {
+      flex: 1;
+      overflow-y: auto;
+      background: var(--body-bg);
+      padding: 22px 28px;
+    }
+    .rules-editor {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 22px 24px;
+      max-width: 720px;
+    }
+    .re-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .re-header h3 { margin: 0; font-size: 15px; font-weight: 600; }
+    .re-field { margin-bottom: 16px; }
+    .re-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 6px;
+    }
+    .re-input,
+    .re-select {
+      width: 100%;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: #fff;
+      font-family: 'Archivo', sans-serif;
+      font-size: 12.5px;
+      color: var(--text-primary);
+      box-sizing: border-box;
+    }
+    .re-input:focus, .re-select:focus { outline: none; border-color: #0d9488; }
+    .re-cb-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+    }
+    .re-cb, .re-radio {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+    .re-cb input, .re-radio input { cursor: pointer; }
+    .re-radio-list { display: flex; flex-direction: column; gap: 6px; }
+    .re-logic-toggle { display: inline-flex; gap: 12px; margin-bottom: 8px; }
+    .re-cond-row {
+      display: grid;
+      grid-template-columns: 1.5fr 0.8fr 1fr auto;
+      gap: 8px;
+      margin-bottom: 7px;
+      align-items: center;
+    }
+    .re-cond-row .re-x {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 16px;
+      padding: 0 6px;
+    }
+    .re-cond-row .re-x:hover { color: var(--danger); }
+    .re-add-cond {
+      background: none;
+      border: 1px dashed var(--border);
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11.5px;
+    }
+    .re-add-cond:hover { border-color: #0d9488; color: #0d9488; }
+    .re-action-row {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 10px;
+    }
+    .re-guardrails {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .re-footer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      margin-top: 18px;
+    }
+    .re-footer .spacer { flex: 1; }
+    .btn-teal {
+      background: #0d9488;
+      color: #fff;
+      border: 1px solid #0d9488;
+      padding: 7px 16px;
+      border-radius: 4px;
+      font-family: 'Archivo', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .btn-teal:hover { background: #0b7f73; }
+    .toggle-sw {
+      position: relative;
+      display: inline-block;
+      width: 36px;
+      height: 20px;
+    }
+    .toggle-sw input { display: none; }
+    .toggle-sw .sl {
+      position: absolute;
+      inset: 0;
+      background: #cbd5e1;
+      border-radius: 20px;
+      transition: .2s;
+    }
+    .toggle-sw .sl::before {
+      content: '';
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      width: 16px;
+      height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      transition: .2s;
+    }
+    .toggle-sw input:checked + .sl { background: #0d9488; }
+    .toggle-sw input:checked + .sl::before { transform: translateX(16px); }
+
+    /* ── Ask RM Copilot ─────────────────────────────────────── */
+    .ask-rm-btn {
+      position: fixed;
+      top: 12px;
+      right: 20px;
+      z-index: 90;
+      background: #0d9488;
+      color: #fff;
+      border: 1px solid #0b7f73;
+      padding: 7px 14px 7px 12px;
+      border-radius: 20px;
+      font-family: 'Archivo', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+      letter-spacing: .02em;
+    }
+    .ask-rm-btn:hover { background: #0b7f73; }
+    .ask-rm-btn .sparkle {
+      display: inline-block;
+      font-size: 14px;
+      animation: sparkle 2.5s ease-in-out infinite;
+    }
+    @keyframes sparkle {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50%      { opacity: 1;   transform: scale(1.15); }
+    }
+    .copilot-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 99;
+      display: none;
+    }
+    .copilot-backdrop.open { display: block; }
+    .copilot-panel {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 42vh;
+      min-height: 360px;
+      background: #1e2128;
+      color: #e5e7eb;
+      z-index: 100;
+      transform: translateY(100%);
+      transition: transform .25s cubic-bezier(.4,0,.2,1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 -8px 24px rgba(0,0,0,.35);
+      font-family: 'Archivo', sans-serif;
+    }
+    .copilot-panel.open { transform: translateY(0); }
+    .copilot-head {
+      padding: 12px 20px;
+      border-bottom: 1px solid #2d313b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #16181d;
+    }
+    .copilot-head .ct {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .copilot-head .ct .sparkle { color: #0d9488; font-size: 15px; }
+    .copilot-close {
+      background: none;
+      border: none;
+      color: #9ca3af;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .copilot-close:hover { color: #fff; background: #2d313b; }
+    .copilot-chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .cp-msg {
+      max-width: 78%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+    .cp-msg.cp-asst {
+      background: #2a2e38;
+      color: #e5e7eb;
+      border: 1px solid #353a46;
+      align-self: flex-start;
+      border-top-left-radius: 2px;
+    }
+    .cp-msg.cp-asst::before {
+      content: '✦ ';
+      color: #0d9488;
+      font-weight: 700;
+      margin-right: 4px;
+    }
+    .cp-msg.cp-user {
+      background: #3a4049;
+      color: #fff;
+      align-self: flex-end;
+      border-top-right-radius: 2px;
+    }
+    .cp-typing {
+      display: inline-flex;
+      gap: 4px;
+      padding: 12px 14px;
+      background: #2a2e38;
+      border: 1px solid #353a46;
+      border-radius: 10px;
+      border-top-left-radius: 2px;
+      align-self: flex-start;
+      width: fit-content;
+    }
+    .cp-typing span {
+      width: 6px;
+      height: 6px;
+      background: #0d9488;
+      border-radius: 50%;
+      animation: cpDot 1.2s infinite ease-in-out;
+    }
+    .cp-typing span:nth-child(2) { animation-delay: .18s; }
+    .cp-typing span:nth-child(3) { animation-delay: .36s; }
+    @keyframes cpDot {
+      0%, 60%, 100% { opacity: .35; transform: scale(0.85); }
+      30%           { opacity: 1;   transform: scale(1.1); }
+    }
+    .copilot-suggest {
+      padding: 0 20px 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .cp-pill {
+      background: #2a2e38;
+      color: #d1d5db;
+      border: 1px solid #353a46;
+      border-radius: 14px;
+      padding: 5px 12px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .cp-pill:hover { background: #0d9488; border-color: #0d9488; color: #fff; }
+    .copilot-input-wrap {
+      padding: 12px 20px 16px;
+      border-top: 1px solid #2d313b;
+      background: #16181d;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .cp-input {
+      flex: 1;
+      background: #0f1116;
+      border: 1px solid #353a46;
+      color: #fff;
+      padding: 9px 14px;
+      border-radius: 20px;
+      font-family: inherit;
+      font-size: 12.5px;
+      outline: none;
+    }
+    .cp-input:focus { border-color: #0d9488; }
+    .cp-send {
+      background: #0d9488;
+      color: #fff;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 20px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .cp-send:hover { background: #0b7f73; }
   </style>
 </head>
 <body>
 <div class="analytics-backdrop" id="analyticsBackdrop" onclick="closeExposure()"></div>
+
+<!-- ── Ask RM button + Copilot panel ── -->
+<button type="button" class="ask-rm-btn" onclick="openCopilot()">
+  <span class="sparkle">✦</span> Ask RM
+</button>
+<div class="copilot-backdrop" id="copilotBackdrop" onclick="closeCopilot()"></div>
+<aside class="copilot-panel" id="copilotPanel" aria-hidden="true">
+  <div class="copilot-head">
+    <div class="ct"><span class="sparkle">✦</span> RM Copilot</div>
+    <button type="button" class="copilot-close" onclick="closeCopilot()">×</button>
+  </div>
+  <div class="copilot-chat" id="copilotChat"></div>
+  <div class="copilot-suggest" id="copilotSuggest"></div>
+  <div class="copilot-input-wrap">
+    <input type="text" class="cp-input" id="copilotInput"
+           placeholder="Ask anything about pricing, demand or recommendations..."
+           onkeydown="if(event.key==='Enter'){copilotSend();}" />
+    <button type="button" class="cp-send" onclick="copilotSend()">Send</button>
+  </div>
+</aside>
+
 <div class="app">
 
   <!-- ── Top Nav ── -->
@@ -472,9 +930,9 @@
 
   <!-- ── Sub-tab Bar ── -->
   <div class="subtab-bar">
-    <a href="pricing.html" class="subtab">Vacation Packages</a>
-    <a href="hotel.html"   class="subtab">Hotel Only</a>
     <a href="flight.html"  class="subtab active">Flight Only</a>
+    <a href="hotel.html"   class="subtab">Hotel Only</a>
+    <a href="pricing.html" class="subtab">Vacation Packages</a>
     <div class="subtab-spacer"></div>
     <button class="btn btn-primary" onclick="runEvaluation()" style="margin-right:8px;">
       <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="3,2 12,7 3,12" fill="currentColor" stroke="none"/></svg>
@@ -524,6 +982,7 @@
   <div class="subsubtab-bar" id="subsubtabBar" style="display:flex;align-items:center;">
     <a class="subsubtab active" data-view="recs"       onclick="switchView('recs')">New Recommendations</a>
     <a class="subsubtab"        data-view="competitor" onclick="switchView('competitor')">Competitor Analysis</a>
+    <a class="subsubtab"        data-view="rules"      onclick="switchView('rules')">Package Rules</a>
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px;padding-right:16px;">
       <div class="view-toggle" role="group" aria-label="View mode">
         <button type="button" class="vt-btn vt-active" data-mode="list" onclick="setViewMode('list')">☰ List</button>
@@ -651,6 +1110,27 @@
           </thead>
           <tbody id="competitorTableBody"></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- Package Rules view -->
+    <div class="view hidden" id="viewRules">
+      <div class="rules-shell">
+        <div class="rules-list-pane">
+          <div class="rules-list-head">
+            <div class="rules-list-title">Package Rules</div>
+            <button class="btn btn-primary btn-sm" onclick="newPackageRule()">+ New Rule</button>
+          </div>
+          <div class="rules-list" id="rulesList"></div>
+        </div>
+        <div class="rules-editor-pane" id="rulesEditorPane">
+          <div class="rules-editor-empty" id="rulesEditorEmpty">
+            <div style="font-size:13px;color:var(--text-muted);text-align:center;padding:60px 20px;">
+              Select a rule to edit or click <strong>+ New Rule</strong> to create one.
+            </div>
+          </div>
+          <div class="rules-editor" id="rulesEditor" style="display:none;"></div>
+        </div>
       </div>
     </div>
 
@@ -1521,8 +2001,14 @@ function switchView(view) {
   document.querySelector(`.subsubtab[data-view="${view}"]`).classList.add('active');
 
   document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-  const map = { recs: 'viewRecs', competitor: 'viewCompetitor' };
+  const map = { recs: 'viewRecs', competitor: 'viewCompetitor', rules: 'viewRules' };
   document.getElementById(map[view]).classList.remove('hidden');
+  // Hide view-toggle and adv filters button when on Rules tab
+  const viewToggle = document.querySelector('.view-toggle');
+  const advBtn = document.getElementById('advTriggerBtn');
+  if (viewToggle) viewToggle.style.display = (view === 'rules') ? 'none' : '';
+  if (advBtn)     advBtn.style.display     = (view === 'rules') ? 'none' : '';
+  if (view === 'rules') renderPackageRules();
 }
 
 // ── Filter / menu stubs ────────────────────────────────────
@@ -2167,6 +2653,436 @@ renderMetricsBar();
 renderRecsHead();
 renderRecsTable();
 renderCompetitorTable();
+
+// ── Package Rules ──────────────────────────────────────────
+let _rulesState = {
+  selectedId: null,
+  draft: null, // working copy while editing
+};
+
+function ruleSummary(rule) {
+  const catShort = {
+    'Own Flight': 'Own Flight',
+    'Risk Block': 'Risk Block',
+    '3rd Party':  '3rd Party',
+  };
+  const cats = (rule.flightCategories || []).map(c => catShort[c] || c).join('/');
+  const destLbl = (rule.destinations && rule.destinations[0] === 'All') ? 'All Destinations' : (rule.destinations || []).join(', ');
+  return `${cats || 'Any flight'} · ${destLbl}`;
+}
+function conditionString(c) {
+  if (c.metric === 'Always apply') return 'Always apply';
+  return `${c.metric} ${c.operator} ${c.value}`;
+}
+function actionSummary(a) {
+  if (!a) return '';
+  if (a.type === 'Lock price')      return 'Lock price' + (a.flagForReview ? ' + Flag for review' : '');
+  if (a.type === 'Flag for review') return 'Flag for review';
+  if (a.type === 'Set margin to $') return `Set minimum margin to $${a.value}`;
+  if (a.type === 'Set fare to $')   return `Set fare to $${a.value}`;
+  const pct = a.type.includes('%');
+  const unit = pct ? '%' : '$';
+  const dir = a.type.startsWith('Increase') ? 'Increase' : 'Decrease';
+  return `${dir} margin by ${unit === '$' ? '$' : ''}${a.value}${unit === '%' ? '%' : ''}`;
+}
+
+function renderPackageRules() {
+  const listEl = document.getElementById('rulesList');
+  listEl.innerHTML = PACKAGE_RULES.map(r => {
+    const sCls = r.status === 'Active' ? 'rs-active' : r.status === 'Draft' ? 'rs-draft' : 'rs-inactive';
+    const condStr = (r.conditions || []).map(conditionString).join(r.conditionLogic === 'ANY' ? ' OR ' : ' AND ');
+    const active = (r.id === _rulesState.selectedId) ? ' active' : '';
+    return `<div class="rule-card${active}" onclick="editPackageRule('${r.id}')">
+      <div class="rc-top">
+        <div class="rc-name">${r.name}</div>
+        <span class="rule-status ${sCls}">${r.status}</span>
+      </div>
+      <div class="rc-meta">${ruleSummary(r)}</div>
+      <div class="rc-cond">${condStr}</div>
+      <div class="rc-meta" style="margin-top:6px;">→ ${actionSummary(r.action)}</div>
+      <div class="rc-foot">
+        <span>Modified ${r.lastModified} · ${r.modifiedBy}</span>
+        <div class="rc-actions">
+          <button type="button" class="rc-icon-btn" title="Edit" onclick="event.stopPropagation();editPackageRule('${r.id}')">✎</button>
+          <button type="button" class="rc-icon-btn" title="Toggle active" onclick="event.stopPropagation();togglePackageRule('${r.id}')">${r.status === 'Active' ? '⏸' : '▶'}</button>
+          <button type="button" class="rc-icon-btn" title="Delete" onclick="event.stopPropagation();deletePackageRule('${r.id}')">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function newPackageRule() {
+  _rulesState.selectedId = null;
+  _rulesState.draft = {
+    id: 'RULE-' + String(Date.now()).slice(-6),
+    name: '',
+    status: 'Draft',
+    priority: 50,
+    flightCategories: [],
+    hotelClassifications: ['Any'],
+    commitment: 'Any',
+    destinations: ['All'],
+    conditionLogic: 'ALL',
+    conditions: [{ metric: 'LF %', operator: '>=', value: 80 }],
+    action: { type: 'Increase margin by $', value: 10, maxChange: 50, minMargin: null, maxMargin: null, flagForReview: false },
+    lastModified: new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' }),
+    modifiedBy: 'Current User',
+  };
+  renderPackageRules();
+  renderRuleEditor();
+}
+function editPackageRule(id) {
+  const r = PACKAGE_RULES.find(x => x.id === id);
+  if (!r) return;
+  _rulesState.selectedId = id;
+  _rulesState.draft = JSON.parse(JSON.stringify(r));
+  renderPackageRules();
+  renderRuleEditor();
+}
+function togglePackageRule(id) {
+  const r = PACKAGE_RULES.find(x => x.id === id);
+  if (!r) return;
+  r.status = (r.status === 'Active') ? 'Inactive' : 'Active';
+  renderPackageRules();
+}
+function deletePackageRule(id) {
+  const i = PACKAGE_RULES.findIndex(x => x.id === id);
+  if (i === -1) return;
+  if (!confirm('Delete this rule?')) return;
+  PACKAGE_RULES.splice(i, 1);
+  if (_rulesState.selectedId === id) { _rulesState.selectedId = null; _rulesState.draft = null; }
+  renderPackageRules();
+  renderRuleEditor();
+}
+
+function renderRuleEditor() {
+  const empty = document.getElementById('rulesEditorEmpty');
+  const ed    = document.getElementById('rulesEditor');
+  if (!_rulesState.draft) {
+    empty.style.display = '';
+    ed.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  ed.style.display = '';
+  const d = _rulesState.draft;
+
+  const flightCats = ['Own Flight', 'Risk Block', '3rd Party'];
+  const hotelCls   = ['Exclusive', 'Commodity', 'Any'];
+  const commitments = ['Fully Committed', 'Allotment — Partially Committed', 'Allotment — Not Committed', 'Any'];
+
+  const catCbs = flightCats.map(c => `
+    <label class="re-cb"><input type="checkbox" ${d.flightCategories.includes(c) ? 'checked' : ''} onchange="ruleDraftToggleCat('${c}', this.checked)"> ${c}</label>`).join('');
+  const hotelCbs = hotelCls.map(c => `
+    <label class="re-cb"><input type="checkbox" ${d.hotelClassifications.includes(c) ? 'checked' : ''} onchange="ruleDraftToggleHotel('${c}', this.checked)"> ${c}</label>`).join('');
+  const commitRadios = commitments.map((c, i) => `
+    <label class="re-radio"><input type="radio" name="ruleCommit" ${d.commitment === c ? 'checked' : ''} onchange="ruleDraftSet('commitment', '${c.replace(/'/g, "\\'")}')"> ${c}</label>`).join('');
+
+  const destOpts = ['All'].concat(DESTINATIONS.map(x => x.name));
+  const destSel = `<select class="re-select" onchange="ruleDraftSet('destinations', [this.value])">
+    ${destOpts.map(o => `<option ${d.destinations[0] === o ? 'selected' : ''}>${o}</option>`).join('')}
+  </select>`;
+
+  const metrics  = ['LF %', 'Forecast LF %', 'Rate of Sale', 'Days to Departure', 'Margin $', 'Occ %', 'Beds:Seats Ratio', 'Always apply'];
+  const ops      = ['>', '<', '=', '>=', '<=', 'between'];
+  const condRows = d.conditions.map((c, i) => `
+    <div class="re-cond-row">
+      <select class="re-select" onchange="ruleDraftCondSet(${i}, 'metric', this.value)">
+        ${metrics.map(m => `<option ${c.metric === m ? 'selected' : ''}>${m}</option>`).join('')}
+      </select>
+      <select class="re-select" onchange="ruleDraftCondSet(${i}, 'operator', this.value)" ${c.metric === 'Always apply' ? 'disabled' : ''}>
+        ${ops.map(o => `<option ${c.operator === o ? 'selected' : ''}>${o}</option>`).join('')}
+      </select>
+      <input type="text" class="re-input" value="${c.value != null ? c.value : ''}" ${c.metric === 'Always apply' ? 'disabled' : ''} oninput="ruleDraftCondSet(${i}, 'value', this.value)" />
+      <button type="button" class="re-x" onclick="ruleDraftCondRemove(${i})" title="Remove condition">×</button>
+    </div>`).join('');
+
+  const actions = ['Increase margin by $', 'Decrease margin by $', 'Increase margin by %', 'Decrease margin by %', 'Set margin to $', 'Set fare to $', 'Lock price', 'Flag for review'];
+  const isNoValue = (d.action.type === 'Lock price' || d.action.type === 'Flag for review');
+
+  ed.innerHTML = `
+    <div class="re-header">
+      <h3>${_rulesState.selectedId ? 'Edit Rule' : 'New Rule'}</h3>
+      <label class="re-radio" style="gap:8px;">
+        <span style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;">Active</span>
+        <span class="toggle-sw"><input type="checkbox" ${d.status === 'Active' ? 'checked' : ''} onchange="ruleDraftSet('status', this.checked ? 'Active' : 'Inactive')"><span class="sl"></span></span>
+      </label>
+    </div>
+
+    <div class="re-field">
+      <label class="re-label">Rule Name</label>
+      <input type="text" class="re-input" value="${(d.name || '').replace(/"/g, '&quot;')}" oninput="ruleDraftSet('name', this.value)" placeholder="e.g. Own Flight High LF Uplift" />
+    </div>
+
+    <div class="re-field">
+      <label class="re-label">Flight Category</label>
+      <div class="re-cb-grid">${catCbs}</div>
+    </div>
+
+    <div class="re-field">
+      <label class="re-label">Hotel Classification</label>
+      <div class="re-cb-grid">${hotelCbs}</div>
+    </div>
+
+    <div class="re-field">
+      <label class="re-label">Commitment Type</label>
+      <div class="re-radio-list">${commitRadios}</div>
+    </div>
+
+    <div class="re-field">
+      <label class="re-label">Destination</label>
+      ${destSel}
+    </div>
+
+    <div class="re-field">
+      <label class="re-label">Trigger Conditions — when
+        <select class="re-select" style="display:inline-block;width:auto;padding:2px 6px;margin-left:6px;font-size:11px;" onchange="ruleDraftSet('conditionLogic', this.value)">
+          <option value="ALL" ${d.conditionLogic === 'ALL' ? 'selected' : ''}>ALL</option>
+          <option value="ANY" ${d.conditionLogic === 'ANY' ? 'selected' : ''}>ANY</option>
+        </select>
+        of these are met
+      </label>
+      ${condRows}
+      <button type="button" class="re-add-cond" onclick="ruleDraftCondAdd()">+ Add Condition</button>
+    </div>
+
+    <div class="re-field">
+      <label class="re-label">Action</label>
+      <div class="re-action-row">
+        <select class="re-select" onchange="ruleDraftActionSet('type', this.value)">
+          ${actions.map(a => `<option ${d.action.type === a ? 'selected' : ''}>${a}</option>`).join('')}
+        </select>
+        <input type="text" class="re-input" value="${d.action.value != null ? d.action.value : ''}" ${isNoValue ? 'disabled' : ''} oninput="ruleDraftActionSet('value', this.value)" placeholder="Value" />
+      </div>
+      <div class="re-guardrails">
+        <div>
+          <label class="re-label" style="font-size:10px;">Max change $</label>
+          <input type="text" class="re-input" value="${d.action.maxChange != null ? d.action.maxChange : ''}" oninput="ruleDraftActionSet('maxChange', this.value)" />
+        </div>
+        <div>
+          <label class="re-label" style="font-size:10px;">Min margin $</label>
+          <input type="text" class="re-input" value="${d.action.minMargin != null ? d.action.minMargin : ''}" oninput="ruleDraftActionSet('minMargin', this.value)" />
+        </div>
+        <div>
+          <label class="re-label" style="font-size:10px;">Max margin $</label>
+          <input type="text" class="re-input" value="${d.action.maxMargin != null ? d.action.maxMargin : ''}" oninput="ruleDraftActionSet('maxMargin', this.value)" />
+        </div>
+      </div>
+    </div>
+
+    <div class="re-field">
+      <label class="re-label">Rule Priority (lower = higher priority)</label>
+      <input type="number" class="re-input" style="max-width:120px;" value="${d.priority}" oninput="ruleDraftSet('priority', parseInt(this.value)||0)" />
+    </div>
+
+    <div class="re-footer">
+      <div class="spacer"></div>
+      <button type="button" class="cdp-btn" style="width:auto;padding:7px 16px;" onclick="cancelRuleEdit()">Cancel</button>
+      <button type="button" class="btn-teal" onclick="saveRuleEdit()">Save Rule</button>
+    </div>
+  `;
+}
+
+function ruleDraftSet(key, val)           { if (!_rulesState.draft) return; _rulesState.draft[key] = val; }
+function ruleDraftToggleCat(c, on)        {
+  const arr = _rulesState.draft.flightCategories;
+  const i = arr.indexOf(c);
+  if (on && i === -1) arr.push(c);
+  if (!on && i !== -1) arr.splice(i, 1);
+}
+function ruleDraftToggleHotel(c, on)      {
+  const arr = _rulesState.draft.hotelClassifications;
+  const i = arr.indexOf(c);
+  if (on && i === -1) arr.push(c);
+  if (!on && i !== -1) arr.splice(i, 1);
+}
+function ruleDraftCondSet(i, key, val)    {
+  const c = _rulesState.draft.conditions[i];
+  c[key] = val;
+  if (key === 'metric' && val === 'Always apply') { c.operator = '—'; c.value = ''; }
+  if (key === 'metric' && val !== 'Always apply' && c.operator === '—') { c.operator = '>='; c.value = 0; }
+  renderRuleEditor();
+}
+function ruleDraftCondAdd()               {
+  _rulesState.draft.conditions.push({ metric: 'LF %', operator: '>=', value: 80 });
+  renderRuleEditor();
+}
+function ruleDraftCondRemove(i)           {
+  _rulesState.draft.conditions.splice(i, 1);
+  if (_rulesState.draft.conditions.length === 0) {
+    _rulesState.draft.conditions.push({ metric: 'LF %', operator: '>=', value: 80 });
+  }
+  renderRuleEditor();
+}
+function ruleDraftActionSet(key, val)     { _rulesState.draft.action[key] = val; }
+function cancelRuleEdit()                 { _rulesState.draft = null; _rulesState.selectedId = null; renderPackageRules(); renderRuleEditor(); }
+function saveRuleEdit() {
+  const d = _rulesState.draft;
+  if (!d) return;
+  if (!d.name || !d.name.trim()) { alert('Please enter a rule name.'); return; }
+  const existing = PACKAGE_RULES.findIndex(r => r.id === d.id);
+  d.lastModified = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' });
+  if (existing >= 0) PACKAGE_RULES[existing] = d;
+  else               PACKAGE_RULES.unshift(d);
+  _rulesState.selectedId = d.id;
+  _rulesState.draft = JSON.parse(JSON.stringify(d));
+  renderPackageRules();
+  renderRuleEditor();
+}
+
+// ── RM Copilot ─────────────────────────────────────────────
+const _copilotSuggestions = [
+  'Why has the fare increased for WS2401?',
+  'Which flights are at risk?',
+  "What's the competitor position for Cancun?",
+];
+let _copilotHistory = [];
+
+function openCopilot() {
+  document.getElementById('copilotBackdrop').classList.add('open');
+  document.getElementById('copilotPanel').classList.add('open');
+  document.getElementById('copilotPanel').setAttribute('aria-hidden', 'false');
+  if (_copilotHistory.length === 0) {
+    copilotPush('asst', "Hi — I'm your RM Copilot. Ask me about pricing, demand, recommendations, or competitor position. Try one of the suggestions below.");
+  }
+  renderCopilotSuggest();
+  setTimeout(() => { const i = document.getElementById('copilotInput'); if (i) i.focus(); }, 180);
+}
+function closeCopilot() {
+  document.getElementById('copilotBackdrop').classList.remove('open');
+  document.getElementById('copilotPanel').classList.remove('open');
+  document.getElementById('copilotPanel').setAttribute('aria-hidden', 'true');
+}
+function renderCopilotSuggest() {
+  const el = document.getElementById('copilotSuggest');
+  el.innerHTML = _copilotSuggestions.map(q =>
+    `<button type="button" class="cp-pill" onclick="copilotAskSuggest('${q.replace(/'/g, "\\'")}')">${q}</button>`
+  ).join('');
+}
+function copilotPush(role, text) {
+  _copilotHistory.push({ role, text });
+  const chat = document.getElementById('copilotChat');
+  const cls  = role === 'asst' ? 'cp-asst' : 'cp-user';
+  const div = document.createElement('div');
+  div.className = 'cp-msg ' + cls;
+  div.textContent = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+function copilotShowTyping() {
+  const chat = document.getElementById('copilotChat');
+  const div = document.createElement('div');
+  div.className = 'cp-typing';
+  div.id = 'cpTyping';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+function copilotHideTyping() {
+  const t = document.getElementById('cpTyping');
+  if (t) t.remove();
+}
+function copilotSend() {
+  const input = document.getElementById('copilotInput');
+  const q = (input.value || '').trim();
+  if (!q) return;
+  input.value = '';
+  copilotPush('user', q);
+  copilotShowTyping();
+  setTimeout(() => {
+    copilotHideTyping();
+    copilotPush('asst', copilotAnswer(q));
+  }, 800);
+}
+function copilotAskSuggest(q) {
+  document.getElementById('copilotInput').value = q;
+  copilotSend();
+}
+
+function copilotAnswer(q) {
+  const ql = q.toLowerCase();
+  // Try to detect a flight number mentioned (e.g. WS2401)
+  const flightMatch = q.match(/\b([A-Z]{2}\d{3,4})\b/);
+  // Try to detect a known destination name
+  const destMatch = DESTINATIONS.find(d => ql.includes(d.name.toLowerCase()) || ql.includes(d.id.toLowerCase()));
+
+  // "why did/has * increase"
+  if (/why (has|did|have) .* (increase|increased|gone up|risen)/.test(ql) || /why.*increase/.test(ql)) {
+    if (flightMatch) {
+      let found = null;
+      FLIGHT_DATA.forEach(dest => dest.routes.forEach(r => {
+        if (r.flightNum === flightMatch[1] && !found) {
+          const d0 = r.dates[0];
+          if (d0) {
+            const lf = d0.capacity ? Math.round((d0.sold / d0.capacity) * 100) : 0;
+            const tgt = Math.round(d0.targetLF * 100);
+            const delta = (d0.recFare - (d0.currentFare || d0.recFare));
+            found = `${flightMatch[1]} (${r.origin}→${dest.id}) is currently ${lf}% full vs target ${tgt}%. Rate of sale is ${d0.rateOfSale.toFixed(1)}/day vs target ${d0.rateOfSaleTarget.toFixed(1)}/day. The recommendation engine has suggested a $${d0.recFare} fare${delta ? ` (a ${delta > 0 ? '+' : ''}$${delta} adjustment)` : ''} to capture this demand.`;
+          }
+        }
+      }));
+      if (found) return found;
+    }
+    if (destMatch) {
+      const fd = FLIGHT_DATA.find(d => d.id === destMatch.id);
+      if (fd && fd.routes[0] && fd.routes[0].dates[0]) {
+        const d0 = fd.routes[0].dates[0];
+        const lf = d0.capacity ? Math.round((d0.sold / d0.capacity) * 100) : 0;
+        return `${destMatch.name} has seen load factors running at ${lf}% vs target ${Math.round(d0.targetLF * 100)}% on ${fd.routes[0].flightNum}. The recommendation engine has suggested a fare of $${d0.recFare} (current $${d0.currentFare || d0.recFare}) to capture demand uplift.`;
+      }
+    }
+    return "Demand has firmed up over the past 2 weeks — LF tracking ahead of target on several key routes. The recommendation engine has suggested margin adjustments to capture the uplift. Expand a route for full details.";
+  }
+
+  // "which * behind / at risk / behind plan"
+  if (/which .* (behind|at risk|behind plan|behind target)/.test(ql) || /at risk|behind/.test(ql)) {
+    const atRisk = [];
+    FLIGHT_DATA.forEach(dest => dest.routes.forEach(r => {
+      r.dates.forEach(d => {
+        if (d.forecastLF < d.targetLF - 0.05 || d.rateOfSale < d.rateOfSaleTarget * 0.85) {
+          atRisk.push(`${r.flightNum} ${r.origin}→${dest.id} (${shortDate(d.departureDate)}) — fcst ${Math.round(d.forecastLF*100)}% vs tgt ${Math.round(d.targetLF*100)}%`);
+        }
+      });
+    }));
+    if (atRisk.length === 0) return "No flights currently flagged as at risk — all routes are tracking at or above target.";
+    return `The following flights are currently behind target:\n\n• ` + atRisk.slice(0, 6).join('\n• ') + (atRisk.length > 6 ? `\n\n…and ${atRisk.length - 6} more.` : '');
+  }
+
+  // "competitor" / "comp"
+  if (/comp(etitor|etitive)?|competitor position/.test(ql)) {
+    if (destMatch) {
+      const fd = FLIGHT_DATA.find(d => d.id === destMatch.id);
+      if (fd && fd.routes[0] && fd.routes[0].dates[0]) {
+        const d0 = fd.routes[0].dates[0];
+        const cheapest = Math.min(d0.comp1Fare, d0.comp2Fare);
+        const delta = (d0.currentFare || d0.recFare) - cheapest;
+        return `Competitor pricing for ${destMatch.name}: Comp 1 is at $${d0.comp1Fare}, Comp 2 at $${d0.comp2Fare}. Our current fare of $${d0.currentFare || d0.recFare} is ${delta > 0 ? `$${delta} above` : delta < 0 ? `$${Math.abs(delta)} below` : 'at parity with'} the cheapest competitor.`;
+      }
+    }
+    return "Pick a specific destination (e.g. 'Cancun', 'Punta Cana') and I'll pull the competitor position for you.";
+  }
+
+  // "low LF / low load factor"
+  if (/low (lf|load factor|occupancy|occ)/.test(ql)) {
+    const worst = [];
+    FLIGHT_DATA.forEach(dest => dest.routes.forEach(r => {
+      const d = r.dates[0];
+      if (!d || !d.capacity) return;
+      const lf = d.sold / d.capacity;
+      worst.push({ lbl: `${dest.name} (${r.flightNum})`, lf });
+    }));
+    worst.sort((a, b) => a.lf - b.lf);
+    const top = worst.slice(0, 5).map(w => `${w.lbl} — ${Math.round(w.lf * 100)}%`).join('\n• ');
+    return `Lowest-performing flights this week:\n\n• ${top}`;
+  }
+
+  // Fallback
+  return "I don't have specific data on that right now. You can check the detailed view by expanding a destination in the list, running a new evaluation, or asking about a specific flight number or destination.";
+}
+
+// Override default suggestions — this is flight.html
+// (left in place for flight page; hotel.html supplies its own set)
 </script>
 
 </body>

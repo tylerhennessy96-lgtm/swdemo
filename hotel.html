@@ -400,10 +400,225 @@
       letter-spacing: .02em;
       opacity: 0.8;
     }
+
+    /* ── Ask RM Copilot ─────────────────────────────────────── */
+    .ask-rm-btn {
+      position: fixed;
+      top: 12px;
+      right: 20px;
+      z-index: 90;
+      background: #0d9488;
+      color: #fff;
+      border: 1px solid #0b7f73;
+      padding: 7px 14px 7px 12px;
+      border-radius: 20px;
+      font-family: 'Archivo', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+      letter-spacing: .02em;
+    }
+    .ask-rm-btn:hover { background: #0b7f73; }
+    .ask-rm-btn .sparkle {
+      display: inline-block;
+      font-size: 14px;
+      animation: sparkle 2.5s ease-in-out infinite;
+    }
+    @keyframes sparkle {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50%      { opacity: 1;   transform: scale(1.15); }
+    }
+    .copilot-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 99;
+      display: none;
+    }
+    .copilot-backdrop.open { display: block; }
+    .copilot-panel {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 42vh;
+      min-height: 360px;
+      background: #1e2128;
+      color: #e5e7eb;
+      z-index: 100;
+      transform: translateY(100%);
+      transition: transform .25s cubic-bezier(.4,0,.2,1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 -8px 24px rgba(0,0,0,.35);
+      font-family: 'Archivo', sans-serif;
+    }
+    .copilot-panel.open { transform: translateY(0); }
+    .copilot-head {
+      padding: 12px 20px;
+      border-bottom: 1px solid #2d313b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #16181d;
+    }
+    .copilot-head .ct {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .copilot-head .ct .sparkle { color: #0d9488; font-size: 15px; }
+    .copilot-close {
+      background: none;
+      border: none;
+      color: #9ca3af;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .copilot-close:hover { color: #fff; background: #2d313b; }
+    .copilot-chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .cp-msg {
+      max-width: 78%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+    .cp-msg.cp-asst {
+      background: #2a2e38;
+      color: #e5e7eb;
+      border: 1px solid #353a46;
+      align-self: flex-start;
+      border-top-left-radius: 2px;
+    }
+    .cp-msg.cp-asst::before {
+      content: '✦ ';
+      color: #0d9488;
+      font-weight: 700;
+      margin-right: 4px;
+    }
+    .cp-msg.cp-user {
+      background: #3a4049;
+      color: #fff;
+      align-self: flex-end;
+      border-top-right-radius: 2px;
+    }
+    .cp-typing {
+      display: inline-flex;
+      gap: 4px;
+      padding: 12px 14px;
+      background: #2a2e38;
+      border: 1px solid #353a46;
+      border-radius: 10px;
+      border-top-left-radius: 2px;
+      align-self: flex-start;
+      width: fit-content;
+    }
+    .cp-typing span {
+      width: 6px;
+      height: 6px;
+      background: #0d9488;
+      border-radius: 50%;
+      animation: cpDot 1.2s infinite ease-in-out;
+    }
+    .cp-typing span:nth-child(2) { animation-delay: .18s; }
+    .cp-typing span:nth-child(3) { animation-delay: .36s; }
+    @keyframes cpDot {
+      0%, 60%, 100% { opacity: .35; transform: scale(0.85); }
+      30%           { opacity: 1;   transform: scale(1.1); }
+    }
+    .copilot-suggest {
+      padding: 0 20px 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .cp-pill {
+      background: #2a2e38;
+      color: #d1d5db;
+      border: 1px solid #353a46;
+      border-radius: 14px;
+      padding: 5px 12px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .cp-pill:hover { background: #0d9488; border-color: #0d9488; color: #fff; }
+    .copilot-input-wrap {
+      padding: 12px 20px 16px;
+      border-top: 1px solid #2d313b;
+      background: #16181d;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .cp-input {
+      flex: 1;
+      background: #0f1116;
+      border: 1px solid #353a46;
+      color: #fff;
+      padding: 9px 14px;
+      border-radius: 20px;
+      font-family: inherit;
+      font-size: 12.5px;
+      outline: none;
+    }
+    .cp-input:focus { border-color: #0d9488; }
+    .cp-send {
+      background: #0d9488;
+      color: #fff;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 20px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .cp-send:hover { background: #0b7f73; }
   </style>
 </head>
 <body>
 <div class="analytics-backdrop" id="analyticsBackdrop" onclick="closeExposure()"></div>
+
+<!-- ── Ask RM button + Copilot panel ── -->
+<button type="button" class="ask-rm-btn" onclick="openCopilot()">
+  <span class="sparkle">✦</span> Ask RM
+</button>
+<div class="copilot-backdrop" id="copilotBackdrop" onclick="closeCopilot()"></div>
+<aside class="copilot-panel" id="copilotPanel" aria-hidden="true">
+  <div class="copilot-head">
+    <div class="ct"><span class="sparkle">✦</span> RM Copilot</div>
+    <button type="button" class="copilot-close" onclick="closeCopilot()">×</button>
+  </div>
+  <div class="copilot-chat" id="copilotChat"></div>
+  <div class="copilot-suggest" id="copilotSuggest"></div>
+  <div class="copilot-input-wrap">
+    <input type="text" class="cp-input" id="copilotInput"
+           placeholder="Ask anything about pricing, demand or recommendations..."
+           onkeydown="if(event.key==='Enter'){copilotSend();}" />
+    <button type="button" class="cp-send" onclick="copilotSend()">Send</button>
+  </div>
+</aside>
+
 <div class="app">
 
   <!-- ── Top Nav ── -->
@@ -477,9 +692,9 @@
 
   <!-- ── Sub-tab Bar ── -->
   <div class="subtab-bar">
-    <a href="pricing.html" class="subtab">Vacation Packages</a>
-    <a href="hotel.html"   class="subtab active">Hotel Only</a>
     <a href="flight.html"  class="subtab">Flight Only</a>
+    <a href="hotel.html"   class="subtab active">Hotel Only</a>
+    <a href="pricing.html" class="subtab">Vacation Packages</a>
     <div class="subtab-spacer"></div>
     <button class="btn btn-primary" onclick="runEvaluation()" style="margin-right:8px;">
       <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="3,2 12,7 3,12" fill="currentColor" stroke="none"/></svg>
@@ -2178,6 +2393,128 @@ renderMetricsBar();
 renderRecsHead();
 renderRecsTable();
 renderExceptionsTable();
+
+// ── RM Copilot ─────────────────────────────────────────────
+const _copilotSuggestions = [
+  'Why did ADR increase for Punta Cana?',
+  'Which hotels are behind plan?',
+  "What's driving low occupancy in Wk May 4?",
+];
+let _copilotHistory = [];
+
+function openCopilot() {
+  document.getElementById('copilotBackdrop').classList.add('open');
+  document.getElementById('copilotPanel').classList.add('open');
+  document.getElementById('copilotPanel').setAttribute('aria-hidden', 'false');
+  if (_copilotHistory.length === 0) {
+    copilotPush('asst', "Hi — I'm your RM Copilot. Ask me about ADR, occupancy, cost changes, or which hotels need attention. Try one of the suggestions below.");
+  }
+  renderCopilotSuggest();
+  setTimeout(() => { const i = document.getElementById('copilotInput'); if (i) i.focus(); }, 180);
+}
+function closeCopilot() {
+  document.getElementById('copilotBackdrop').classList.remove('open');
+  document.getElementById('copilotPanel').classList.remove('open');
+  document.getElementById('copilotPanel').setAttribute('aria-hidden', 'true');
+}
+function renderCopilotSuggest() {
+  const el = document.getElementById('copilotSuggest');
+  el.innerHTML = _copilotSuggestions.map(q =>
+    `<button type="button" class="cp-pill" onclick="copilotAskSuggest('${q.replace(/'/g, "\\'")}')">${q}</button>`
+  ).join('');
+}
+function copilotPush(role, text) {
+  _copilotHistory.push({ role, text });
+  const chat = document.getElementById('copilotChat');
+  const cls  = role === 'asst' ? 'cp-asst' : 'cp-user';
+  const div = document.createElement('div');
+  div.className = 'cp-msg ' + cls;
+  div.textContent = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+function copilotShowTyping() {
+  const chat = document.getElementById('copilotChat');
+  const div = document.createElement('div');
+  div.className = 'cp-typing';
+  div.id = 'cpTyping';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+function copilotHideTyping() {
+  const t = document.getElementById('cpTyping');
+  if (t) t.remove();
+}
+function copilotSend() {
+  const input = document.getElementById('copilotInput');
+  const q = (input.value || '').trim();
+  if (!q) return;
+  input.value = '';
+  copilotPush('user', q);
+  copilotShowTyping();
+  setTimeout(() => {
+    copilotHideTyping();
+    copilotPush('asst', copilotAnswer(q));
+  }, 800);
+}
+function copilotAskSuggest(q) {
+  document.getElementById('copilotInput').value = q;
+  copilotSend();
+}
+
+function copilotAnswer(q) {
+  const ql = q.toLowerCase();
+  const destMatch = HOTEL_DATA.find(d => ql.includes(d.name.toLowerCase()) || ql.includes(d.id.toLowerCase()));
+  const weekMatch = q.match(/wk\s+([a-z]+)\s*(\d+)?/i);
+
+  // "why did * increase" / "why has * increased"
+  if (/why (has|did|have) .* (increase|increased|gone up|risen)/.test(ql) || /why.*increase/.test(ql)) {
+    if (destMatch) {
+      const uplift = Math.round(((destMatch.avgRecADR - destMatch.avgCurrentADR) / destMatch.avgCurrentADR) * 1000) / 10;
+      const occPct = Math.round(destMatch.forecastOcc * 100);
+      return `${destMatch.name} has seen forecast occupancy climb to ${occPct}% (current occ ${Math.round(destMatch.currentOcc * 100)}%). The recommendation engine is suggesting an ADR of $${destMatch.avgRecADR} (current $${destMatch.avgCurrentADR}) — a ${uplift > 0 ? '+' : ''}${uplift}% adjustment to capture this demand.`;
+    }
+    return "Demand has firmed up on several destinations, with forecast occupancy running ahead of pace. The recommendation engine has suggested ADR uplifts to capture the demand. Which destination were you asking about?";
+  }
+
+  // "which hotels behind plan"
+  if (/which .* (behind plan|behind|at risk|underperform)/.test(ql) || /behind plan|at risk|underperform/.test(ql)) {
+    const behind = [];
+    HOTEL_DATA.forEach(d => {
+      d.hotels.forEach(h => {
+        if (h.forecastOcc < 0.60) {
+          behind.push(`${h.name} (${d.name}) — fcst occ ${Math.round(h.forecastOcc * 100)}%`);
+        }
+      });
+    });
+    if (behind.length === 0) return "No hotels flagged as behind plan — forecast occupancy is tracking at or above threshold everywhere.";
+    return `The following hotels are currently behind plan:\n\n• ` + behind.slice(0, 6).join('\n• ') + (behind.length > 6 ? `\n\n…and ${behind.length - 6} more.` : '');
+  }
+
+  // "low occupancy" / "driving low occ"
+  if (/low (occ|occupancy|lf)|driving low/.test(ql)) {
+    const worst = [];
+    HOTEL_DATA.forEach(d => d.hotels.forEach(h => {
+      worst.push({ lbl: `${h.name} (${d.name})`, occ: h.forecastOcc });
+    }));
+    worst.sort((a, b) => a.occ - b.occ);
+    const top = worst.slice(0, 5).map(w => `${w.lbl} — ${Math.round(w.occ * 100)}%`).join('\n• ');
+    const wk = weekMatch ? ` for ${q.match(/Wk\s+\w+\s*\d*/i)?.[0] || 'that week'}` : '';
+    return `Lowest-occupancy hotels${wk}:\n\n• ${top}\n\nDrivers typically include: soft forward bookings, ADR above market, or nearby competitor promotions.`;
+  }
+
+  // "adr" / "rate"
+  if (/adr|rate|price/.test(ql)) {
+    if (destMatch) {
+      return `${destMatch.name}: Avg current ADR $${destMatch.avgCurrentADR}, avg rec ADR $${destMatch.avgRecADR} (Δ $${destMatch.deltaADR}). Forecast occupancy ${Math.round(destMatch.forecastOcc * 100)}% across ${destMatch.totalHotels} hotels.`;
+    }
+    return "Pick a specific destination (e.g. 'Cancun', 'Punta Cana') and I'll pull ADR and occupancy figures.";
+  }
+
+  // Fallback
+  return "I don't have specific data on that right now. You can check the detailed view by expanding a destination in the list, running a new evaluation, or asking about a specific hotel or destination.";
+}
 </script>
 
 </body>

@@ -556,3 +556,132 @@ const PUBLISHED_HOTEL_CHANGES = [
   { id: 'PC-008', destination: 'Cancun',      hotel: 'Krystal Cancun',       roomCategory: 'Standard',   checkInWeek: 'Wk May 04', oldADR: 135, newADR: 142, publishedBy: 'Priya Patel', publishedDate: '04/25/26', status: 'Live'      },
 ];
 PUBLISHED_HOTEL_CHANGES.forEach(p => { p.changeAmt = p.newADR - p.oldADR; });
+
+// ── Package Rules seed ─────────────────────────────────────
+const PACKAGE_RULES = [
+  {
+    id: 'RULE-001',
+    name: 'Own Flight High LF Uplift',
+    status: 'Active',
+    priority: 10,
+    flightCategories: ['Own Flight'],
+    hotelClassifications: ['Any'],
+    commitment: 'Fully Committed',
+    destinations: ['All'],
+    conditionLogic: 'ALL',
+    conditions: [
+      { metric: 'LF %', operator: '>=', value: 80 },
+    ],
+    action: { type: 'Increase margin by $', value: 20, maxChange: 40, minMargin: 80, maxMargin: null },
+    lastModified: '04/10/26',
+    modifiedBy: 'Sarah Chen',
+  },
+  {
+    id: 'RULE-002',
+    name: 'Risk Block Distressed Inventory',
+    status: 'Active',
+    priority: 20,
+    flightCategories: ['Risk Block'],
+    hotelClassifications: ['Any'],
+    commitment: 'Allotment — Not Committed',
+    destinations: ['All'],
+    conditionLogic: 'ALL',
+    conditions: [
+      { metric: 'LF %', operator: '<', value: 50 },
+      { metric: 'Days to Departure', operator: '<', value: 30 },
+    ],
+    action: { type: 'Decrease margin by $', value: 25, maxChange: 50, minMargin: 20, maxMargin: null },
+    lastModified: '04/08/26',
+    modifiedBy: 'Marcus Webb',
+  },
+  {
+    id: 'RULE-003',
+    name: 'Exclusive Hotel Premium',
+    status: 'Active',
+    priority: 15,
+    flightCategories: ['Own Flight', 'Risk Block', '3rd Party'],
+    hotelClassifications: ['Exclusive'],
+    commitment: 'Any',
+    destinations: ['All'],
+    conditionLogic: 'ALL',
+    conditions: [
+      { metric: 'Occ %', operator: '>=', value: 75 },
+      { metric: 'Beds:Seats Ratio', operator: '<', value: 0.90 },
+    ],
+    action: { type: 'Increase margin by %', value: 8, maxChange: 60, minMargin: null, maxMargin: null },
+    lastModified: '04/05/26',
+    modifiedBy: 'Priya Patel',
+  },
+  {
+    id: 'RULE-004',
+    name: '3rd Party Seat Margin Floor',
+    status: 'Active',
+    priority: 30,
+    flightCategories: ['3rd Party'],
+    hotelClassifications: ['Any'],
+    commitment: 'Any',
+    destinations: ['All'],
+    conditionLogic: 'ALL',
+    conditions: [
+      { metric: 'Always apply', operator: '—', value: '' },
+    ],
+    action: { type: 'Set margin to $', value: 30, maxChange: null, minMargin: 30, maxMargin: null },
+    lastModified: '03/28/26',
+    modifiedBy: 'Jordan Kim',
+  },
+  {
+    id: 'RULE-005',
+    name: 'Caribbean Peak Season Lock',
+    status: 'Active',
+    priority: 5,
+    flightCategories: ['Own Flight', 'Risk Block', '3rd Party'],
+    hotelClassifications: ['Any'],
+    commitment: 'Any',
+    destinations: ['Caribbean'],
+    conditionLogic: 'ALL',
+    conditions: [
+      { metric: 'LF %', operator: '>=', value: 90 },
+    ],
+    action: { type: 'Lock price', value: '', maxChange: null, minMargin: null, maxMargin: null, flagForReview: true },
+    lastModified: '04/01/26',
+    modifiedBy: 'Sarah Chen',
+  },
+  {
+    id: 'RULE-006',
+    name: 'Commodity Hotel Low Occ Discount',
+    status: 'Draft',
+    priority: 25,
+    flightCategories: ['Own Flight', 'Risk Block', '3rd Party'],
+    hotelClassifications: ['Commodity'],
+    commitment: 'Any',
+    destinations: ['All'],
+    conditionLogic: 'ALL',
+    conditions: [
+      { metric: 'Occ %', operator: '<', value: 45 },
+      { metric: 'Days to Departure', operator: '<', value: 21 },
+    ],
+    action: { type: 'Decrease margin by $', value: 15, maxChange: 30, minMargin: 0, maxMargin: null },
+    lastModified: '04/12/26',
+    modifiedBy: 'Lisa Tran',
+  },
+];
+
+const RULE_METRICS    = ['LF %', 'Forecast LF %', 'Rate of Sale', 'Days to Departure', 'Margin $', 'Occ %', 'Beds:Seats Ratio'];
+const RULE_OPERATORS  = ['>', '<', '=', '≥', '≤', 'between'];
+const RULE_ACTIONS    = [
+  'Increase margin by $',
+  'Decrease margin by $',
+  'Increase margin by %',
+  'Decrease margin by %',
+  'Set margin to $',
+  'Set fare to $',
+  'Lock price',
+  'Flag for review',
+];
+const HOTEL_CLASSIFICATIONS = ['Exclusive', 'Commodity', 'Any'];
+const COMMITMENT_TYPES = [
+  'Fully Committed',
+  'Allotment — Partially Committed',
+  'Allotment — Not Committed',
+  'Any',
+];
