@@ -1257,15 +1257,22 @@ function aggCatsAtWeek(cats, weekIdx) {
 }
 
 // ── Recommendations tree table render ──────────────────────
+let topSortDir = 'asc'; // 'asc' | 'desc' — applies to dest+week row ordering
+function toggleTopSort() {
+  topSortDir = (topSortDir === 'asc') ? 'desc' : 'asc';
+  renderRecsHead();
+  renderRecsTable();
+}
 function renderRecsHead() {
   const thead = document.getElementById('recsTableHead');
+  const arrow = topSortDir === 'asc' ? '↑' : '↓';
   thead.innerHTML = `
     <tr>
       <th style="min-width:320px;">Destination / Week</th>
-      <th style="width:100px;">Check-in Wk</th>
+      <th style="width:100px;cursor:pointer;user-select:none;" onclick="toggleTopSort()" title="Sort by check-in week">Check-in Wk <span class="sort-ind">${arrow}</span></th>
       <th class="text-right" style="width:110px;">Sold / Alloc</th>
       <th class="text-right" style="width:70px;">Sold %</th>
-      <th class="text-right" style="width:80px;">Forecast<span class="th-sub">Occ %</span></th>
+      <th class="text-right" style="width:80px;cursor:pointer;user-select:none;" onclick="toggleTopSort()" title="Sort by forecast occ">Forecast<span class="th-sub">Occ % <span class="sort-ind">${arrow}</span></span></th>
       <th class="text-right" style="width:80px;">Current<span class="th-sub">Occ %</span></th>
       <th class="text-right" style="width:90px;">Supp Cost<span class="th-sub">/ night</span></th>
       <th class="text-right" style="width:90px;">Current<span class="th-sub">ADR $</span></th>
@@ -1283,7 +1290,7 @@ function renderRecsHead() {
 
 function renderRecsTable() {
   const tbody = document.getElementById('recsTableBody');
-  const rows = [];
+  const entries = [];
   let visibleLeaves = 0, totalLeaves = 0;
   const visibleDestSet = new Set();
   const totalDestCount = HOTEL_DATA.length;
@@ -1326,7 +1333,11 @@ function renderRecsTable() {
       // "MM/DD" extracted from weekStart (which is "MM/DD/YY")
       const shortDate = (wkMeta.weekStart || '').slice(0, 5);
 
-      rows.push(`
+      const entryRows = [];
+      const entry = { weekIdx, forecastOcc: dwAgg.forecastOcc, rows: entryRows };
+      entries.push(entry);
+
+      entryRows.push(`
         <tr class="row-property" onclick="toggleWeek('${weekKey}')" style="cursor:pointer;">
           <td>
             <button class="expand-btn ${weekOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleWeek('${weekKey}')">${chevron(weekOpen)}</button>
@@ -1374,7 +1385,7 @@ function renderRecsTable() {
         const hWeeks = visibleCatsForHotel.map(c => c.checkInWeeks[weekIdx]).filter(Boolean);
         const hMargin = aggMargin(hWeeks);
 
-        rows.push(`
+        entryRows.push(`
           <tr class="row-bedtype clickable" onclick="toggleHotel('${hotelKey}')" style="cursor:pointer;">
             <td>
               <button class="expand-btn ${hotelOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleHotel('${hotelKey}')">${chevron(hotelOpen)}</button>
@@ -1420,7 +1431,7 @@ function renderRecsTable() {
           const marginD   = recMargin - curMargin;
           const marginPct = eff ? curMargin / eff : 0;
 
-          rows.push(`
+          entryRows.push(`
             <tr class="row-unit">
               <td>
                 <span>${cat.name}</span>
@@ -1468,12 +1479,20 @@ function renderRecsTable() {
     });
   });
 
+  // Sort top-level dest+week entries: primary week, secondary forecast occ
+  const mul = topSortDir === 'asc' ? 1 : -1;
+  entries.sort((a, b) => {
+    if (a.weekIdx !== b.weekIdx) return (a.weekIdx - b.weekIdx) * mul;
+    return (a.forecastOcc - b.forecastOcc) * mul;
+  });
+
+  const allRows = entries.flatMap(e => e.rows);
   // Empty state when no destinations match the current filters
   if (visibleDestSet.size === 0 && (advFiltersActive() || headerFiltersActive())) {
-    rows.push('<tr><td colspan="16" style="text-align:center;color:var(--text-muted);padding:32px;">No results match current filters</td></tr>');
+    allRows.push('<tr><td colspan="16" style="text-align:center;color:var(--text-muted);padding:32px;">No results match current filters</td></tr>');
   }
 
-  tbody.innerHTML = rows.join('');
+  tbody.innerHTML = allRows.join('');
 
   // Row count bar above the table
   const rcb = document.getElementById('rowCountBar');
@@ -2018,7 +2037,8 @@ function renderCalendarHead() {
       <div class="cal-wk-sub">${mmdd}</div>
     </th>`;
   }).join('');
-  thead.innerHTML = `<tr><th class="cal-corner">Destination / Hotel / Room</th>${weekCells}</tr>`;
+  const arrow = topSortDir === 'asc' ? '↑' : '↓';
+  thead.innerHTML = `<tr><th class="cal-corner" style="cursor:pointer;" onclick="toggleTopSort()" title="Sort destinations by forecast occ">Destination / Hotel / Room <span class="sort-ind">${arrow}</span></th>${weekCells}</tr>`;
 }
 
 function renderCalendar() {
@@ -2026,7 +2046,12 @@ function renderCalendar() {
   const tbody = document.getElementById('calBody');
   const rows = [];
 
-  HOTEL_DATA.forEach(dest => {
+  const mul = topSortDir === 'asc' ? 1 : -1;
+  const sortedDests = HOTEL_DATA.slice().sort((a, b) => {
+    return ((a.forecastOcc || 0) - (b.forecastOcc || 0)) * mul;
+  });
+
+  sortedDests.forEach(dest => {
     // Apply header filter (dest-level)
     if (headerFiltersActive()) {
       // Use a representative week to skip non-matching dests by brand/region/dest/rm

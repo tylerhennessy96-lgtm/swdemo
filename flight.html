@@ -1534,12 +1534,19 @@ function hotelOccForWeek(dest, weekIdx) {
 }
 
 // ── Table head ─────────────────────────────────────────────
+let topSortDir = 'asc'; // 'asc' | 'desc' — applies to dest+week row ordering
+function toggleTopSort() {
+  topSortDir = (topSortDir === 'asc') ? 'desc' : 'asc';
+  renderRecsHead();
+  renderRecsTable();
+}
 function renderRecsHead() {
   const thead = document.getElementById('recsTableHead');
+  const arrow = topSortDir === 'asc' ? '↑' : '↓';
   thead.innerHTML = `
     <tr>
       <th style="min-width:320px;">Destination / Week</th>
-      <th style="width:100px;">Dep. Week</th>
+      <th style="width:100px;cursor:pointer;user-select:none;" onclick="toggleTopSort()" title="Sort by departure week">Dep. Week <span class="sort-ind">${arrow}</span></th>
       <th class="text-right" style="width:110px;">Sold / Cap</th>
       <th class="text-right" style="width:70px;">LF %</th>
       <th class="text-right" style="width:90px;">Current<span class="th-sub">Fare $</span></th>
@@ -1548,7 +1555,7 @@ function renderRecsHead() {
       <th class="text-right" style="width:90px;">Current<span class="th-sub">Margin $</span></th>
       <th class="text-right" style="width:90px;">Rec<span class="th-sub">Margin $</span></th>
       <th class="text-right" style="width:80px;">Margin<span class="th-sub">Δ $</span></th>
-      <th class="text-right" style="width:90px;">Forecast<span class="th-sub">LF %</span></th>
+      <th class="text-right" style="width:90px;cursor:pointer;user-select:none;" onclick="toggleTopSort()" title="Sort by forecast LF">Forecast<span class="th-sub">LF % <span class="sort-ind">${arrow}</span></span></th>
       <th class="text-right" style="width:70px;">B:S</th>
       <th class="text-right" style="width:80px;">Hotel<span class="th-sub">Occ %</span></th>
       <th style="width:80px;">Flags</th>
@@ -1560,7 +1567,7 @@ function renderRecsHead() {
 // ── Recs tree body ─────────────────────────────────────────
 function renderRecsTable() {
   const tbody = document.getElementById('recsTableBody');
-  const rows = [];
+  const entries = [];
   let visibleLeaves = 0, totalLeaves = 0;
   const visibleDestSet = new Set();
   const totalDestCount = FLIGHT_DATA.length;
@@ -1603,8 +1610,12 @@ function renderRecsTable() {
       const shortDt    = shortMMDD(refDateStr);
       const hOcc       = hotelOccForWeek(dest, weekIdx);
 
+      const entryRows = [];
+      const entry = { weekIdx, forecastLF: dwAgg.forecastLF, rows: entryRows };
+      entries.push(entry);
+
       // ── Level 1: Destination + Week row ──
-      rows.push(`
+      entryRows.push(`
         <tr class="row-property" onclick="toggleDestWeek('${dwKey}')" style="cursor:pointer;">
           <td>
             <button class="expand-btn ${dwOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleDestWeek('${dwKey}')">${chevron(dwOpen)}</button>
@@ -1651,7 +1662,7 @@ function renderRecsTable() {
         const rosAheadRoute = date.rateOfSale >= date.rateOfSaleTarget;
         const routeAlert = !rosAheadRoute || date.forecastLF < date.targetLF - 0.05;
 
-        rows.push(`
+        entryRows.push(`
           <tr class="row-bedtype clickable" onclick="toggleRoute('${routeKey}')" style="cursor:pointer;">
             <td>
               <button class="expand-btn ${routeOpen ? 'open' : ''}" onclick="event.stopPropagation();toggleRoute('${routeKey}')">${chevron(routeOpen)}</button>
@@ -1685,7 +1696,7 @@ function renderRecsTable() {
         const rosAhead = date.rateOfSale >= date.rateOfSaleTarget;
         const hasNote = !!notes[date.id];
 
-        rows.push(`
+        entryRows.push(`
           <tr class="row-unit">
             <td>
               <span>${shortDate(date.departureDate)}</span>
@@ -1735,11 +1746,19 @@ function renderRecsTable() {
     }
   });
 
+  // Sort top-level dest+week entries: primary week, secondary forecast LF
+  const mul = topSortDir === 'asc' ? 1 : -1;
+  entries.sort((a, b) => {
+    if (a.weekIdx !== b.weekIdx) return (a.weekIdx - b.weekIdx) * mul;
+    return (a.forecastLF - b.forecastLF) * mul;
+  });
+
+  const allRows = entries.flatMap(e => e.rows);
   if (visibleDestSet.size === 0 && (advFiltersActive() || headerFiltersActive())) {
-    rows.push('<tr><td colspan="15" style="text-align:center;color:var(--text-muted);padding:32px;">No results match current filters</td></tr>');
+    allRows.push('<tr><td colspan="15" style="text-align:center;color:var(--text-muted);padding:32px;">No results match current filters</td></tr>');
   }
 
-  tbody.innerHTML = rows.join('');
+  tbody.innerHTML = allRows.join('');
 
   const rcb = document.getElementById('rowCountBar');
   if (rcb) {
@@ -2257,7 +2276,8 @@ function renderCalendarHead() {
       <div class="cal-wk-sub">${wk.mmdd}</div>
     </th>`;
   }).join('');
-  thead.innerHTML = `<tr><th class="cal-corner">Destination / Route / Flight</th>${weekCells}</tr>`;
+  const arrow = topSortDir === 'asc' ? '↑' : '↓';
+  thead.innerHTML = `<tr><th class="cal-corner" style="cursor:pointer;" onclick="toggleTopSort()" title="Sort destinations by forecast LF">Destination / Route / Flight <span class="sort-ind">${arrow}</span></th>${weekCells}</tr>`;
 }
 
 function renderCalendar() {
@@ -2265,7 +2285,23 @@ function renderCalendar() {
   const tbody = document.getElementById('calBody');
   const rows = [];
 
-  FLIGHT_DATA.forEach(dest => {
+  // Sort destinations by avg forecast LF (asc/desc per topSortDir)
+  const mul = topSortDir === 'asc' ? 1 : -1;
+  const sortedDests = FLIGHT_DATA.slice().sort((a, b) => {
+    const aLF = (() => {
+      let s = 0, n = 0;
+      a.routes.forEach(r => r.dates.forEach(d => { s += d.forecastLF; n++; }));
+      return n ? s / n : 0;
+    })();
+    const bLF = (() => {
+      let s = 0, n = 0;
+      b.routes.forEach(r => r.dates.forEach(d => { s += d.forecastLF; n++; }));
+      return n ? s / n : 0;
+    })();
+    return (aLF - bLF) * mul;
+  });
+
+  sortedDests.forEach(dest => {
     if (headerFiltersActive() && !passesHeaderFilters(dest)) return;
     const destOpen = calExpandedDests.has(dest.id);
 

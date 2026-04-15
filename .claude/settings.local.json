@@ -18,7 +18,8 @@
       "Bash(ls:*)",
       "Bash(git checkout:*)",
       "Bash(wc:*)",
-      "Bash(awk '/<script>/,/<\\\\/script>/{if\\(!/<script>/ && !/<\\\\/script>/\\) print}' /Users/tylerhennessy/swdemo-main/hotel.html)"
+      "Bash(awk '/<script>/,/<\\\\/script>/{if\\(!/<script>/ && !/<\\\\/script>/\\) print}' /Users/tylerhennessy/swdemo-main/hotel.html)",
+      "Bash(awk '/<script>/,/<\\\\/script>/{if\\(!/<script>/ && !/<\\\\/script>/\\) print}' /Users/tylerhennessy/swdemo-main/flight.html)"
     ]
   }
 }
