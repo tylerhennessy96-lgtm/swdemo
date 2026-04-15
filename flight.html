@@ -995,7 +995,7 @@
 
 <!-- ── Row-level RM Copilot side panel ── -->
 <aside class="cprp" id="rowCopilotPanel" aria-hidden="true">
-  <button type="button" class="cprp-close" onclick="event.stopPropagation();closeRowCopilot();" aria-label="Close copilot">×</button>
+  <button type="button" class="cprp-close" id="rowCopilotCloseBtn" aria-label="Close copilot">×</button>
   <div class="cprp-head" id="rowCopilotHead"></div>
   <div class="cprp-chat" id="rowCopilotChat"></div>
   <div class="cprp-suggest" id="rowCopilotSuggest"></div>
@@ -1045,7 +1045,7 @@
     </a>
 
     <div class="nav-tabs">
-      <a href="pricing.html" class="nav-tab active">Pricing</a>
+      <a href="flight.html" class="nav-tab active">Pricing</a>
       <a href="demand.html"  class="nav-tab">Demand Forecast</a>
       <a href="#"            class="nav-tab">Rules &amp; Parameters</a>
     </div>
@@ -3278,6 +3278,17 @@ function closeRowCopilot() {
   _rowCopilotCtxData = null;
   document.getElementById('gcpPanel').classList.remove('row-open');
 }
+// Attach close-button listener directly (avoid relying on inline onclick
+// in case the handler is not in scope when HTML parses).
+(function wireRowCopilotClose() {
+  const btn = document.getElementById('rowCopilotCloseBtn');
+  if (!btn) return;
+  btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    closeRowCopilot();
+  });
+})();
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     const rp = document.getElementById('rowCopilotPanel');
